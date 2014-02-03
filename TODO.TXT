@@ -1,0 +1,13 @@
+Option for display errors
+
+Option for display error details
+
+Option for "not found"-page
+
+Option for "error"-page
+
+Log runtime errors
+
+Log fatal errors
+
+Make sure that the global validators are usable by actions directly
