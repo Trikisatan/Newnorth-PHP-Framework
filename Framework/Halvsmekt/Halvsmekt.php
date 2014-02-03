@@ -17,6 +17,8 @@ require('MySql/Connection.php');
 require('MySql/Result.php');
 
 function ConfigError($Message, $Data = array()) {
+	ob_clean();
+
 	echo '<b>Config error</b><br />';
 	echo $Message, '<br />';
 
@@ -42,6 +44,9 @@ function ErrorHandler($Severity, $Message, $File, $Line, $Variables) {
 
 	throw new ErrorException($Message, 0, $Severity, $File, $Line);
 }
+function GetLocale() {
+	return \Framework\Halvsmekt\Application::GetLocale();
+}
 function GenerateUrl($Route = null, $Parameters = array()) {
 	return \Framework\Halvsmekt\Application::GenerateUrl($Route, $Parameters);
 }
@@ -50,6 +55,12 @@ function GetConnection($Name) {
 }
 function GetDataManager($Name) {
 	return \Framework\Halvsmekt\Application::GetDataManager($Name);
+}
+function GetPageName() {
+	return \Framework\Halvsmekt\Page::GetName();
+}
+function GetPageDirectory() {
+	return \Framework\Halvsmekt\Page::GetDirectory();
 }
 function ParseIniFile($Path) {
 	try {

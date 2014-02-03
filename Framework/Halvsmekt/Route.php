@@ -101,14 +101,27 @@ class Route {
 	}
 	public function ReversedMatch($Parameters, &$Url) {
 		$Url = $this->ReversablePattern;
-
 		foreach($Parameters as $Part => $Value) {
 			$Url = preg_replace('/\/(?:\+|\*)'.$Part.'\//', '/'.$Value.'/', $Url);
 		}
 		$Url = preg_replace('/\/(?:\*)(?:[^\/]+)(?:\/|$)/', '/', $Url);
 		$Url = preg_replace('/\/(?:\*)(?:\/|$)/', '/', $Url);
 
-		return $this->Match($Url, $Match);
+		if(!$this->Match($Url, $Match)) {
+			return false;
+		}
+
+		foreach($Parameters as $Key => $Value) {
+			if(!isset($Match[$Key])) {
+				return false;
+			}
+
+			if($Match[$Key] !== $Parameters[$Key]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
 ?>

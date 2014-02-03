@@ -56,17 +56,33 @@ class Application {
 	public static function GenerateUrl($Route = null, $Parameters = array()) {
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
-		$Route = Application::$Routes[$Route];
+		if($Route !== null) {
+			$Route = Application::$Routes[$Route];
 
-		$Route->SetDefaults($Parameters);
+			$Route->SetDefaults($Parameters);
 
-		$Route->ReversedTranslate($Parameters, $Locale);
+			$Route->ReversedTranslate($Parameters, $Locale);
 
-		if(!$Route->ReversedMatch($Parameters, $Url)) {
-			throw new \exception('Unable to generate URL.');
+			if(!$Route->ReversedMatch($Parameters, $Url)) {
+				throw new \exception('Unable to generate URL.');
+			}
+
+			return $Url;
 		}
 
-		return $Url;
+		foreach(Application::$Routes as $Route) {
+			$Route->SetDefaults($Parameters);
+
+			$Route->ReversedTranslate($Parameters, $Parameters['Locale']);
+
+			if(!$Route->ReversedMatch($Parameters, $Url)) {
+				continue;
+			}
+
+			return $Url;
+		}
+
+		throw new \exception('Unable to generate URL.');
 	}
 	public static function GetConnection($Name) {
 		return Application::$Connections[$Name];
@@ -313,8 +329,8 @@ class Application {
 			global $Page;
 
 			$Page = new Application::$Page(
-				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\') + 1)),
-				substr(Application::$Page, strrpos(Application::$Page, '\\') + 1)
+				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\'))),
+				substr(Application::$Page, strrpos(Application::$Page, '\\'))
 			);
 
 			$Page->PreInitialize();
@@ -335,13 +351,13 @@ class Application {
 			global $Layout, $Page;
 
 			$Layout = new Application::$Layout(
-				str_replace('\\', '/', substr(Application::$Layout, 0, strrpos(Application::$Layout, '\\') + 1)),
-				substr(Application::$Layout, strrpos(Application::$Layout, '\\') + 1)
+				str_replace('\\', '/', substr(Application::$Layout, 0, strrpos(Application::$Layout, '\\'))),
+				substr(Application::$Layout, strrpos(Application::$Layout, '\\'))
 			);
 
 			$Page = new Application::$Page(
-				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\') + 1)),
-				substr(Application::$Page, strrpos(Application::$Page, '\\') + 1)
+				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\'))),
+				substr(Application::$Page, strrpos(Application::$Page, '\\'))
 			);
 
 			$Layout->PreInitialize();
