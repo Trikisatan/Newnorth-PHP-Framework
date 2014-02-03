@@ -1,0 +1,23 @@
+<div class="<?php  echo $this->ClassName; ?>">
+	<?php
+	if(isset($this->Label[0])) {
+		?>
+		<label for="<?php echo $this->Id; ?>"><?php echo $this->Label; ?></label>
+		<?php
+	}
+	?>
+	<div class="Input-TextBox"><input id="<?php echo $this->Id; ?>" name="<?php echo $this->Name; ?>" type="text" value="<?php echo $this->Value; ?>" placeholder="<?php echo $this->Placeholder; ?>"<?=0 < $this->MaxLength ? ' maxlength="'.$this->MaxLength.'"' : ''?> /></div>
+	<?php
+	if(0 < count($this->ErrorMessages)) {
+	?>
+	<div class="Input-ErrorMessages">
+		<?php
+		foreach($this->ErrorMessages as $ErrorMessage) {
+			echo '<p>', $ErrorMessage, '</p>';
+		}
+		?>
+	</div>
+	<?php
+	}
+	?>
+</div>

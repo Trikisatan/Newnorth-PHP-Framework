@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Halvsmekt;
+namespace Framework\Newnorth;
 
 class Controls implements \ArrayAccess {
 	/* Variables */

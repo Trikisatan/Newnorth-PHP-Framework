@@ -1,7 +1,7 @@
 <?php
-namespace Framework\Halvsmekt;
+namespace Framework\Newnorth;
 
-abstract class Layout extends Validators {
+abstract class Page extends Validators {
 	/* Static variables */
 	private static $Instance = null;
 	private static $Directory;
@@ -12,90 +12,90 @@ abstract class Layout extends Validators {
 
 	/* Magic methods */
 	public function __construct($Directory, $Name) {
-		if(Layout::$Instance !== null) {
+		if(Page::$Instance !== null) {
 			ConfigError(
 				'An instance of the layout has already been initialized.'
 			);
 		}
 
-		Layout::$Instance = $this;
-		Layout::$Directory = $Directory;
-		Layout::$Name = $Name;
-		Layout::$Translations = new Translations($Directory.$Name.'/');
-		Layout::$Controls = new Controls($Directory.$Name.'/');
-		Layout::$Actions = new Actions($this, $Directory.$Name.'/');
+		Page::$Instance = $this;
+		Page::$Directory = $Directory;
+		Page::$Name = $Name;
+		Page::$Translations = new Translations($Directory.$Name.'/');
+		Page::$Controls = new Controls($Directory.$Name.'/');
+		Page::$Actions = new Actions($this, $Directory.$Name.'/');
 	}
 	public function __toString() {
-		return Layout::$Directory.Layout::$Name;
+		return Page::$Directory.Page::$Name;
 	}
 
 	/* Events */
 	public function PreInitialize() {
-		Layout::$Translations->Load();
-		Layout::$Controls->Load();
-		Layout::$Actions->Load();
+		Page::$Translations->Load();
+		Page::$Controls->Load();
+		Page::$Actions->Load();
 
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PreInitialize();
 		}
 	}
 	public abstract function Initialize();
 	public function PostInitialize() {
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->Initialize();
 		}
 
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PostInitialize();
 		}
 	}
 	public function PreLoad() {
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PreLoad();
 		}
 	}
 	public abstract function Load();
 	public function PostLoad() {
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->Load();
 		}
 
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PostLoad();
 		}
 	}
 	public function PreExecute() {
-		Layout::$Actions->Execute();
+		Page::$Actions->Execute();
 
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PreExecute();
 		}
 	}
 	public abstract function Execute();
 	public function PostExecute() {
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->Execute();
 		}
 
-		foreach(Layout::$Controls as $Control) {
+		foreach(Page::$Controls as $Control) {
 			$Control->PostExecute();
 		}
 	}
-	public function Render() {
+	public function Render($PlaceHolder) {
 		$Application = Application::GetInstance();
-		$Page = Page::GetInstance();
+		$Layout = Layout::GetInstance();
 
 		$Output[0] = ob_get_contents();
 		ob_clean();
 
 		try {
-			include('Application/'.Layout::$Directory.Layout::$Name.'/Content.phtml');
+			include('Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml');
 		}
 		catch(\Exception $Exception) {
 			ConfigError(
-				'Unable to load layout\'s content.',
+				'Unable to load page\'s content.',
 				array(
-					'Path' => Layout::$Directory.Layout::$Name.'/Content.phtml',
+					'Path' => Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml',
 				)
 			);
 		}
@@ -103,29 +103,29 @@ abstract class Layout extends Validators {
 		$Output[1] = ob_get_contents();
 		ob_clean();
 
-		Layout::$Translations->Translate($Output[1]);
+		Page::$Translations->Translate($Output[1]);
 
 		echo $Output[0].$Output[1];
 	}
 
 	/* Static methods */
 	public static function GetInstance() {
-		return Layout::$Instance;
+		return Page::$Instance;
 	}
 	public static function GetDirectory() {
-		return Layout::$Directory;
+		return Page::$Directory;
 	}
 	public static function GetName() {
-		return Layout::$Name;
+		return Page::$Name;
 	}
-	public static function GetTranslation($Key) {
-		return Layout::$Translations[$Key];
+	public static function GetTranslation($Key, $DefaultValue = null) {
+		return isset(Page::$Translations[$Key]) ? Page::$Translations[$Key] : $DefaultValue;
 	}
 	public static function SetTranslation($Key, $Value) {
-		Layout::$Translations[$Key] = $Value;
+		Page::$Translations[$Key] = $Value;
 	}
 	public static function RenderControl($Alias) {
-		Layout::$Controls[$Alias]->Render();
+		Page::$Controls[$Alias]->Render();
 	}
 }
 ?>

@@ -1,0 +1,17 @@
+<div class="<?php  echo $this->ClassName; ?>">
+	<label for="<?php echo $this->Id; ?>"><?php echo $this->Label; ?></label>
+	<div class="Input-TextBox"><textarea id="<?php echo $this->Id; ?>" name="<?php echo $this->Name; ?>"><?php echo $this->Value; ?></textarea></div>
+	<?php
+	if(0 < count($this->ErrorMessages)) {
+	?>
+	<div class="Input-ErrorMessages">
+		<?php
+		foreach($this->ErrorMessages as $ErrorMessage) {
+			echo '<p>', $ErrorMessage, '</p>';
+		}
+		?>
+	</div>
+	<?php
+	}
+	?>
+</div>

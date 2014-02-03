@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Halvsmekt;
+namespace Framework\Newnorth;
 
 abstract class Control extends Validators {
 	/* Variables */
@@ -111,8 +111,8 @@ abstract class Control extends Validators {
 	public function GetControlParent() {
 		return $this->_Parent;
 	}
-	public function GetTranslation($Key) {
-		return $this->Translations[$Key];
+	public function GetTranslation($Key, $DefaultValue = null) {
+		return isset($this->Translations[$Key]) ? $this->Translations[$Key] : $DefaultValue;
 	}
 	public function SetTranslation($Key, $Value) {
 		$this->Translations[$Key] = $Value;

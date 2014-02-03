@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Halvsmekt;
+namespace Framework\Newnorth;
 
 class Application {
 	/* Static variables */
@@ -182,7 +182,7 @@ class Application {
 				);
 			}
 
-			Application::$Routes[$Name] = new \Framework\Halvsmekt\Route(
+			Application::$Routes[$Name] = new \Framework\Newnorth\Route(
 				$Name,
 				$Data['Pattern'],
 				isset($Data['Requirements']) ? $Data['Requirements'] : array(),

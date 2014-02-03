@@ -1,0 +1,14 @@
+<div class="<?=$this->ClassName?>">
+	<?php
+	if(isset($this->Label[0])) {
+		?>
+		<label for="<?php echo $this->Id; ?>"><?=$this->Label?></label>
+		<?php
+	}
+	?>
+	<div class="Input-DropDownList"><select id="<?=$this->Id?>" name="<?=$this->Name?>"<?php if(isset($this->OnChange[0])) { ?> onchange="<?=$this->OnChange?>"<?php } ?>><?php
+foreach($this->Options as $Option) {
+?><option value="<?php echo $Option['Value']; ?>"<?php if($Option['Value'] === $this->Value) { ?> selected="selected"<?php } ?>><?php echo $Option['Text']; ?></option><?php
+}
+?></select></div>
+</div>

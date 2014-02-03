@@ -1,16 +1,9 @@
 <?php
-ob_start();
-
-require('Framework/Halvsmekt/Halvsmekt.php');
+require('Framework/Newnorth/Newnorth.php');
 
 session_start();
 
-if(!isset($_COOKIE['Token'])) {
-	$Token = md5(rand());
-	setcookie('Token', $Token);
-	$_COOKIE['Token'] = $Token;
-	unset($Token);
-}
+ob_start();
 
 try {
 	$Layout = null;

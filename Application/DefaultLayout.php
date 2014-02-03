@@ -1,7 +1,7 @@
 <?php
-use \Framework\Halvsmekt\Application as Application;
-use \Framework\Halvsmekt\Layout as Layout;
-use \Framework\Halvsmekt\Page as Page;
+use \Framework\Newnorth\Application as Application;
+use \Framework\Newnorth\Layout as Layout;
+use \Framework\Newnorth\Page as Page;
 
 class DefaultLayout extends Layout {
 	/* Events */

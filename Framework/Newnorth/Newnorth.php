@@ -45,22 +45,22 @@ function ErrorHandler($Severity, $Message, $File, $Line, $Variables) {
 	throw new ErrorException($Message, 0, $Severity, $File, $Line);
 }
 function GetLocale() {
-	return \Framework\Halvsmekt\Application::GetLocale();
+	return \Framework\Newnorth\Application::GetLocale();
 }
 function GenerateUrl($Route = null, $Parameters = array()) {
-	return \Framework\Halvsmekt\Application::GenerateUrl($Route, $Parameters);
+	return \Framework\Newnorth\Application::GenerateUrl($Route, $Parameters);
 }
 function GetConnection($Name) {
-	return \Framework\Halvsmekt\Application::GetConnection($Name);
+	return \Framework\Newnorth\Application::GetConnection($Name);
 }
 function GetDataManager($Name) {
-	return \Framework\Halvsmekt\Application::GetDataManager($Name);
+	return \Framework\Newnorth\Application::GetDataManager($Name);
 }
 function GetPageName() {
-	return \Framework\Halvsmekt\Page::GetName();
+	return \Framework\Newnorth\Page::GetName();
 }
 function GetPageDirectory() {
-	return \Framework\Halvsmekt\Page::GetDirectory();
+	return \Framework\Newnorth\Page::GetDirectory();
 }
 function ParseIniFile($Path) {
 	try {

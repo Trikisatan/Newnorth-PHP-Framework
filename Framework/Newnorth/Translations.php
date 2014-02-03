@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Halvsmekt;
+namespace Framework\Newnorth;
 
 class Translations implements \ArrayAccess {
 	/* Variables */
@@ -22,6 +22,9 @@ class Translations implements \ArrayAccess {
 			foreach($Translations as $SubKey => $Value) {
 				$this[$Key.'_'.$SubKey] = $Value;
 			}
+		}
+		else if($Value === null) {
+			unset($this->Items[$Key]);
 		}
 		else {
 			$this->Items[$Key] = $Value;
