@@ -1,12 +1,8 @@
 Option for e-mailing errors
 
-Option for logging errors
-
 Option for "not found"-page
 
 Option for "error"-page
-
-Log errors
 
 RSS reader
 

@@ -7,6 +7,8 @@ class Application {
 	private static $Url;
 	private static $DisplayErrors;
 	private static $DisplayErrorDetails;
+	private static $LogErrors;
+	private static $LogFile;
 	private static $Connections = array();
 	private static $Routes = array();
 	private static $Parameters = null;
@@ -121,6 +123,13 @@ class Application {
 	public static function HandleError($Type, $Message, $Data) {
 		ob_clean();
 
+		$Data = array_merge(
+			array(
+				'Url' => Application::$Url,
+			),
+			$Data
+		);
+
 		if(isset($Data['Stacktrace'])) {
 			for($I = 0; $I < count($Data['Stacktrace']); ++$I) {
 				$Data['Stacktrace'][$I] = $Data['Stacktrace'][$I]['function'].'(...) in '.$Data['Stacktrace'][$I]['file'].' on line '.$Data['Stacktrace'][$I]['line'];
@@ -137,6 +146,22 @@ class Application {
 			else {
 				echo $DisplayMessage;
 			}
+		}
+
+		if(Application::$LogErrors) {
+			$Data = array_merge(
+				array(
+					'Type' => $Type,
+					'Message' => $Message,
+				),
+				$Data
+			);
+
+			file_put_contents(
+				Application::$LogFile,
+				json_encode($Data)."\n",
+				FILE_APPEND
+			);
 		}
 
 		exit();
@@ -162,20 +187,6 @@ class Application {
 		}
 
 		if(is_int($Section)) {
-			if(is_array($Data)) {
-				if(count($Data) === 0) {
-					return '';
-				}
-
-				$Message = '';
-
-				foreach($Data as $SubSection => $SubData) {
-					$Message .= Application::CreateErrorDisplayMessage($SubSection, $SubData);
-				}
-
-				return $Message;
-			}
-
 			return '<br />'.$Data;
 		}
 
@@ -212,6 +223,8 @@ class Application {
 
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
+		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
+		Application::$LogFile = isset($Config['ErrorHandling']['LogFile']) ? $Config['ErrorHandling']['LogFile'] : 'errors.log';
 
 		if(isset($Config['Connections'])) {
 			foreach($Config['Connections'] as $Name => $Data) {

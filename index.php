@@ -18,7 +18,7 @@ catch(ErrorException $Exception) {
 		'Runtime error',
 		$Exception->getMessage(),
 		array(
-			array(
+			'Details' => array(
 				'Severity' => $Exception->getSeverity(),
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
@@ -32,7 +32,7 @@ catch(Exception $Exception) {
 		'Unhandled exception',
 		$Exception->getMessage(),
 		array(
-			array(
+			'Details' => array(
 				'Code' => $Exception->getCode(),
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
