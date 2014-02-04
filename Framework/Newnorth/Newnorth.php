@@ -16,51 +16,41 @@ require('DataType.php');
 require('MySql/Connection.php');
 require('MySql/Result.php');
 
+use \Framework\Newnorth\Application as Application;
+use \Framework\Newnorth\Layout as Layout;
+use \Framework\Newnorth\Page as Page;
+
+/* Error handling */
 function ConfigError($Message, $Data = array()) {
-	ob_clean();
-
-	echo '<b>Config error</b><br />';
-	echo $Message, '<br />';
-
-	foreach($Data as $Key => $Value) {
-		echo '<b>', $Key, ':</b> ', $Value, '<br />';
-	}
-
-	exit();
+	Application::HandleError(
+		'Configuration error',
+		$Message,
+		array(
+			'Data' => $Data,
+		)
+	);
 }
-function ErrorHandler($Severity, $Message, $File, $Line, $Variables) {
-	$Message =
-		'<b>Runtime error</b><br />'.
-		$Message.'<br />'.
-		'<b>Severity:</b> '.$Severity.'<br />'.
-		'<b>File:</b> '.$File.'<br />'.
-		'<b>Line:</b> '.$Line.'<br />'.
-		'<b>Variables</b><br />';
-
-	foreach($Variables as $Key => $Value) {
-		$Message .=
-			'<b>'.$Key.':</b> '.$Value.'<br />';
-	}
-
+function ErrorCatcher($Severity, $Message, $File, $Line, $Variables) {
 	throw new ErrorException($Message, 0, $Severity, $File, $Line);
 }
+
 function GetLocale() {
-	return \Framework\Newnorth\Application::GetLocale();
+	return Application::GetLocale();
 }
 function GenerateUrl($Route = null, $Parameters = array()) {
-	return \Framework\Newnorth\Application::GenerateUrl($Route, $Parameters);
+	return Application::GenerateUrl($Route, $Parameters);
 }
 function GetConnection($Name) {
-	return \Framework\Newnorth\Application::GetConnection($Name);
+	return Application::GetConnection($Name);
 }
 function GetDataManager($Name) {
-	return \Framework\Newnorth\Application::GetDataManager($Name);
+	return Application::GetDataManager($Name);
 }
 function GetPageName() {
-	return \Framework\Newnorth\Page::GetName();
+	return Page::GetName();
 }
 function GetPageDirectory() {
-	return \Framework\Newnorth\Page::GetDirectory();
+	return Page::GetDirectory();
 }
 function ParseIniFile($Path) {
 	try {
@@ -97,5 +87,5 @@ function ParseIniFile($Path) {
 	return $Data;
 }
 
-set_error_handler("ErrorHandler");
+set_error_handler("ErrorCatcher");
 ?>

@@ -1,13 +1,15 @@
-Option for display errors
-
 Option for display error details
+
+Option for e-mailing errors
+
+Option for logging errors
 
 Option for "not found"-page
 
 Option for "error"-page
 
-Log runtime errors
+Log errors
 
-Log fatal errors
+RSS reader
 
 Make sure that the global validators are usable by actions directly

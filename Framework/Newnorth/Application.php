@@ -4,13 +4,14 @@ namespace Framework\Newnorth;
 class Application {
 	/* Static variables */
 	private static $Instance = null;
-	private static $Url = null;
+	private static $Url;
+	private static $DisplayErrors;
+	private static $Connections = array();
 	private static $Routes = array();
 	private static $Parameters = null;
 	private static $Locale = null;
 	private static $Page = null;
 	private static $Layout = null;
-	private static $Connections = array();
 	private static $DataManagers = array();
 
 	/* Magic methods */
@@ -116,6 +117,78 @@ class Application {
 
 		return Application::$DataManagers[$Name] = $DataManager;
 	}
+	public static function HandleError($Type, $Message, $Data) {
+		ob_clean();
+
+		if(isset($Data['Stacktrace'])) {
+			for($I = 0; $I < count($Data['Stacktrace']); ++$I) {
+				$Data['Stacktrace'][$I] = $Data['Stacktrace'][$I]['function'].'(...) in '.$Data['Stacktrace'][$I]['file'].' on line '.$Data['Stacktrace'][$I]['line'];
+			}
+		}
+
+		$DisplayMessage = '<b>'.$Type.'</b><br />'.$Message;
+		$DisplayMessage .= Application::CreateErrorDisplayMessage(null, $Data);
+
+		if(Application::$DisplayErrors) {
+			echo $DisplayMessage;
+		}
+
+		exit();
+	}
+	private static function CreateErrorDisplayMessage($Section, $Data) {
+		if($Section === null) {
+			$Message = '';
+
+			foreach($Data as $Section => $SubData) {
+				$SubMessage = Application::CreateErrorDisplayMessage($Section, $SubData);
+
+				if(isset($SubMessage[0])) {
+					if(is_int($Section)) {
+						$Message .= $SubMessage;
+					}
+					else {
+						$Message .= '<br />'.$SubMessage;
+					}
+				}
+			}
+
+			return $Message;
+		}
+
+		if(is_int($Section)) {
+			if(is_array($Data)) {
+				if(count($Data) === 0) {
+					return '';
+				}
+
+				$Message = '';
+
+				foreach($Data as $SubSection => $SubData) {
+					$Message .= Application::CreateErrorDisplayMessage($SubSection, $SubData);
+				}
+
+				return $Message;
+			}
+
+			return '<br />'.$Data;
+		}
+
+		if(is_array($Data)) {
+			if(count($Data) === 0) {
+				return '';
+			}
+
+			$Message = '<br /><b>'.$Section.'</b>';
+
+			foreach($Data as $SubSection => $SubData) {
+				$Message .= Application::CreateErrorDisplayMessage($SubSection, $SubData);
+			}
+
+			return $Message;
+		}
+
+		return '<br /><b>'.$Section.':</b> '.$Data;
+	}
 
 	/* Methods */
 	private function LoadConfig($FilePath) {
@@ -130,6 +203,8 @@ class Application {
 				)
 			);
 		}
+
+		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 
 		if(isset($Config['Connections'])) {
 			foreach($Config['Connections'] as $Name => $Data) {

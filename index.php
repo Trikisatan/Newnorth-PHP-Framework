@@ -1,6 +1,8 @@
 <?php
 require('Framework/Newnorth/Newnorth.php');
 
+use \Framework\Newnorth\Application as Application;
+
 session_start();
 
 ob_start();
@@ -8,13 +10,36 @@ ob_start();
 try {
 	$Layout = null;
 	$Page = null;
-	$Application = new \Framework\Halvsmekt\Application();
+	$Application = new Application();
 	$Application->Run();
 }
 catch(ErrorException $Exception) {
-	ob_clean();
-	echo $Exception->getMessage();
-	exit();
+	Application::HandleError(
+		'Runtime error',
+		$Exception->getMessage(),
+		array(
+			array(
+				'Severity' => $Exception->getSeverity(),
+				'File' => $Exception->getFile(),
+				'Line' => $Exception->getLine(),
+			),
+			'Stacktrace' => array_slice($Exception->getTrace(), 1)
+		)
+	);
+}
+catch(Exception $Exception) {
+	Application::HandleError(
+		'Unhandled exception',
+		$Exception->getMessage(),
+		array(
+			array(
+				'Code' => $Exception->getCode(),
+				'File' => $Exception->getFile(),
+				'Line' => $Exception->getLine(),
+			),
+			'Stacktrace' => $Exception->getTrace()
+		)
+	);
 }
 
 ob_end_flush();
