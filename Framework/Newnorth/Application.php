@@ -6,6 +6,7 @@ class Application {
 	private static $Instance = null;
 	private static $Url;
 	private static $DisplayErrors;
+	private static $DisplayErrorDetails;
 	private static $Connections = array();
 	private static $Routes = array();
 	private static $Parameters = null;
@@ -127,10 +128,15 @@ class Application {
 		}
 
 		$DisplayMessage = '<b>'.$Type.'</b><br />'.$Message;
-		$DisplayMessage .= Application::CreateErrorDisplayMessage(null, $Data);
+		$DisplayMessageDetails = Application::CreateErrorDisplayMessage(null, $Data);
 
 		if(Application::$DisplayErrors) {
-			echo $DisplayMessage;
+			if(Application::$DisplayErrorDetails) {
+				echo $DisplayMessage.$DisplayMessageDetails;
+			}
+			else {
+				echo $DisplayMessage;
+			}
 		}
 
 		exit();
@@ -205,6 +211,7 @@ class Application {
 		}
 
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
+		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
 
 		if(isset($Config['Connections'])) {
 			foreach($Config['Connections'] as $Name => $Data) {

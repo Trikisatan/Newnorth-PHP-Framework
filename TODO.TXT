@@ -1,5 +1,3 @@
-Option for display error details
-
 Option for e-mailing errors
 
 Option for logging errors
