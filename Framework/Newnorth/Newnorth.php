@@ -5,6 +5,7 @@ require('Validators.php');
 
 require('Action.php');
 require('Actions.php');
+require('EMail.php');
 require('Layout.php');
 require('Page.php');
 require('Route.php');

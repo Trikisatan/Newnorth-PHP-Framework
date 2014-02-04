@@ -1,5 +1,3 @@
-Option for e-mailing errors
-
 Option for "not found"-page
 
 Option for "error"-page

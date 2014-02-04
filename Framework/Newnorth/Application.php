@@ -9,6 +9,9 @@ class Application {
 	private static $DisplayErrorDetails;
 	private static $LogErrors;
 	private static $LogFile;
+	private static $EMailErrors;
+	private static $EMailFrom;
+	private static $EMailTo;
 	private static $Connections = array();
 	private static $Routes = array();
 	private static $Parameters = null;
@@ -164,6 +167,25 @@ class Application {
 			);
 		}
 
+		if(Application::$EMailErrors) {
+			if(isset(Application::$EMailTo[0])) {
+				try {
+					$EMail = new EMail();
+
+					if(isset(Application::$EMailFrom[0])) {
+						$EMail->SetFrom(Application::$EMailFrom);
+					}
+
+					$EMail->SetSubject($Type.': '.$Message);
+					$EMail->SetHtml($DisplayMessage.$DisplayMessageDetails);
+					$EMail->Send(Application::$EMailTo);
+				}
+				catch(Exception $Exception) {
+					
+				}
+			}
+		}
+
 		exit();
 	}
 	private static function CreateErrorDisplayMessage($Section, $Data) {
@@ -225,6 +247,9 @@ class Application {
 		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
 		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
 		Application::$LogFile = isset($Config['ErrorHandling']['LogFile']) ? $Config['ErrorHandling']['LogFile'] : 'errors.log';
+		Application::$EMailErrors = isset($Config['ErrorHandling']['EMailErrors']) ? $Config['ErrorHandling']['EMailErrors'] === '1' : false;
+		Application::$EMailFrom = isset($Config['ErrorHandling']['EMailFrom']) ? $Config['ErrorHandling']['EMailFrom'] : '';
+		Application::$EMailTo = isset($Config['ErrorHandling']['EMailTo']) ? $Config['ErrorHandling']['EMailTo'] : '';
 
 		if(isset($Config['Connections'])) {
 			foreach($Config['Connections'] as $Name => $Data) {
