@@ -6,6 +6,7 @@ class Application {
 	private static $Instance = null;
 	private static $Url;
 	private static $Config;
+	private static $DefaultLocale;
 	private static $DisplayErrors;
 	private static $DisplayErrorDetails;
 	private static $LogErrors;
@@ -251,6 +252,7 @@ class Application {
 		}
 
 		Application::$Config = $Config;
+		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : '';
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
 		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
@@ -329,6 +331,9 @@ class Application {
 				}
 				else if(isset($_SESSION['Locale'][0])) {
 					Application::$Locale = $_SESSION['Locale'];
+				}
+				else if(isset(Application::$DefaultLocale[0])) {
+					Application::$Locale = Application::$DefaultLocale;
 				}
 				else {
 					ConfigError(
