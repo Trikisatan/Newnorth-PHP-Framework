@@ -4,4 +4,11 @@ Option for "error"-page
 
 RSS reader
 
-Make sure that the global validators are usable by actions directly
+Make sure that the global
+validators are usable by
+actions directly
+
+Add referrer to error message
+
+Separate not found errors from
+the other errors

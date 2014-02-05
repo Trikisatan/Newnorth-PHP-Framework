@@ -81,17 +81,7 @@ abstract class Control extends Validators {
 		$Output[0] = ob_get_contents();
 		ob_clean();
 
-		try {
-			include('Application/'.$this->Directory.$this->Name.'/Content.phtml');
-		}
-		catch(\Exception $Exception) {
-			ConfigError(
-				'Unable to load control\'s content.',
-				array(
-					'Path' => $this->Directory.$this->Name.'/Content.phtml',
-				)
-			);
-		}
+		include('Application/'.$this->Directory.$this->Name.'/Content.phtml');
 
 		$Output[1] = ob_get_contents();
 		ob_clean();

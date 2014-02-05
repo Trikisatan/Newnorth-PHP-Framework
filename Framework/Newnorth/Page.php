@@ -88,17 +88,7 @@ abstract class Page extends Validators {
 		$Output[0] = ob_get_contents();
 		ob_clean();
 
-		try {
-			include('Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml');
-		}
-		catch(\Exception $Exception) {
-			ConfigError(
-				'Unable to load page\'s content.',
-				array(
-					'Path' => Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml',
-				)
-			);
-		}
+		include('Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml');
 
 		$Output[1] = ob_get_contents();
 		ob_clean();

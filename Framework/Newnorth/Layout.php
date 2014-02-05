@@ -88,17 +88,7 @@ abstract class Layout extends Validators {
 		$Output[0] = ob_get_contents();
 		ob_clean();
 
-		try {
-			include('Application/'.Layout::$Directory.Layout::$Name.'/Content.phtml');
-		}
-		catch(\Exception $Exception) {
-			ConfigError(
-				'Unable to load layout\'s content.',
-				array(
-					'Path' => Layout::$Directory.Layout::$Name.'/Content.phtml',
-				)
-			);
-		}
+		include('Application/'.Layout::$Directory.Layout::$Name.'/Content.phtml');
 
 		$Output[1] = ob_get_contents();
 		ob_clean();
