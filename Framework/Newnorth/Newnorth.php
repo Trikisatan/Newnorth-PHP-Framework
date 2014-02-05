@@ -35,6 +35,12 @@ function ErrorCatcher($Severity, $Message, $File, $Line, $Variables) {
 	throw new ErrorException($Message, 0, $Severity, $File, $Line);
 }
 
+function HasConfig($Section) {
+	return Application::HasConfig($Section);
+}
+function GetConfig($Section = null) {
+	return Application::GetConfig($Section);
+}
 function GetLocale() {
 	return Application::GetLocale();
 }

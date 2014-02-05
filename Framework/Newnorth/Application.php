@@ -5,6 +5,7 @@ class Application {
 	/* Static variables */
 	private static $Instance = null;
 	private static $Url;
+	private static $Config;
 	private static $DisplayErrors;
 	private static $DisplayErrorDetails;
 	private static $LogErrors;
@@ -47,14 +48,16 @@ class Application {
 	public static function GetInstance() {
 		return Application::$Instance;
 	}
+	public static function HasConfig($Section) {
+		return isset(Application::$Config[$Section]);
+	}
+	public static function GetConfig($Section) {
+		return Application::$Config[$Section];
+	}
 	public static function HasParameter($Name) {
 		return isset(Application::$Parameters[$Name]);
 	}
 	public static function GetParameter($Name) {
-		if(!isset(Application::$Parameters[$Name])) {
-			throw new \exception('Unable to get the parameter "'.$Name.'", it does not exist.');
-		}
-
 		return Application::$Parameters[$Name];
 	}
 	public static function GetLocale() {
@@ -243,6 +246,7 @@ class Application {
 			);
 		}
 
+		Application::$Config = $Config;
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
 		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
