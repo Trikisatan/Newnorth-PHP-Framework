@@ -1,14 +1,7 @@
-Option for "not found"-page
-
 Option for "error"-page
 
-RSS reader
+Option for "config error"-page
 
 Make sure that the global
 validators are usable by
 actions directly
-
-Add referrer to error message
-
-Separate not found errors from
-the other errors

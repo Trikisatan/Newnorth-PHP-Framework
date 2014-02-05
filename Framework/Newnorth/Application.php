@@ -132,6 +132,7 @@ class Application {
 		$Data = array_merge(
 			array(
 				'Url' => Application::$Url,
+				'Referrer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
 			),
 			$Data
 		);
@@ -142,7 +143,7 @@ class Application {
 			}
 		}
 
-		$DisplayMessage = '<b>'.$Type.'</b><br />'.$Message;
+		$DisplayMessage = '<b>'.$Type.'</b><br />'.htmlspecialchars($Message);
 		$DisplayMessageDetails = Application::CreateErrorDisplayMessage(null, $Data);
 
 		if(Application::$DisplayErrors) {
@@ -202,8 +203,11 @@ class Application {
 					if(is_int($Section)) {
 						$Message .= $SubMessage;
 					}
-					else {
+					else if(is_array($SubData)) {
 						$Message .= '<br />'.$SubMessage;
+					}
+					else {
+						$Message .= $SubMessage;
 					}
 				}
 			}
@@ -212,7 +216,7 @@ class Application {
 		}
 
 		if(is_int($Section)) {
-			return '<br />'.$Data;
+			return '<br />'.htmlspecialchars($Data);
 		}
 
 		if(is_array($Data)) {
@@ -229,7 +233,7 @@ class Application {
 			return $Message;
 		}
 
-		return '<br /><b>'.$Section.':</b> '.$Data;
+		return '<br /><b>'.$Section.':</b> '.htmlspecialchars($Data);
 	}
 
 	/* Methods */
