@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Newnorth\MySql;
+namespace Framework\MySQL;
 
 class Connection {
 	/* Variables */

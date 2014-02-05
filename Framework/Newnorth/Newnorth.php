@@ -14,8 +14,6 @@ require('Control.php');
 require('Controls.php');
 require('DataManager.php');
 require('DataType.php');
-require('MySql/Connection.php');
-require('MySql/Result.php');
 
 use \Framework\Newnorth\Application as Application;
 use \Framework\Newnorth\Layout as Layout;

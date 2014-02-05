@@ -1,6 +1,8 @@
 <?php
+/* Includes */
 require('Framework/Newnorth/Newnorth.php');
 
+/* Execution of application */
 use \Framework\Newnorth\Application as Application;
 
 session_start();
