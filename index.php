@@ -25,7 +25,7 @@ catch(ErrorException $Exception) {
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
 			),
-			'Stacktrace' => array_slice($Exception->getTrace(), 1)
+			'StackTrace' => array_slice($Exception->getTrace(), 1)
 		)
 	);
 }
@@ -39,7 +39,7 @@ catch(Exception $Exception) {
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
 			),
-			'Stacktrace' => $Exception->getTrace()
+			'StackTrace' => $Exception->getTrace()
 		)
 	);
 }

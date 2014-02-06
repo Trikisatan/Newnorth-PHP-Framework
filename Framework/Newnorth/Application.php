@@ -14,6 +14,7 @@ class Application {
 	private static $EMailErrors;
 	private static $EMailFrom;
 	private static $EMailTo;
+	private static $ErrorPage;
 	private static $Connections = array();
 	private static $Routes = array();
 	private static $Parameters = null;
@@ -74,7 +75,7 @@ class Application {
 
 			$Route->ReversedTranslate($Parameters, $Locale);
 
-			if(!$Route->ReversedMatch($Parameters, $Url)) {
+			if(!$Route->ReversedMatch($Parameters, $Locale, $Url)) {
 				throw new \exception('Unable to generate URL.');
 			}
 
@@ -84,9 +85,9 @@ class Application {
 		foreach(Application::$Routes as $Route) {
 			$Route->SetDefaults($Parameters);
 
-			$Route->ReversedTranslate($Parameters, $Parameters['Locale']);
+			$Route->ReversedTranslate($Parameters, $Locale);
 
-			if(!$Route->ReversedMatch($Parameters, $Url)) {
+			if(!$Route->ReversedMatch($Parameters, $Locale, $Url)) {
 				continue;
 			}
 
@@ -138,67 +139,93 @@ class Application {
 			$Data
 		);
 
-		if(isset($Data['Stacktrace'])) {
-			for($I = 0; $I < count($Data['Stacktrace']); ++$I) {
-				$Data['Stacktrace'][$I] = $Data['Stacktrace'][$I]['function'].'(...) in '.$Data['Stacktrace'][$I]['file'].' on line '.$Data['Stacktrace'][$I]['line'];
-			}
-		}
-
-		$DisplayMessage = '<b>'.$Type.'</b><br />'.htmlspecialchars($Message);
-		$DisplayMessageDetails = Application::CreateErrorDisplayMessage(null, $Data);
-
-		if(Application::$DisplayErrors) {
-			if(Application::$DisplayErrorDetails) {
-				echo $DisplayMessage.$DisplayMessageDetails;
-			}
-			else {
-				echo $DisplayMessage;
-			}
-		}
+		Application::FormatStackTrace($Data);
 
 		if(Application::$LogErrors) {
-			$Data = array_merge(
-				array(
-					'Type' => $Type,
-					'Message' => $Message,
-				),
-				$Data
-			);
+			Application::LogError($Type, $Message, $Data);
+		}
 
+		if(Application::$EMailErrors) {
+			Application::EMailError($Type, $Message, $Data);
+		}
+
+		if(isset(Application::$ErrorPage[0])) {
+			Application::ShowErrorPage($Type, $Message, $Data);
+		}
+		else if(Application::$DisplayErrors) {
+			Application::PrintError($Type, $Message, $Data);
+		}
+
+		exit();
+	}
+	private static function FormatStackTrace(&$Data) {
+		if(isset($Data['StackTrace'])) {
+			$StackTrace = &$Data['StackTrace'];
+
+			for($I = 0; $I < count($StackTrace); ++$I) {
+				$StackTrace[$I] = $StackTrace[$I]['function'].'(...) in '.$StackTrace[$I]['file'].' on line '.$StackTrace[$I]['line'];
+			}
+		}
+	}
+	private static function LogError($Type, $Message, $Data) {
+		$Data = array_merge(
+			array(
+				'Type' => $Type,
+				'Message' => $Message,
+			),
+			$Data
+		);
+
+		try {
 			file_put_contents(
 				Application::$LogFile,
 				json_encode($Data)."\n",
 				FILE_APPEND
 			);
 		}
-
-		if(Application::$EMailErrors) {
-			if(isset(Application::$EMailTo[0])) {
-				try {
-					$EMail = new EMail();
-
-					if(isset(Application::$EMailFrom[0])) {
-						$EMail->SetFrom(Application::$EMailFrom);
-					}
-
-					$EMail->SetSubject($Type.': '.$Message);
-					$EMail->SetHtml($DisplayMessage.$DisplayMessageDetails);
-					$EMail->Send(Application::$EMailTo);
-				}
-				catch(Exception $Exception) {
-					
-				}
-			}
-		}
-
-		exit();
+		catch(Exception $Exception) { }
 	}
-	private static function CreateErrorDisplayMessage($Section, $Data) {
+	private static function EMailError($Type, $Message, $Data) {
+		if(isset(Application::$EMailTo[0])) {
+			$EMail = new EMail();
+
+			if(isset(Application::$EMailFrom[0])) {
+				$EMail->SetFrom(Application::$EMailFrom);
+			}
+
+			$EMail->SetSubject($Type.': '.$Message);
+			$EMail->SetHtml(
+				'<b>'.$Type.'</b><br />'.
+				htmlspecialchars($Message).
+				Application::CreateErrorMessage(null, $Data)
+			);
+
+			try {
+				$EMail->Send(Application::$EMailTo);
+			}
+			catch(Exception $Exception) { }
+		}
+	}
+	private static function ShowErrorPage($Type, $Message, $Data) {
+		try {
+			require(Application::$ErrorPage);
+		}
+		catch(Exception $Exception) { }
+	}
+	private static function PrintError($Type, $Message, $Data) {
+		if(Application::$DisplayErrorDetails) {
+			echo '<b>', $Type, '</b><br />', htmlspecialchars($Message), Application::CreateErrorMessage(null, $Data);
+		}
+		else {
+			echo '<b>', $Type, '</b><br />', htmlspecialchars($Message);
+		}
+	}
+	private static function CreateErrorMessage($Section, $Data) {
 		if($Section === null) {
 			$Message = '';
 
 			foreach($Data as $Section => $SubData) {
-				$SubMessage = Application::CreateErrorDisplayMessage($Section, $SubData);
+				$SubMessage = Application::CreateErrorMessage($Section, $SubData);
 
 				if(isset($SubMessage[0])) {
 					if(is_int($Section)) {
@@ -228,7 +255,7 @@ class Application {
 			$Message = '<br /><b>'.$Section.'</b>';
 
 			foreach($Data as $SubSection => $SubData) {
-				$Message .= Application::CreateErrorDisplayMessage($SubSection, $SubData);
+				$Message .= Application::CreateErrorMessage($SubSection, $SubData);
 			}
 
 			return $Message;
@@ -260,6 +287,7 @@ class Application {
 		Application::$EMailErrors = isset($Config['ErrorHandling']['EMailErrors']) ? $Config['ErrorHandling']['EMailErrors'] === '1' : false;
 		Application::$EMailFrom = isset($Config['ErrorHandling']['EMailFrom']) ? $Config['ErrorHandling']['EMailFrom'] : '';
 		Application::$EMailTo = isset($Config['ErrorHandling']['EMailTo']) ? $Config['ErrorHandling']['EMailTo'] : '';
+		Application::$ErrorPage = isset($Config['ErrorHandling']['ErrorPage']) ? $Config['ErrorHandling']['ErrorPage'] : '';
 
 		if(isset($Config['Connections'])) {
 			foreach($Config['Connections'] as $Name => $Data) {

@@ -1,7 +1,3 @@
-Option for "error"-page
-
-Option for "config error"-page
-
 Make sure that the global
 validators are usable by
 actions directly
