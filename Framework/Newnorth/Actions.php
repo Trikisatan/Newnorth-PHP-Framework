@@ -30,7 +30,7 @@ class Actions implements \ArrayAccess {
         return $this->Actions[$Key];
     }
 	public function Load() {
-		$FilePath = $this->Directory.'Actions.ini';
+		$FilePath = 'Application/'.$this->Directory.'Actions.ini';
 		$Items = ParseIniFile($FilePath);
 
 		if($Items === false) {
@@ -57,16 +57,20 @@ class Actions implements \ArrayAccess {
 			}
 
 			$Action->AutoFill();
-			$Action->Load();
-			$Action->LockMySqlTables();
+
+			if(!$Action->Load()) {
+				continue;
+			}
+
+			$Action->LockConnections();
 
 			if(!$Action->Validate()) {
-				$Action->UnlockMySqlTables();
+				$Action->UnlockConnections();
 				continue;
 			}
 
 			$Redirect = $Action->Execute();
-			$Action->UnlockMySqlTables();
+			$Action->UnlockConnections();
 
 			if(isset($Redirect)) {
 				header('Location: '.$Redirect);

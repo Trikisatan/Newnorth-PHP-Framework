@@ -17,7 +17,7 @@ abstract class Control extends Validators {
 		$this->Name = $Name;
 		$this->Translations = new Translations($Directory.$Name.'/');
 		$this->Controls = new Controls($Directory.$Name.'/');
-		$this->Actions = new Actions($this, $this->Directory.$this->Name.'/');
+		$this->Actions = new Actions($this, $Directory.$Name.'/');
 	}
 	public function __toString() {
 		return $this->Directory.$this->Name;
@@ -26,69 +26,37 @@ abstract class Control extends Validators {
 	/* Events */
 	public function PreInitialize() {
 		$this->Translations->Load();
-		$this->Controls->Load();
 		$this->Actions->Load();
-
-		foreach($this->Controls as $Control) {
-			$Control->PreInitialize();
-		}
+		$this->Controls->PreInitialize();
 	}
 	public abstract function Initialize();
 	public function PostInitialize() {
-		foreach($this->Controls as $Control) {
-			$Control->Initialize();
-		}
-
-		foreach($this->Controls as $Control) {
-			$Control->PostInitialize();
-		}
+		$this->Controls->Initialize();
+		$this->Controls->PostInitialize();
 	}
 	public function PreLoad() {
-		foreach($this->Controls as $Control) {
-			$Control->PreLoad();
-		}
+		$this->Controls->PreLoad();
 	}
 	public abstract function Load();
 	public function PostLoad() {
-		foreach($this->Controls as $Control) {
-			$Control->Load();
-		}
-
-		foreach($this->Controls as $Control) {
-			$Control->PostLoad();
-		}
+		$this->Controls->Load();
+		$this->Controls->PostLoad();
 	}
 	public function PreExecute() {
 		$this->Actions->Execute();
-
-		foreach($this->Controls as $Control) {
-			$Control->PreExecute();
-		}
+		$this->Controls->PreExecute();
 	}
 	public abstract function Execute();
 	public function PostExecute() {
-		foreach($this->Controls as $Control) {
-			$Control->Execute();
-		}
-
-		foreach($this->Controls as $Control) {
-			$Control->PostExecute();
-		}
+		$this->Controls->Execute();
+		$this->Controls->PostExecute();
 	}
 	public function Render() {
-		$Application = Application::GetInstance();
-
-		$Output[0] = ob_get_contents();
-		ob_clean();
-
-		include('Application/'.$this->Directory.$this->Name.'/Content.phtml');
-
-		$Output[1] = ob_get_contents();
-		ob_clean();
-
-		$this->Translations->Translate($Output[1]);
-
-		echo $Output[0].$Output[1];
+		HtmlRenderer::Render(
+			$this,
+			$this->Directory.$this->Name.'/Content.phtml',
+			$this->Translations
+		);
 	}
 
 	/* Methods */
@@ -106,6 +74,9 @@ abstract class Control extends Validators {
 	}
 	public function SetTranslation($Key, $Value) {
 		$this->Translations[$Key] = $Value;
+	}
+	public function GetControl($Alias) {
+		return $this->Controls[$Alias];
 	}
 	public function RenderControl($Alias) {
 		$this->Controls[$Alias]->Render();

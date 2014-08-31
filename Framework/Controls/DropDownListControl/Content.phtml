@@ -1,0 +1,30 @@
+<div class="<?=$Control->ClassName?>">
+	<?
+	if(isset($Control->Label[0])) {
+		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
+	}
+	?>
+	<div class="Input-DropDownList">
+		<select id="<?=$Control->Id?>" name="<?=$Control->Name?>" onchange="<?=$Control->OnChange?>">
+			<?
+			foreach($Control->Options as $Option) {
+				if($Option['Value'] === $Control->Value) {
+					?><option value="<?=$Option['Value']?>" selected="selected"><?=$Option['Text']?></option><?php
+				}
+				else {
+					?><option value="<?=$Option['Value']?>"><?=$Option['Text']?></option><?php
+				}
+			}
+			?>
+		</select>
+	</div>
+	<?
+	if(0 < count($Control->ErrorMessages)) {
+		?><div class="Input-ErrorMessages"><?
+			foreach($Control->ErrorMessages as $ErrorMessage) {
+				?><p><?=$ErrorMessage?></p><?
+			}
+		?></div><?
+	}
+	?>
+</div>

@@ -31,14 +31,16 @@ class Application {
 			);
 		}
 
+		if(!isset($_SESSION['Token'])) {
+			$_SESSION['Token'] = md5(rand());
+		}
+
 		Application::$Instance = $this;
 		Application::$Url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
 
 		$this->LoadConfig($ConfigFilePath);
 		$this->LoadRoutes($RoutesFilePath);
-
 		$this->ParseUrl();
-
 		$this->LoadLayout();
 		$this->LoadPage();
 	}
@@ -127,6 +129,9 @@ class Application {
 		}
 
 		return Application::$DataManagers[$Name] = $DataManager;
+	}
+	public static function GetToken() {
+		return $_SESSION['Token'];
 	}
 	public static function HandleError($Type, $Message, $Data) {
 		ob_clean();
@@ -489,9 +494,10 @@ class Application {
 		if(Application::$Layout === null) {
 			global $Page;
 
+			$Directory = strrpos(Application::$Page, '\\');
 			$Page = new Application::$Page(
-				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\'))),
-				substr(Application::$Page, strrpos(Application::$Page, '\\'))
+				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
+				$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
 			);
 
 			$Page->PreInitialize();
@@ -511,14 +517,16 @@ class Application {
 		else {
 			global $Layout, $Page;
 
+			$Directory = strrpos(Application::$Page, '\\');
 			$Layout = new Application::$Layout(
-				str_replace('\\', '/', substr(Application::$Layout, 0, strrpos(Application::$Layout, '\\'))),
-				substr(Application::$Layout, strrpos(Application::$Layout, '\\'))
+				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Layout, 0, $Directory + 1)),
+				$Directory === false ? Application::$Layout : substr(Application::$Layout, $Directory + 1)
 			);
 
+			$Directory = strrpos(Application::$Page, '\\');
 			$Page = new Application::$Page(
-				str_replace('\\', '/', substr(Application::$Page, 0, strrpos(Application::$Page, '\\'))),
-				substr(Application::$Page, strrpos(Application::$Page, '\\'))
+				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
+				$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
 			);
 
 			$Layout->PreInitialize();

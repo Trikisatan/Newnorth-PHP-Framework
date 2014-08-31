@@ -1,0 +1,12 @@
+<div class="<?=$Control->ClassName?>">
+	<div class="Input-CheckBox"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="checkbox" value="<?=$Control->Value?>"<?=($Control->IsChecked ? ' checked="checked"' : '')?> /></div><label class="Input-CheckBoxLabel" for="<?=$Control->Id?>"><?=$Control->Label?></label>
+	<?
+	if(0 < count($Control->ErrorMessages)) {
+		?><div class="Input-ErrorMessages"><?
+			foreach($Control->ErrorMessages as $ErrorMessage) {
+				?><p><?=$ErrorMessage?></p><?
+			}
+		?></div><?
+	}
+	?>
+</div>

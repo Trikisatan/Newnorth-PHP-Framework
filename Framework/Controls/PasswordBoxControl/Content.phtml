@@ -1,0 +1,17 @@
+<div class="<?=$Control->ClassName?>">
+	<?
+	if(isset($Control->Label[0])) {
+		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
+	}
+	?>
+	<div class="Input-TextBox"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="password" value="<?=$Control->Value?>" placeholder="<?=$Control->Placeholder?>" /></div>
+	<?
+	if(0 < count($Control->ErrorMessages)) {
+		?><div class="Input-ErrorMessages"><?
+			foreach($Control->ErrorMessages as $ErrorMessage) {
+				?><p><?=$ErrorMessage?></p><?
+			}
+		?></div><?
+	}
+	?>
+</div>

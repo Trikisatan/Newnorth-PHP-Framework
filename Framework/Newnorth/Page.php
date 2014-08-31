@@ -32,70 +32,37 @@ abstract class Page extends Validators {
 	/* Events */
 	public function PreInitialize() {
 		Page::$Translations->Load();
-		Page::$Controls->Load();
 		Page::$Actions->Load();
-
-		foreach(Page::$Controls as $Control) {
-			$Control->PreInitialize();
-		}
+		Page::$Controls->PreInitialize();
 	}
 	public abstract function Initialize();
 	public function PostInitialize() {
-		foreach(Page::$Controls as $Control) {
-			$Control->Initialize();
-		}
-
-		foreach(Page::$Controls as $Control) {
-			$Control->PostInitialize();
-		}
+		Page::$Controls->Initialize();
+		Page::$Controls->PostInitialize();
 	}
 	public function PreLoad() {
-		foreach(Page::$Controls as $Control) {
-			$Control->PreLoad();
-		}
+		Page::$Controls->PreLoad();
 	}
 	public abstract function Load();
 	public function PostLoad() {
-		foreach(Page::$Controls as $Control) {
-			$Control->Load();
-		}
-
-		foreach(Page::$Controls as $Control) {
-			$Control->PostLoad();
-		}
+		Page::$Controls->Load();
+		Page::$Controls->PostLoad();
 	}
 	public function PreExecute() {
 		Page::$Actions->Execute();
-
-		foreach(Page::$Controls as $Control) {
-			$Control->PreExecute();
-		}
+		Page::$Controls->PreExecute();
 	}
 	public abstract function Execute();
 	public function PostExecute() {
-		foreach(Page::$Controls as $Control) {
-			$Control->Execute();
-		}
-
-		foreach(Page::$Controls as $Control) {
-			$Control->PostExecute();
-		}
+		Page::$Controls->Execute();
+		Page::$Controls->PostExecute();
 	}
 	public function Render($PlaceHolder) {
-		$Application = Application::GetInstance();
-		$Layout = Layout::GetInstance();
-
-		$Output[0] = ob_get_contents();
-		ob_clean();
-
-		include('Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml');
-
-		$Output[1] = ob_get_contents();
-		ob_clean();
-
-		Page::$Translations->Translate($Output[1]);
-
-		echo $Output[0].$Output[1];
+		HtmlRenderer::Render(
+			null,
+			'Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml',
+			Page::$Translations
+		);
 	}
 
 	/* Static methods */
@@ -116,6 +83,11 @@ abstract class Page extends Validators {
 	}
 	public static function RenderControl($Alias) {
 		Page::$Controls[$Alias]->Render();
+	}
+
+	/* Methods */
+	public function GetControl($Alias) {
+		return Page::$Controls[$Alias];
 	}
 }
 ?>

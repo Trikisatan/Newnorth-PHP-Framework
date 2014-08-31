@@ -32,70 +32,37 @@ abstract class Layout extends Validators {
 	/* Events */
 	public function PreInitialize() {
 		Layout::$Translations->Load();
-		Layout::$Controls->Load();
 		Layout::$Actions->Load();
-
-		foreach(Layout::$Controls as $Control) {
-			$Control->PreInitialize();
-		}
+		Layout::$Controls->PreInitialize();
 	}
 	public abstract function Initialize();
 	public function PostInitialize() {
-		foreach(Layout::$Controls as $Control) {
-			$Control->Initialize();
-		}
-
-		foreach(Layout::$Controls as $Control) {
-			$Control->PostInitialize();
-		}
+		Layout::$Controls->Initialize();
+		Layout::$Controls->PostInitialize();
 	}
 	public function PreLoad() {
-		foreach(Layout::$Controls as $Control) {
-			$Control->PreLoad();
-		}
+		Layout::$Controls->PreLoad();
 	}
 	public abstract function Load();
 	public function PostLoad() {
-		foreach(Layout::$Controls as $Control) {
-			$Control->Load();
-		}
-
-		foreach(Layout::$Controls as $Control) {
-			$Control->PostLoad();
-		}
+		Layout::$Controls->Load();
+		Layout::$Controls->PostLoad();
 	}
 	public function PreExecute() {
 		Layout::$Actions->Execute();
-
-		foreach(Layout::$Controls as $Control) {
-			$Control->PreExecute();
-		}
+		Layout::$Controls->PreExecute();
 	}
 	public abstract function Execute();
 	public function PostExecute() {
-		foreach(Layout::$Controls as $Control) {
-			$Control->Execute();
-		}
-
-		foreach(Layout::$Controls as $Control) {
-			$Control->PostExecute();
-		}
+		Layout::$Controls->Execute();
+		Layout::$Controls->PostExecute();
 	}
 	public function Render() {
-		$Application = Application::GetInstance();
-		$Page = Page::GetInstance();
-
-		$Output[0] = ob_get_contents();
-		ob_clean();
-
-		include('Application/'.Layout::$Directory.Layout::$Name.'/Content.phtml');
-
-		$Output[1] = ob_get_contents();
-		ob_clean();
-
-		Layout::$Translations->Translate($Output[1]);
-
-		echo $Output[0].$Output[1];
+		HtmlRenderer::Render(
+			null,
+			'Application/'.Layout::$Directory.Layout::$Name.'/Content.phtml',
+			Layout::$Translations
+		);
 	}
 
 	/* Static methods */
@@ -116,6 +83,11 @@ abstract class Layout extends Validators {
 	}
 	public static function RenderControl($Alias) {
 		Layout::$Controls[$Alias]->Render();
+	}
+
+	/* Methods */
+	public function GetControl($Alias) {
+		return Layout::$Controls[$Alias];
 	}
 }
 ?>

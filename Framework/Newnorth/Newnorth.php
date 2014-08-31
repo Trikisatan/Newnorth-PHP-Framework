@@ -6,6 +6,7 @@ require('Validators.php');
 require('Action.php');
 require('Actions.php');
 require('EMail.php');
+require('HtmlRenderer.php');
 require('Layout.php');
 require('Page.php');
 require('Route.php');
@@ -51,13 +52,16 @@ function GetConnection($Name) {
 function GetDataManager($Name) {
 	return Application::GetDataManager($Name);
 }
+function GetToken() {
+	return Application::GetToken();
+}
 function GetPageName() {
 	return Page::GetName();
 }
 function GetPageDirectory() {
 	return Page::GetDirectory();
 }
-function ParseIniFile($Path) {
+function ParseIniFile($Path, $Split = true) {
 	try {
 		$Data = @parse_ini_file($Path, true);
 	}
@@ -69,23 +73,25 @@ function ParseIniFile($Path) {
 		return false;
 	}
 
-	foreach($Data as $SectionKey => $SectionValue) {
-		if(is_array($SectionValue)) {
-			foreach($SectionValue as $Key => $Value) {
-				$Keys = explode('_', $Key);
+	if($Split) {
+		foreach($Data as $SectionKey => &$SectionValue) {
+			if(is_array($SectionValue)) {
+				foreach($SectionValue as $Key => $Value) {
+					$Keys = explode('_', $Key);
 
-				if(1 < count($Keys)) {
-					$Var = &$SectionValue[$Keys[0]];
+					if(1 < count($Keys)) {
+						unset($SectionValue[$Key]);
 
-					for($I = 1; $I < count($Keys); ++$I) {
-						$Var = &$Var[$Keys[$I]];
+						$Var = &$SectionValue[$Keys[0]];
+
+						for($I = 1; $I < count($Keys); ++$I) {
+							$Var = &$Var[$Keys[$I]];
+						}
+
+						$Var = $Value;
 					}
-
-					$Var = $Value;
 				}
 			}
-
-			$Data[$SectionKey] = $SectionValue;
 		}
 	}
 

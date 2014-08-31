@@ -9,7 +9,7 @@ class Action {
 	private $RequiredVariables;
 	private $RequiredValues;
 	private $AutoFill;
-	private $Locks;
+	private $Connections;
 	private $Validation;
 	public $ErrorMessages = array();
 
@@ -29,14 +29,15 @@ class Action {
 	/* Methods */
 	public function Load() {
 		$FilePath = 'Application/'.$this->Directory.'/'.$this->Name.'Action.ini';
-		$Data = ParseIniFile($FilePath);
+		$Data = ParseIniFile($FilePath, false);
 
 		if($Data === false) {
-			return;
+			return false;
 		}
 
-		$this->Locks = isset($Data['Locks']) ? $Data['Locks'] : array();
+		$this->Connections = isset($Data['Connections']) ? $Data['Connections'] : array();
 		$this->Validation = isset($Data['Validation']) ? $Data['Validation'] : array();
+		return true;
 	}
 	public function ValidateRequiredVariables() {
 		foreach($this->RequiredVariables as $Variable => $IsRequired) {
@@ -135,7 +136,7 @@ class Action {
 	}
 	public function AutoFill() {
 		foreach($this->AutoFill as $Control => $Variable) {
-			$Control = $this->Owner->Controls[$Control];
+			$Control = $this->Owner->GetControl($Control);
 			$Variable = explode('/', $Variable);
 
 			if($Variable[0] === '_GET') {
@@ -162,15 +163,15 @@ class Action {
 			);
 		}
 	}
-	public function Lock() {
-		foreach($this->Locks as $Connection => $Items) {
+	public function LockConnections() {
+		foreach($this->Connections as $Connection => $Items) {
 			if(0 < count($Items)) {
 				GetConnection($Connection)->Lock($Items);
 			}
 		}
 	}
-	public function Unlock() {
-		foreach($this->Locks as $Connection => $Items) {
+	public function UnlockConnections() {
+		foreach($this->Connections as $Connection => $Items) {
 			if(0 < count($Items)) {
 				GetConnection($Connection)->Unlock($Items);
 			}
@@ -184,12 +185,12 @@ class Action {
 				return false;
 			}
 
-			$Name = $this->Name.'Action_'.$Name.'Validation';
+			$Method = $this->GetValidationMethod($Name);
 
 			if(isset($Validation['Control'])) {
-				$Control = $this->Owner->Controls[$Validation['Control']];
+				$Control = $this->Owner->GetControl($Validation['Control']);
 
-				if($this->Owner->$Name($Control)) {
+				if($this->Owner->$Method($Control)) {
 					continue;
 				}
 
@@ -198,7 +199,7 @@ class Action {
 				}
 			}
 			else {
-				if($this->Owner->$Name()) {
+				if($this->Owner->$Method(null)) {
 					continue;
 				}
 
@@ -215,6 +216,42 @@ class Action {
 		}
 
 		return !$HasErrorOccurred;
+	}
+	private function GetValidationMethod($Name) {
+		$Method = $this->Name.'Action_'.$Name.'Validation';
+
+		if(!method_exists($this->Owner, $Method)) {
+			$Method = $Name.'Validation';
+
+			if(!method_exists($this->Owner, $Method)) {
+				$Method = strrpos($Name, '_');
+
+				if($Method === false) {
+					ConfigError(
+						'Validation method not found.',
+						array(
+							'Action' => $this->Directory.$this->Name,
+							'Name' => $Name,
+						)
+					);
+				}
+
+				$Method = substr($Name, $Method + 1).'Validation';
+
+				if(!method_exists($this->Owner, $Method)) {
+					ConfigError(
+						'Validation method not found.',
+						array(
+							'Action' => $this->Directory.$this->Name,
+							'Method' => $Method,
+							'Name' => $Name,
+						)
+					);
+				}
+			}
+		}
+
+		return $Method;
 	}
 }
 ?>

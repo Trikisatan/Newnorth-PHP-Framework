@@ -1,0 +1,13 @@
+<div class="<?=$Control->ClassName?>">
+	<label for="<?=$Control->Id?>"><?=$Control->Label?></label>
+	<div class="Input-TextBox"><textarea id="<?=$Control->Id?>" name="<?=$Control->Name?>"><?=$Control->Value?></textarea></div>
+	<?
+	if(0 < count($Control->ErrorMessages)) {
+		?><div class="Input-ErrorMessages"><?
+			foreach($Control->ErrorMessages as $ErrorMessage) {
+				?><p><?=$ErrorMessage?></p><?
+			}
+		?></div><?
+	}
+	?>
+</div>
