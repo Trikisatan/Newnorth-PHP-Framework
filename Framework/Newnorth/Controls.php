@@ -1,16 +1,18 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 class Controls implements \ArrayAccess {
 	/* Variables */
+	private $Owner;
 	private $Directory;
 	private $Items = array();
 
 	/* Magic methods */
-	public function __construct($Directory) {
+	public function __construct($Owner, $Directory) {
+		$this->Owner = $Owner;
 		$this->Directory = $Directory;
 
-		$FilePath = 'Application/'.$this->Directory.'Controls.ini';
+		$FilePath = $this->Directory.'Controls.ini';
 		$Items = ParseIniFile($FilePath);
 
 		if($Items !== false) {
@@ -30,7 +32,7 @@ class Controls implements \ArrayAccess {
 		}
 	}
 	public function __toString() {
-		return 'Application/'.$this->Directory.'Controls.ini';
+		return $this->Directory.'Controls.ini';
 	}
 
 	/* Methods */
@@ -54,7 +56,7 @@ class Controls implements \ArrayAccess {
 		}
 		else {
 			$Class = str_replace('/', '\\', $this->Directory.$Name).'Control';
-			$Directory = './Application/'.$this->Directory;
+			$Directory = './'.$this->Directory;
 			$Name = $Name.'Control';
 		}
 
@@ -74,7 +76,7 @@ class Controls implements \ArrayAccess {
 			}
 		}
 
-		$Control = new $Class($this, $Directory, $Name);
+		$Control = new $Class($this->Owner, $Directory, $Name);
 
 		foreach($Data as $Key => $Value) {
 			$Control->$Key = $Value;

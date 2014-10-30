@@ -43,9 +43,6 @@ function GetConfig($Section = null) {
 function GetLocale() {
 	return Application::GetLocale();
 }
-function GenerateUrl($Route = null, $Parameters = array()) {
-	return Application::GenerateUrl($Route, $Parameters);
-}
 function GetConnection($Name) {
 	return Application::GetConnection($Name);
 }

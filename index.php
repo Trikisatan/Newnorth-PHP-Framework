@@ -1,13 +1,13 @@
-<?php
+<?
+session_start();
+
+ob_start();
+
 /* Includes */
 require('Framework/Newnorth/Newnorth.php');
 
 /* Execution of application */
 use \Framework\Newnorth\Application as Application;
-
-session_start();
-
-ob_start();
 
 try {
 	$Layout = null;
@@ -25,7 +25,7 @@ catch(ErrorException $Exception) {
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
 			),
-			'StackTrace' => array_slice($Exception->getTrace(), 1)
+			'StackTrace' => array_slice($Exception->getTrace(), 1),
 		)
 	);
 }
@@ -39,10 +39,8 @@ catch(Exception $Exception) {
 				'File' => $Exception->getFile(),
 				'Line' => $Exception->getLine(),
 			),
-			'StackTrace' => $Exception->getTrace()
+			'StackTrace' => $Exception->getTrace(),
 		)
 	);
 }
-
-ob_end_flush();
 ?>

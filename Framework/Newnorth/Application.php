@@ -15,13 +15,14 @@ class Application {
 	private static $EMailFrom;
 	private static $EMailTo;
 	private static $ErrorPage;
+	private static $Cache = null;
 	private static $Connections = array();
+	private static $DataManagers = array();
 	private static $Routes = array();
 	private static $Parameters = null;
 	private static $Locale = null;
 	private static $Page = null;
 	private static $Layout = null;
-	private static $DataManagers = array();
 
 	/* Magic methods */
 	public function __construct($ConfigFilePath = 'Config', $RoutesFilePath = 'Routes') {
@@ -39,10 +40,13 @@ class Application {
 		Application::$Url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
 
 		$this->LoadConfig($ConfigFilePath);
-		$this->LoadRoutes($RoutesFilePath);
-		$this->ParseUrl();
-		$this->LoadLayout();
-		$this->LoadPage();
+
+		if(!Application::LoadPageCache()) {
+			$this->LoadRoutes($RoutesFilePath);
+			$this->ParseUrl();
+			$this->LoadLayout();
+			$this->LoadPage();
+		}
 	}
 	public function __toString() {
 		return '';
@@ -67,36 +71,41 @@ class Application {
 	public static function GetLocale() {
 		return Application::$Locale;
 	}
-	public static function GenerateUrl($Route = null, $Parameters = array()) {
+	public static function GenerateUrl(array $Parameters) {
+		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Parameters['Page'];
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
-		if($Route !== null) {
+		if(isset($Parameters['Route'][0])) {
 			$Route = Application::$Routes[$Route];
+			$RouteParameters = array_slice($Parameters, 0);
 
-			$Route->SetDefaults($Parameters);
+			$Route->SetDefaults($RouteParameters);
+			$Route->ReversedTranslate($RouteParameters, $Locale);
 
-			$Route->ReversedTranslate($Parameters, $Locale);
-
-			if(!$Route->ReversedMatch($Parameters, $Locale, $Url)) {
-				throw new \exception('Unable to generate URL.');
+			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+				return $Url;
 			}
+		}
+		else {
+			foreach(Application::$Routes as $Route) {
+				$RouteParameters = array_slice($Parameters, 0);
 
-			return $Url;
+				$Route->SetDefaults($RouteParameters);
+				$Route->ReversedTranslate($RouteParameters, $Locale);
+
+				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+					return $Url;
+				}
+			}
 		}
 
-		foreach(Application::$Routes as $Route) {
-			$Route->SetDefaults($Parameters);
-
-			$Route->ReversedTranslate($Parameters, $Locale);
-
-			if(!$Route->ReversedMatch($Parameters, $Locale, $Url)) {
-				continue;
-			}
-
-			return $Url;
-		}
-
-		throw new \exception('Unable to generate URL.');
+		Application::HandleError(
+			'Content generation error',
+			'Unable to generate URL.',
+			array(
+				'Parameters' => $Parameters,
+			)
+		);
 	}
 	public static function GetConnection($Name) {
 		return Application::$Connections[$Name];
@@ -109,7 +118,7 @@ class Application {
 		$ClassName = str_replace('/', '\\', $Name).'DataManager';
 
 		if(!class_exists($ClassName, false)) {
-			include('Application/'.substr($Name, 1).'DataManager.php');
+			include(substr($Name, 1).'DataManager.php');
 
 			if(!class_exists($ClassName, false)) {
 				throw new \exception('Unable to get the data manager "'.$ClassName.'", it does not exist.');
@@ -121,7 +130,7 @@ class Application {
 		$DataManager->DataType = str_replace('/', '\\', $Name).'DataType';
 
 		if(!class_exists($DataManager->DataType, false)) {
-			include('Application/'.substr($Name, 1).'DataType.php');
+			include(substr($Name, 1).'DataType.php');
 
 			if(!class_exists($DataManager->DataType, false)) {
 				throw new \exception('Unable to get the data type "'.$DataManager->DataType.'", it does not exist.');
@@ -163,12 +172,71 @@ class Application {
 
 		exit();
 	}
+	public static function LoadCache($Key, $TimeToLive, &$Data) {
+		$Path = 'Cache/'.md5($Key);
+
+		if(!file_exists($Path)) {
+			return false;
+		}
+
+		$Data = @file_get_contents($Path, $Data);
+
+		if($Data === false) {
+			return false;
+		}
+		
+		$Newline = strpos($Data, "\n");
+		$Time = (int)substr($Data, 0, $Newline);
+		$Data = substr($Data, $Newline + 1);
+
+		if($Time < time() - $TimeToLive) {
+			unlink($Path);
+			return false;
+		}
+
+		return true;
+	}
+	private static function LoadPageCache() {
+		if(!isset(Application::$Config['Cache'][Application::$Url])) {
+			return false;
+		}
+
+		if(!Application::LoadCache(Application::$Url, Application::$Config['Cache'][Application::$Url], $Contents)) {
+			return false;
+		}
+
+		Application::$Cache = $Contents;
+		return true;
+	}
+	public static function SaveCache($Key, $Data) {
+		file_put_contents('Cache/'.md5($Key), time()."\n".$Data);
+	}
+	public static function SavePageCache() {
+		if(!isset(Application::$Config['Cache'][Application::$Url])) {
+			return false;
+		}
+
+		Application::SaveCache(Application::$Url, ob_get_contents());
+	}
 	private static function FormatStackTrace(&$Data) {
 		if(isset($Data['StackTrace'])) {
 			$StackTrace = &$Data['StackTrace'];
 
 			for($I = 0; $I < count($StackTrace); ++$I) {
-				$StackTrace[$I] = $StackTrace[$I]['function'].'(...) in '.$StackTrace[$I]['file'].' on line '.$StackTrace[$I]['line'];
+				$Row = $StackTrace[$I];
+				$String = '';
+
+				if(isset($Row['class'])) {
+					$String .= $Row['class'].$Row['type'];
+				}
+
+				$String .= $Row['function'].'(...)';
+
+				if(isset($Row['file'], $Row['line'])) {
+					$String .= ' in '.$Row['file'].' on line '.$Row['line'];
+				}
+
+				$StackTrace[$I] = $String;
 			}
 		}
 	}
@@ -271,7 +339,7 @@ class Application {
 
 	/* Methods */
 	private function LoadConfig($FilePath) {
-		$FilePath = 'Application/'.$FilePath.'.ini';
+		$FilePath = $FilePath.'.ini';
 		$Config = ParseIniFile($FilePath);
 
 		if($Config === false) {
@@ -322,7 +390,7 @@ class Application {
 		}
 	}
 	private function LoadRoutes($FilePath) {
-		$FilePath = 'Application/'.$FilePath.'.ini';
+		$FilePath = $FilePath.'.ini';
 		$Routes = ParseIniFile($FilePath);
 
 		if($Routes === false) {
@@ -427,7 +495,7 @@ class Application {
 		}
 
 		try {
-			include('Application/'.$Path);
+			include($Path);
 		}
 		catch(\Exception $Exception) {
 			ConfigError(
@@ -466,7 +534,7 @@ class Application {
 		}
 
 		try {
-			include('Application/'.$Path);
+			include($Path);
 		}
 		catch(\Exception $Exception) {
 			ConfigError(
@@ -474,6 +542,7 @@ class Application {
 				array(
 					'Path' => $Path,
 					'Class' => $Class,
+					'Exception' => $Exception,
 				)
 			);
 		}
@@ -491,66 +560,98 @@ class Application {
 		Application::$Page = $Class;
 	}
 	public function Run() {
-		if(Application::$Layout === null) {
-			global $Page;
+		global $InitializationTime, $LoadTime, $ExecutionTime, $RenderTime;
+		
+		if(Application::$Cache === null) {
+			if(Application::$Layout === null) {
+				global $Page;
 
-			$Directory = strrpos(Application::$Page, '\\');
-			$Page = new Application::$Page(
-				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
-				$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
-			);
+				$Directory = strrpos(Application::$Page, '\\');
+				$Page = new Application::$Page(
+					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
+					$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
+				);
 
-			$Page->PreInitialize();
-			$Page->Initialize();
-			$Page->PostInitialize();
+				$start = microtime(true);
+				$Page->PreInitialize();
+				$Page->Initialize();
+				$Page->PostInitialize();
+				$InitializationTime = microtime(true) - $start;
 
-			$Page->PreLoad();
-			$Page->Load();
-			$Page->PostLoad();
+				$start = microtime(true);
+				$Page->PreLoad();
+				$Page->Load();
+				$Page->PostLoad();
+				$LoadTime = microtime(true) - $start;
 
-			$Page->PreExecute();
-			$Page->Execute();
-			$Page->PostExecute();
+				$start = microtime(true);
+				$Page->PreExecute();
+				$Page->Execute();
+				$Page->PostExecute();
+				$ExecutionTime = microtime(true) - $start;
 
-			$Page->Render();
+				$start = microtime(true);
+				$Page->Render();
+				$RenderTime = microtime(true) - $start;
+			}
+			else {
+				global $Layout, $Page;
+
+				$Directory = strrpos(Application::$Page, '\\');
+				$Layout = new Application::$Layout(
+					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Layout, 0, $Directory + 1)),
+					$Directory === false ? Application::$Layout : substr(Application::$Layout, $Directory + 1)
+				);
+
+				$Directory = strrpos(Application::$Page, '\\');
+				$Page = new Application::$Page(
+					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
+					$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
+				);
+
+				$start = microtime(true);
+				$Page->PreInitialize();
+				$Layout->PreInitialize();
+				$Page->Initialize();
+				$Layout->Initialize();
+				$Page->PostInitialize();
+				$Layout->PostInitialize();
+				$InitializationTime = microtime(true) - $start;
+
+				$start = microtime(true);
+				$Page->PreLoad();
+				$Layout->PreLoad();
+				$Page->Load();
+				$Layout->Load();
+				$Page->PostLoad();
+				$Layout->PostLoad();
+				$LoadTime = microtime(true) - $start;
+
+				$start = microtime(true);
+				$Page->PreExecute();
+				$Layout->PreExecute();
+				$Page->Execute();
+				$Layout->Execute();
+				$Page->PostExecute();
+				$Layout->PostExecute();
+				$ExecutionTime = microtime(true) - $start;
+
+				$start = microtime(true);
+				$Layout->Render();
+				$RenderTime = microtime(true) - $start;
+			}
+
+			Application::SavePageCache();
 		}
-		else {
-			global $Layout, $Page;
+		else
+		{
+			$InitializationTime = 0;
+			$LoadTime = 0;
+			$ExecutionTime = 0;
 
-			$Directory = strrpos(Application::$Page, '\\');
-			$Layout = new Application::$Layout(
-				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Layout, 0, $Directory + 1)),
-				$Directory === false ? Application::$Layout : substr(Application::$Layout, $Directory + 1)
-			);
-
-			$Directory = strrpos(Application::$Page, '\\');
-			$Page = new Application::$Page(
-				$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
-				$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
-			);
-
-			$Layout->PreInitialize();
-			$Page->PreInitialize();
-			$Layout->Initialize();
-			$Page->Initialize();
-			$Layout->PostInitialize();
-			$Page->PostInitialize();
-
-			$Layout->PreLoad();
-			$Page->PreLoad();
-			$Layout->Load();
-			$Page->Load();
-			$Layout->PostLoad();
-			$Page->PostLoad();
-
-			$Layout->PreExecute();
-			$Page->PreExecute();
-			$Layout->Execute();
-			$Page->Execute();
-			$Layout->PostExecute();
-			$Page->PostExecute();
-
-			$Layout->Render();
+			$start = microtime(true);
+			echo Application::$Cache;
+			$RenderTime = microtime(true) - $start;
 		}
 	}
 }

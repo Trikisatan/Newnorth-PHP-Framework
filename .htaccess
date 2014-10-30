@@ -5,6 +5,20 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^.*$ - [NC,L]
 RewriteRule ^.*$ index.php [NC,L]
 
-<Files ./errors.log>
 deny from all
+
+<Files index.php>
+allow from all
+</Files>
+
+<Files *.css>
+allow from all
+</Files>
+
+<Files *.js>
+allow from all
+</Files>
+
+<Files *.png>
+allow from all
 </Files>

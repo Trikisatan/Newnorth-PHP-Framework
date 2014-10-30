@@ -30,7 +30,7 @@ class Actions implements \ArrayAccess {
         return $this->Actions[$Key];
     }
 	public function Load() {
-		$FilePath = 'Application/'.$this->Directory.'Actions.ini';
+		$FilePath = $this->Directory.'Actions.ini';
 		$Items = ParseIniFile($FilePath);
 
 		if($Items === false) {

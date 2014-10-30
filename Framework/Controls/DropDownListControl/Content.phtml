@@ -1,30 +1,31 @@
-<div class="<?=$Control->ClassName?>">
-	<?
+<div class="Input <?=$Control->ClassName?>" Newnorth:Control="DropDownListControl"><?
 	if(isset($Control->Label[0])) {
 		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
 	}
-	?>
-	<div class="Input-DropDownList">
-		<select id="<?=$Control->Id?>" name="<?=$Control->Name?>" onchange="<?=$Control->OnChange?>">
-			<?
-			foreach($Control->Options as $Option) {
-				if($Option['Value'] === $Control->Value) {
-					?><option value="<?=$Option['Value']?>" selected="selected"><?=$Option['Text']?></option><?php
+	?><div class="DropDownList"><?
+		?><select id="<?=$Control->Id?>" name="<?=$Control->Name?>" onchange="<?=$Control->OnChange?>"><?
+			foreach($Control->Options as $Value => $Text) {
+				$Value = (string)$Value;
+
+				if($Value === $Control->Value) {
+					?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?php
 				}
 				else {
-					?><option value="<?=$Option['Value']?>"><?=$Option['Text']?></option><?php
+					?><option value="<?=$Value?>"><?=$Text?></option><?php
 				}
 			}
-			?>
-		</select>
-	</div>
-	<?
-	if(0 < count($Control->ErrorMessages)) {
-		?><div class="Input-ErrorMessages"><?
-			foreach($Control->ErrorMessages as $ErrorMessage) {
-				?><p><?=$ErrorMessage?></p><?
-			}
-		?></div><?
-	}
-	?>
-</div>
+		?></select><?
+	?></div><?
+	?><script language="javascript"><?
+		?>window.addEventListener(<?
+			?>"load",<?
+			?>function(){<?
+				?>element=document.getElementById("<?=$Control->Id?>");<?
+				foreach($Control->Validation as $Method => $Validation) {
+					?>element.AddValidator(function(){<?=$Control->GetValidators()->{'Render'.$Method}($Control, $Validation)?>},"<?=$Validation['ErrorMessage']?>");<?
+				}
+				?>element.Validate();<?
+			?>}<?
+		?>);<?
+	?></script><?
+?></div>

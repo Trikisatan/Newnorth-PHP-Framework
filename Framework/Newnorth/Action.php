@@ -185,12 +185,12 @@ class Action {
 				return false;
 			}
 
-			$Method = $this->GetValidationMethod($Name);
+			$this->GetValidationMethod($Name, $MethodObject, $Method);
 
 			if(isset($Validation['Control'])) {
 				$Control = $this->Owner->GetControl($Validation['Control']);
 
-				if($this->Owner->$Method($Control)) {
+				if($MethodObject->$Method($Control)) {
 					continue;
 				}
 
@@ -199,7 +199,7 @@ class Action {
 				}
 			}
 			else {
-				if($this->Owner->$Method(null)) {
+				if($MethodObject->$Method(null)) {
 					continue;
 				}
 
@@ -217,41 +217,57 @@ class Action {
 
 		return !$HasErrorOccurred;
 	}
-	private function GetValidationMethod($Name) {
+	private function GetValidationMethod($Name, &$MethodObject, &$Method) {
+		$MethodObject = $this->Owner;
 		$Method = $this->Name.'Action_'.$Name.'Validation';
 
-		if(!method_exists($this->Owner, $Method)) {
-			$Method = $Name.'Validation';
+		if(method_exists($MethodObject, $Method)) {
+			return true;
+		}
 
-			if(!method_exists($this->Owner, $Method)) {
-				$Method = strrpos($Name, '_');
+		$Method = $Name.'Validation';
 
-				if($Method === false) {
-					ConfigError(
-						'Validation method not found.',
-						array(
-							'Action' => $this->Directory.$this->Name,
-							'Name' => $Name,
-						)
-					);
-				}
+		if(method_exists($MethodObject, $Method)) {
+			return true;
+		}
 
-				$Method = substr($Name, $Method + 1).'Validation';
+		$Method = strrpos($Name, '_');
 
-				if(!method_exists($this->Owner, $Method)) {
-					ConfigError(
-						'Validation method not found.',
-						array(
-							'Action' => $this->Directory.$this->Name,
-							'Method' => $Method,
-							'Name' => $Name,
-						)
-					);
-				}
+		if($Method !== false) {
+			$Method = substr($Name, $Method + 1).'Validation';
+
+			if(method_exists($MethodObject, $Method)) {
+				return true;
 			}
 		}
 
-		return $Method;
+		$MethodObject = $this->Owner->GetValidators();
+		$Method = $Name;
+
+		if(method_exists($MethodObject, $Method)) {
+			return true;
+		}
+
+		$Method = strrpos($Name, '_');
+
+		if($Method !== false) {
+			$Method = substr($Name, $Method + 1);
+
+			if(method_exists($MethodObject, $Method)) {
+				return true;
+			}
+		}
+
+		ConfigError(
+			'Validation method not found.',
+			array(
+				'Action' => $this->Directory.$this->Name,
+				'Method' => $Method,
+				'Name' => $Name,
+			)
+		);
+
+		return false;
 	}
 }
 ?>

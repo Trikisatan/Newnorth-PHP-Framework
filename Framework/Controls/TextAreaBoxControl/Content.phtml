@@ -1,13 +1,22 @@
-<div class="<?=$Control->ClassName?>">
-	<label for="<?=$Control->Id?>"><?=$Control->Label?></label>
-	<div class="Input-TextBox"><textarea id="<?=$Control->Id?>" name="<?=$Control->Name?>"><?=$Control->Value?></textarea></div>
-	<?
-	if(0 < count($Control->ErrorMessages)) {
-		?><div class="Input-ErrorMessages"><?
-			foreach($Control->ErrorMessages as $ErrorMessage) {
-				?><p><?=$ErrorMessage?></p><?
-			}
-		?></div><?
+<div class="Input <?=$Control->ClassName?>" Newnorth:Control="TextAreaBoxControl"><?
+	if(isset($Control->Label[0])) {
+		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
 	}
-	?>
-</div>
+	?><div class="TextAreaBox"><textarea id="<?=$Control->Id?>" name="<?=$Control->Name?>"><?=$Control->Value?></textarea></div><?
+	?><div class="ErrorMessages"></div><?
+	foreach($Control->ErrorMessages as $ErrorMessage) {
+		?><p><?=$ErrorMessage?></p><?
+	}
+	?><script language="javascript"><?
+		?>window.addEventListener(<?
+			?>"load",<?
+			?>function(){<?
+				?>element=document.getElementById("<?=$Control->Id?>");<?
+				foreach($Control->Validation as $Method => $Validation) {
+					?>element.AddValidator(function(){<?=$Control->GetValidators()->{'Render'.$Method}($Control, $Validation)?>},"<?=$Validation['ErrorMessage']?>");<?
+				}
+				?>element.Validate();<?
+			?>}<?
+		?>);<?
+	?></script><?
+?></div>

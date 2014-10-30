@@ -40,7 +40,7 @@ class Translations implements \ArrayAccess {
         return $this->Items[$Key];
     }
 	public function Load() {
-		$FilePath = 'Application/'.$this->Directory.'/Translations.'.Application::GetLocale().'.ini';
+		$FilePath = $this->Directory.'/Translations.'.Application::GetLocale().'.ini';
 		$Translations = ParseIniFile($FilePath);
 
 		if(!$Translations) {

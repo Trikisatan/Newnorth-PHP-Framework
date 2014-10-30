@@ -42,12 +42,8 @@ class Connection {
 		$Result = $this->Connection->query($QueryString);
 
 		if($Result === false) {
-			$Trace = debug_backtrace();
-			$History = '';
-			for($I = 1; $I < count($Trace); ++$I)
-				$History .= '... In <b>'.$Trace[$I]['file'].'</b> on line <b>'.$Trace[$I]['line'].'</b><br />';
-			trigger_error('MySQL error in <b>'.$Trace[0]['file'].'</b> on line <b>'.$Trace[0]['line'].'</b><br />'.$History.'#'.$this->Connection->errno.': '.$this->Connection->error.'<br />', E_USER_ERROR);
-				
+			trigger_error('MySQL error #'.$this->Connection->errno.': '.$this->Connection->error.'.', E_USER_ERROR);
+
 			return false;
 		}
 		else if($Result === true) {
@@ -126,6 +122,9 @@ class Connection {
 			if($Value === null) {
 				$Where .= ' AND `'.$Column.'` = NULL';
 			}
+			else if(is_int($Value)) {
+				$Where .= ' AND `'.$Column.'` = '.$Value;
+			}
 			else {
 				$Where .= ' AND `'.$Column.'` = "'.$this->EscapeString($Value).'"';
 			}
@@ -191,20 +190,55 @@ class Connection {
 				$Where
 		);
 	}
-	public function Select($Query, $Values = array()) {
-		foreach($Values as $Name => $Value) {
-			if($Value === null) {
-				$Query = str_replace($Name, 'NULL', $Query);
-			}
-			else if(is_int($Value)) {
-				$Query = str_replace($Name, $Value, $Query);
-			}
-			else {
-				$Query = str_replace($Name, '"'.$this->EscapeString($Value).'"', $Query);
+	public function Select($Columns, $Tables, $Conditions = array()) {
+		$Query = array(
+			'Columns' => '*',
+			'Tables' => '',
+			'Conditions' => ''
+		);
+
+		if($Columns !== null) {
+			foreach($Columns as $Alias => $Column) {
+				if(is_int($Alias)) {
+					$Query['Columns'] .= ', `'.str_replace('.', '`.`', $Column).'`';
+				}
+				else {
+					$Query['Columns'] .= ', `'.str_replace('.', '`.`', $Column).'` AS `'.$Alias.'`';
+				}
 			}
 		}
 
-		return $this->Query($Query);
+		if(isset($Query['Columns'][1])) {
+			$Query['Columns'] = substr($Query['Columns'], 3);
+		}
+
+		if(is_array($Tables)) {
+			$Query['Tables'] = '`'.$Tables[0].'`';
+
+			for($I = 1, $Count = count($Tables); $I < $Count; ++$I) {
+				$Query['Tables'] .= ' '.$Tables[$I]['Method'].' `'.$Tables[$I]['Name'].'`';
+
+				$Tables[$I]['Conditions'] = isset($Tables[$I]['Conditions']) ? $this->ProcessConditions($Tables[$I]['Conditions']) : null;
+
+				if($Tables[$I]['Conditions'] !== null) {
+					$Query['Tables'] .= ' ON '.$Tables[$I]['Conditions'];
+				}
+			}
+		}
+		else {
+			$Query['Tables'] = '`'.$Tables.'`';
+		}
+
+		$Query['Conditions'] = $this->ProcessConditions($Conditions);
+
+		return $this->Query(
+			'SELECT '.
+				$Query['Columns'].' '.
+			'FROM '.
+				$Query['Tables'].' '.
+			'WHERE '.
+				$Query['Conditions']
+		);
 	}
 	public function Lock($Tables) {
 		$Query = null;
@@ -235,6 +269,39 @@ class Connection {
 	public function FoundRows() {
 		$Result = $this->Query('SELECT FOUND_ROWS()');
 		return $Result->Fetch() ? $Result->GetInt(0) : 0;
+	}
+
+	private function ProcessConditions($Conditions) {
+		if(0 < count($Conditions)) {
+			$String = '';
+			$I = 0;
+
+			foreach($Conditions as $Column => $Value) {
+				if(0 < $I) {
+					$String .= ' AND ';
+				}
+
+				if(is_int($Column)) {
+					$String .= $Value;
+				}
+				else if($Value === null) {
+					$String .= '`'.str_replace('.', '`.`', $Column).'` = NULL';
+				}
+				else if(is_int($Value)) {
+					$String .= '`'.str_replace('.', '`.`', $Column).'` = '.$Value;
+				}
+				else {
+					$String .= '`'.str_replace('.', '`.`', $Column).'` = "'.$this->EscapeString($Value).'"';
+				}
+
+				++$I;
+			}
+
+			return $String;
+		}
+		else {
+			return null;
+		}
 	}
 }
 ?>

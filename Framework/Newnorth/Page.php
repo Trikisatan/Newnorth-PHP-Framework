@@ -1,14 +1,18 @@
 <?php
 namespace Framework\Newnorth;
 
-abstract class Page extends Validators {
+abstract class Page {
 	/* Static variables */
-	private static $Instance = null;
-	private static $Directory;
-	private static $Name;
-	private static $Translations;
-	private static $Controls;
-	private static $Actions;
+	public static $Instance = null;
+
+	/* Variables */
+	public $Directory;
+	public $Name;
+	public $Translations;
+	public $Controls;
+	public $Actions;
+	public $Validators;
+	public $Renderer = '\Framework\Newnorth\HtmlRenderer';
 
 	/* Magic methods */
 	public function __construct($Directory, $Name) {
@@ -19,75 +23,61 @@ abstract class Page extends Validators {
 		}
 
 		Page::$Instance = $this;
-		Page::$Directory = $Directory;
-		Page::$Name = $Name;
-		Page::$Translations = new Translations($Directory.$Name.'/');
-		Page::$Controls = new Controls($Directory.$Name.'/');
-		Page::$Actions = new Actions($this, $Directory.$Name.'/');
+		$this->Directory = $Directory;
+		$this->Name = $Name;
+		$this->Translations = new Translations($Directory.$Name.'/');
+		$this->Controls = new Controls($this, $Directory.$Name.'/');
+		$this->Actions = new Actions($this, $Directory.$Name.'/');
+		$this->Validators = new Validators();
 	}
 	public function __toString() {
-		return Page::$Directory.Page::$Name;
+		return $this->Directory.$this->Name;
 	}
 
 	/* Events */
 	public function PreInitialize() {
-		Page::$Translations->Load();
-		Page::$Actions->Load();
-		Page::$Controls->PreInitialize();
+		$this->Translations->Load();
+		$this->Actions->Load();
+		$this->Controls->PreInitialize();
 	}
 	public abstract function Initialize();
 	public function PostInitialize() {
-		Page::$Controls->Initialize();
-		Page::$Controls->PostInitialize();
+		$this->Controls->Initialize();
+		$this->Controls->PostInitialize();
 	}
 	public function PreLoad() {
-		Page::$Controls->PreLoad();
+		$this->Controls->PreLoad();
 	}
 	public abstract function Load();
 	public function PostLoad() {
-		Page::$Controls->Load();
-		Page::$Controls->PostLoad();
+		$this->Controls->Load();
+		$this->Controls->PostLoad();
 	}
 	public function PreExecute() {
-		Page::$Actions->Execute();
-		Page::$Controls->PreExecute();
+		$this->Actions->Execute();
+		$this->Controls->PreExecute();
 	}
 	public abstract function Execute();
 	public function PostExecute() {
-		Page::$Controls->Execute();
-		Page::$Controls->PostExecute();
+		$this->Controls->Execute();
+		$this->Controls->PostExecute();
 	}
-	public function Render($PlaceHolder) {
-		HtmlRenderer::Render(
-			null,
-			'Application/'.Page::$Directory.Page::$Name.'/'.$PlaceHolder.'.phtml',
-			Page::$Translations
-		);
+	public function Render($PlaceHolder = null) {
+		call_user_func($this->Renderer.'::Render', $this, $PlaceHolder);
 	}
 
 	/* Static methods */
-	public static function GetInstance() {
-		return Page::$Instance;
+	public function GetTranslation($Key, $DefaultValue = null) {
+		return isset($this->Translations[$Key]) ? $this->Translations[$Key] : $DefaultValue;
 	}
-	public static function GetDirectory() {
-		return Page::$Directory;
+	public function SetTranslation($Key, $Value) {
+		$this->Translations[$Key] = $Value;
 	}
-	public static function GetName() {
-		return Page::$Name;
-	}
-	public static function GetTranslation($Key, $DefaultValue = null) {
-		return isset(Page::$Translations[$Key]) ? Page::$Translations[$Key] : $DefaultValue;
-	}
-	public static function SetTranslation($Key, $Value) {
-		Page::$Translations[$Key] = $Value;
-	}
-	public static function RenderControl($Alias) {
-		Page::$Controls[$Alias]->Render();
-	}
-
-	/* Methods */
 	public function GetControl($Alias) {
-		return Page::$Controls[$Alias];
+		return $this->Controls[$Alias];
+	}
+	public function RenderControl($Alias) {
+		$this->Controls[$Alias]->Render();
 	}
 }
 ?>

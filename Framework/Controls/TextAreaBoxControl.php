@@ -8,6 +8,7 @@ class TextAreaBoxControl extends \Framework\Newnorth\Control {
 	public $ClassName = '';
 	public $Label = '';
 	public $Value = '';
+	public $Validation = array();
 	public $ErrorMessages = array();
 
 	/* Actions */

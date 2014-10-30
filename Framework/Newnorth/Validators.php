@@ -1,9 +1,9 @@
 <?php
 namespace Framework\Newnorth;
 
-abstract class Validators {
+class Validators {
 	/* Methods */
-	public function TokenValidation($Subject) {
+	public function Token($Subject) {
 		if($Subject instanceof \Framework\Newnorth\Control) {
 			return $_POST[$Subject->Name] === GetToken();
 		}
@@ -14,7 +14,7 @@ abstract class Validators {
 			return $_POST['Token'] === GetToken();
 		}
 	}
-	public function DropDownListValueValidation($Control) {
+	public function DropDownList($Control) {
 		for($I = 0; $I < count($Control->Options); $I++) {
 			if($Control->Options[$I]['Value'] === $_POST[$Control->Name]) {
 				return true;
@@ -23,45 +23,40 @@ abstract class Validators {
 
 		return false;
 	}
-	public function EMailAddressFormatValidation($Subject) {
+	public function EMailAddressFormat($Subject) {
 		if($Subject instanceof \Framework\Newnorth\Control) {
 			return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/', $_POST[$Subject->Name]);
 		}
 
 		return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/', $Subject);
 	}
-	public function FileUploadedValidation($Control) {
+	public function FileUploaded($Control) {
 		return 0 < $_FILES[$Control->Name]['size'];
 	}
-	public function NotEmptyValidation($Subject) {
-		if($Subject instanceof \Framework\Newnorth\Control) {
-			return isset($_POST[$Subject->Name][0]);
-		}
-		else if($Subject !== null) {
-			return isset($Subject[0]);
-		}
-		else {
-			ConfigError(
-				'Subject is null.',
-				array()
-			);
-		}
+	public function ValueNotEmpty($Control) {
+		return isset($_POST[$Control->Name][0]);
 	}
-	public function MaxLengthValidation($Subject, $MaxLength = 0) {
+	public function RenderValueNotEmpty($Control, $Data) {
+		return 'return 0<this.value.length';
+	}
+	public function RenderValueRegExp($Control, $Data) {
+		return 'return -1<this.value.search('.$Data['RegExp'].')';
+	}
+	public function MaxLength($Subject, $MaxLength = 0) {
 		if($Subject instanceof \Framework\Newnorth\Control) {
 			return isset($_POST[$Subject->Name][$Subject->MaxLength]);
 		}
 
 		return !isset($Subject[$MaxLength]);
 	}
-	public function MinLengthValidation($Subject, $MinLength = 1) {
+	public function MinLength($Subject, $MinLength = 1) {
 		if($Subject instanceof \Framework\Newnorth\Control) {
 			return isset($_POST[$Subject->Name][$Subject->MinLength - 1]);
 		}
 
 		return isset($Subject[$MinLength - 1]);
 	}
-	public function IsDigitsValidation($Subject) {
+	public function IsDigits($Subject) {
 		if($Subject instanceof \Framework\Newnorth\Control) {
 			return ctype_digit($_POST[$Subject->Name]);
 		}

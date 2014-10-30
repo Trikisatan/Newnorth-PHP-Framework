@@ -10,6 +10,8 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	public $Value = '';
 	public $OnChange = '';
 	public $Options = array();
+	public $Validation = array();
+	public $ErrorMessages = array();
 
 	/* Actions */
 	public function Initialize() {
@@ -31,10 +33,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		$this->Value = $Value;
 	}
 	public function AddOption($Value, $Text) {
-		$this->Options[] = array(
-			'Value' => $Value,
-			'Text' => $Text,
-		);
+		$this->Options[$Value] = $Text;
 	}
 }
 ?>

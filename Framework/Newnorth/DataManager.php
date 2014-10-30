@@ -4,6 +4,7 @@ namespace Framework\Newnorth;
 abstract class DataManager {
 	/* Variables */
 	public $DataType = null;
+	public $Connection = null;
 
 	/* Magic methods */
 	public function __toString() {
@@ -11,8 +12,8 @@ abstract class DataManager {
 	}
 
 	/* Methods */
-	public function Find($Connection, $Query, $Values = array()) {
-		$Result = $Connection->Select($Query, $Values);
+	public function Find($Columns, $Tables, $Conditions) {
+		$Result = $this->Connection->Select($Columns, $Tables, $Conditions);
 
 		if($Result === false) {
 			return null;
@@ -24,8 +25,8 @@ abstract class DataManager {
 
 		return isset($Item) ? $Item : null;
 	}
-	public function FindAll($Connection, $Query, $Values = array()) {
-		$Result = $Connection->Select($Query, $Values);
+	public function FindAll($Columns, $Tables, $Conditions) {
+		$Result = $this->Connection->Select($Columns, $Tables, $Conditions);
 
 		if($Result === false) {
 			return null;

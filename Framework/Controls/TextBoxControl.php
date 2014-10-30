@@ -10,6 +10,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public $Value = '';
 	public $Placeholder = '';
 	public $MaxLength = 0;
+	public $Validation = array();
 	public $ErrorMessages = array();
 
 	/* Events */

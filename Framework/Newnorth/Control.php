@@ -1,14 +1,16 @@
 <?php
 namespace Framework\Newnorth;
 
-abstract class Control extends Validators {
+abstract class Control {
 	/* Variables */
-	private $Parent;
-	private $Directory;
-	private $Name;
-	private $Translations;
-	private $Controls;
-	private $Actions;
+	public $Parent;
+	public $Directory;
+	public $Name;
+	public $Translations;
+	public $Controls;
+	public $Actions;
+	public $Validators;
+	public $Renderer = '\Framework\Newnorth\HtmlRenderer';
 
 	/* Magic methods */
 	public function __construct($Parent, $Directory, $Name) {
@@ -16,8 +18,9 @@ abstract class Control extends Validators {
 		$this->Directory = $Directory;
 		$this->Name = $Name;
 		$this->Translations = new Translations($Directory.$Name.'/');
-		$this->Controls = new Controls($Directory.$Name.'/');
+		$this->Controls = new Controls($this, $Directory.$Name.'/');
 		$this->Actions = new Actions($this, $Directory.$Name.'/');
+		$this->Validators = new Validators();
 	}
 	public function __toString() {
 		return $this->Directory.$this->Name;
@@ -51,24 +54,11 @@ abstract class Control extends Validators {
 		$this->Controls->Execute();
 		$this->Controls->PostExecute();
 	}
-	public function Render() {
-		HtmlRenderer::Render(
-			$this,
-			$this->Directory.$this->Name.'/Content.phtml',
-			$this->Translations
-		);
+	public function Render($PlaceHolder = null) {
+		call_user_func($this->Renderer.'::Render', $this, $PlaceHolder);
 	}
 
 	/* Methods */
-	public function GetControlDirectory() {
-		return $this->Directory;
-	}
-	public function GetControlName() {
-		return $this->Name;
-	}
-	public function GetControlParent() {
-		return $this->_Parent;
-	}
 	public function GetTranslation($Key, $DefaultValue = null) {
 		return isset($this->Translations[$Key]) ? $this->Translations[$Key] : $DefaultValue;
 	}
