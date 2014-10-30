@@ -5,7 +5,9 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^.*$ - [NC,L]
 RewriteRule ^.*$ index.php [NC,L]
 
+<Files *.*>
 deny from all
+</Files>
 
 <Files index.php>
 allow from all

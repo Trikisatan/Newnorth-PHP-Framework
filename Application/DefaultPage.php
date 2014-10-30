@@ -1,4 +1,6 @@
 <?php
+namespace Application;
+
 use \Framework\Newnorth\Application as Application;
 use \Framework\Newnorth\Layout as Layout;
 use \Framework\Newnorth\Page as Page;
