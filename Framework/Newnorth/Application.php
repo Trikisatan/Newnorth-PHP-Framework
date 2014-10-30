@@ -80,6 +80,19 @@ class Application {
 			$RouteParameters = array_slice($Parameters, 0);
 
 			$Route->SetDefaults($RouteParameters);
+
+			foreach(Application::$Parameters as $Key => $Value) {
+				if(is_int($Key)) {
+					continue;
+				}
+
+				if(isset($RouteParameters[$Key])) {
+					continue;
+				}
+
+				$RouteParameters[$Key] = $Value;
+			}
+
 			$Route->ReversedTranslate($RouteParameters, $Locale);
 
 			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
@@ -91,6 +104,19 @@ class Application {
 				$RouteParameters = array_slice($Parameters, 0);
 
 				$Route->SetDefaults($RouteParameters);
+
+				foreach(Application::$Parameters as $Key => $Value) {
+					if(is_int($Key)) {
+						continue;
+					}
+
+					if(isset($RouteParameters[$Key])) {
+						continue;
+					}
+
+					$RouteParameters[$Key] = $Value;
+				}
+
 				$Route->ReversedTranslate($RouteParameters, $Locale);
 
 				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {

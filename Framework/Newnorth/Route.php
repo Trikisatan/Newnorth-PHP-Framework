@@ -60,7 +60,7 @@ class Route {
 		if(count($this->Translations) == 0) {
 			return true;
 		}
-		// ... But since there is translations,
+		// ... But since there are translations,
 		// translation is required.
 		if(!isset($this->Translations[$Locale])) {
 			return false;
@@ -101,9 +101,11 @@ class Route {
 	}
 	public function ReversedMatch($Parameters, $Locale, &$Url) {
 		$Url = $this->ReversablePattern;
+
 		foreach($Parameters as $Part => $Value) {
 			$Url = preg_replace('/\/(?:\+|\*)'.$Part.'\//', '/'.$Value.'/', $Url);
 		}
+
 		$Url = preg_replace('/\/(?:\+|\*)Locale\//', '/'.$Locale.'/', $Url);
 		$Url = preg_replace('/\/(?:\*)(?:[^\/]+)(?:\/|$)/', '/', $Url);
 		$Url = preg_replace('/\/(?:\*)(?:\/|$)/', '/', $Url);
