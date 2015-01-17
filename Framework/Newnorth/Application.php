@@ -1,77 +1,148 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 class Application {
 	/* Static variables */
-	private static $Instance = null;
-	private static $Url;
-	private static $Config;
-	private static $DefaultLocale;
-	private static $DisplayErrors;
-	private static $DisplayErrorDetails;
-	private static $LogErrors;
-	private static $LogFile;
-	private static $EMailErrors;
-	private static $EMailFrom;
-	private static $EMailTo;
-	private static $ErrorPage;
-	private static $Cache = null;
-	private static $Connections = array();
-	private static $DataManagers = array();
-	private static $Routes = array();
-	private static $Parameters = null;
-	private static $Locale = null;
-	private static $Page = null;
-	private static $Layout = null;
 
-	/* Magic methods */
-	public function __construct($ConfigFilePath = 'Config', $RoutesFilePath = 'Routes') {
-		if(Application::$Instance !== null) {
+	static private $Instance = null;
+
+	static private $Url;
+
+	static private $Config;
+
+	static private $Files = [
+		'DataManagers' => '',
+		'DataTypes' => '',
+	];
+
+	static private $DefaultLocale;
+
+	static private $DisplayErrors;
+
+	static private $DisplayErrorDetails;
+
+	static private $LogErrors;
+
+	static private $LogFile;
+
+	static private $EMailErrors;
+
+	static private $EMailFrom;
+
+	static private $EMailTo;
+
+	static private $ErrorPage;
+
+	static private $Cache = null;
+
+	static private $Connections = array();
+
+	static private $DataManagers = array();
+
+	static private $Routes = array();
+
+	static private $Parameters = null;
+
+	static private $Locale = null;
+
+	static private $Page = null;
+
+	static private $Layout = null;
+
+	/* Static methods */
+
+	static private function LoadConfig($FilePath) {
+		$FilePath = $FilePath.'.ini';
+		$Config = ParseIniFile($FilePath);
+
+		if($Config === false) {
 			ConfigError(
-				'An instance of the application has already been initialized.'
+				'Unable to load the application\'s configuration.',
+				array(
+					'File' => $FilePath,
+				)
 			);
 		}
 
-		if(!isset($_SESSION['Token'])) {
-			$_SESSION['Token'] = md5(rand());
+		Application::$Config = $Config;
+
+		if(isset($Config['Files'])) {
+			Application::LoadConfig_Files($Config['Files']);
 		}
 
-		Application::$Instance = $this;
-		Application::$Url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
+		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : '';
 
-		$this->LoadConfig($ConfigFilePath);
+		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 
-		if(!Application::LoadPageCache()) {
-			$this->LoadRoutes($RoutesFilePath);
-			$this->ParseUrl();
-			$this->LoadLayout();
-			$this->LoadPage();
+		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
+
+		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
+
+		Application::$LogFile = isset($Config['ErrorHandling']['LogFile']) ? $Config['ErrorHandling']['LogFile'] : 'errors.log';
+
+		Application::$EMailErrors = isset($Config['ErrorHandling']['EMailErrors']) ? $Config['ErrorHandling']['EMailErrors'] === '1' : false;
+
+		Application::$EMailFrom = isset($Config['ErrorHandling']['EMailFrom']) ? $Config['ErrorHandling']['EMailFrom'] : '';
+
+		Application::$EMailTo = isset($Config['ErrorHandling']['EMailTo']) ? $Config['ErrorHandling']['EMailTo'] : '';
+
+		Application::$ErrorPage = isset($Config['ErrorHandling']['ErrorPage']) ? $Config['ErrorHandling']['ErrorPage'] : '';
+
+		if(isset($Config['Connections'])) {
+			foreach($Config['Connections'] as $Name => $Data) {
+				if(!isset($Data['Type'])) {
+					ConfigError(
+						'Connection\'s type not set.',
+						array(
+							'ConfigFile' => $FilePath,
+							'Connection' => $Name,
+						)
+					);
+				}
+
+				if(!class_exists($Data['Type'], false)) {
+					ConfigError(
+						'Connection\'s type not found.',
+						array(
+							'ConfigFile' => $FilePath,
+							'Connection' => $Name,
+							'Type' => $Data['Type'],
+						)
+					);
+				}
+
+				Application::$Connections[$Name] = new $Data['Type']($Data);
+			}
 		}
 	}
-	public function __toString() {
-		return '';
+
+	static private function LoadConfig_Files($Section) {
+		Application::$Files['DataManagers'] = isset($Section['DataManagers']) ? $Section['DataManagers'] : Application::$Files['DataManagers'];
+
+		Application::$Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : Application::$Files['DataTypes'];
 	}
 
-	/* Static methods */
-	public static function GetInstance() {
-		return Application::$Instance;
-	}
-	public static function HasConfig($Section) {
+	static public function HasConfig($Section) {
 		return isset(Application::$Config[$Section]);
 	}
-	public static function GetConfig($Section) {
+
+	static public function GetConfig($Section) {
 		return Application::$Config[$Section];
 	}
-	public static function HasParameter($Name) {
+
+	static public function HasParameter($Name) {
 		return isset(Application::$Parameters[$Name]);
 	}
-	public static function GetParameter($Name) {
+
+	static public function GetParameter($Name) {
 		return Application::$Parameters[$Name];
 	}
-	public static function GetLocale() {
+
+	static public function GetLocale() {
 		return Application::$Locale;
 	}
-	public static function GenerateUrl(array $Parameters) {
+
+	static public function GenerateUrl(array $Parameters) {
 		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Parameters['Page'];
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
@@ -133,30 +204,32 @@ class Application {
 			)
 		);
 	}
-	public static function GetConnection($Name) {
+
+	static public function GetConnection($Name) {
 		return Application::$Connections[$Name];
 	}
-	public static function GetDataManager($Name) {
+
+	static public function GetDataManager($Name) {
 		if(isset(Application::$DataManagers[$Name])) {
 			return Application::$DataManagers[$Name];
 		}
 
-		$ClassName = str_replace('/', '\\', $Name).'DataManager';
+		$DataManager = '\\'.str_replace('/', '\\', $Name).'DataManager';
 
-		if(!class_exists($ClassName, false)) {
-			include(substr($Name, 1).'DataManager.php');
+		if(!class_exists($DataManager, false)) {
+			include(Application::$Files['DataManagers'].$Name.'DataManager.php');
 
-			if(!class_exists($ClassName, false)) {
-				throw new \exception('Unable to get the data manager "'.$ClassName.'", it does not exist.');
+			if(!class_exists($DataManager, false)) {
+				throw new \exception('Unable to get the data manager "'.$DataManager.'", it does not exist.');
 			}
 		}
 
-		$DataManager = new $ClassName();
+		$DataManager = new $DataManager();
 
-		$DataManager->DataType = str_replace('/', '\\', $Name).'DataType';
+		$DataManager->DataType = '\\'.str_replace('/', '\\', $Name).'DataType';
 
 		if(!class_exists($DataManager->DataType, false)) {
-			include(substr($Name, 1).'DataType.php');
+			include(Application::$Files['DataTypes'].$Name.'DataType.php');
 
 			if(!class_exists($DataManager->DataType, false)) {
 				throw new \exception('Unable to get the data type "'.$DataManager->DataType.'", it does not exist.');
@@ -165,10 +238,12 @@ class Application {
 
 		return Application::$DataManagers[$Name] = $DataManager;
 	}
-	public static function GetToken() {
+
+	static public function GetToken() {
 		return $_SESSION['Token'];
 	}
-	public static function HandleError($Type, $Message, $Data) {
+
+	static public function HandleError($Type, $Message, $Data) {
 		ob_clean();
 
 		$Data = array_merge(
@@ -198,7 +273,8 @@ class Application {
 
 		exit();
 	}
-	public static function LoadCache($Key, $TimeToLive, &$Data) {
+
+	static public function LoadCache($Key, $TimeToLive, &$Data) {
 		$Path = 'Cache/'.md5($Key);
 
 		if(!file_exists($Path)) {
@@ -222,7 +298,8 @@ class Application {
 
 		return true;
 	}
-	private static function LoadPageCache() {
+
+	static private function LoadPageCache() {
 		if(!isset(Application::$Config['Cache'][Application::$Url])) {
 			return false;
 		}
@@ -234,17 +311,20 @@ class Application {
 		Application::$Cache = $Contents;
 		return true;
 	}
-	public static function SaveCache($Key, $Data) {
+
+	static public function SaveCache($Key, $Data) {
 		file_put_contents('Cache/'.md5($Key), time()."\n".$Data);
 	}
-	public static function SavePageCache() {
+
+	static public function SavePageCache() {
 		if(!isset(Application::$Config['Cache'][Application::$Url])) {
 			return false;
 		}
 
 		Application::SaveCache(Application::$Url, ob_get_contents());
 	}
-	private static function FormatStackTrace(&$Data) {
+
+	static private function FormatStackTrace(&$Data) {
 		if(isset($Data['StackTrace'])) {
 			$StackTrace = &$Data['StackTrace'];
 
@@ -266,7 +346,8 @@ class Application {
 			}
 		}
 	}
-	private static function LogError($Type, $Message, $Data) {
+
+	static private function LogError($Type, $Message, $Data) {
 		$Data = array_merge(
 			array(
 				'Type' => $Type,
@@ -284,7 +365,8 @@ class Application {
 		}
 		catch(Exception $Exception) { }
 	}
-	private static function EMailError($Type, $Message, $Data) {
+
+	static private function EMailError($Type, $Message, $Data) {
 		if(isset(Application::$EMailTo[0])) {
 			$EMail = new EMail();
 
@@ -305,13 +387,15 @@ class Application {
 			catch(Exception $Exception) { }
 		}
 	}
-	private static function ShowErrorPage($Type, $Message, $Data) {
+
+	static private function ShowErrorPage($Type, $Message, $Data) {
 		try {
 			require(Application::$ErrorPage);
 		}
 		catch(Exception $Exception) { }
 	}
-	private static function PrintError($Type, $Message, $Data) {
+
+	static private function PrintError($Type, $Message, $Data) {
 		if(Application::$DisplayErrorDetails) {
 			echo '<b>', $Type, '</b><br />', htmlspecialchars($Message), Application::CreateErrorMessage(null, $Data);
 		}
@@ -319,7 +403,8 @@ class Application {
 			echo '<b>', $Type, '</b><br />', htmlspecialchars($Message);
 		}
 	}
-	private static function CreateErrorMessage($Section, $Data) {
+
+	static private function CreateErrorMessage($Section, $Data) {
 		if($Section === null) {
 			$Message = '';
 
@@ -363,58 +448,39 @@ class Application {
 		return '<br /><b>'.$Section.':</b> '.htmlspecialchars($Data);
 	}
 
-	/* Methods */
-	private function LoadConfig($FilePath) {
-		$FilePath = $FilePath.'.ini';
-		$Config = ParseIniFile($FilePath);
+	/* Magic methods */
 
-		if($Config === false) {
+	public function __construct($ConfigFilePath = 'Config', $RoutesFilePath = 'Routes') {
+		if(Application::$Instance !== null) {
 			ConfigError(
-				'Unable to load the application\'s configuration.',
-				array(
-					'File' => $FilePath,
-				)
+				'An instance of the application has already been initialized.'
 			);
 		}
 
-		Application::$Config = $Config;
-		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : '';
-		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
-		Application::$DisplayErrorDetails = isset($Config['ErrorHandling']['DisplayErrorDetails']) ? $Config['ErrorHandling']['DisplayErrorDetails'] === '1' : true;
-		Application::$LogErrors = isset($Config['ErrorHandling']['LogErrors']) ? $Config['ErrorHandling']['LogErrors'] === '1' : true;
-		Application::$LogFile = isset($Config['ErrorHandling']['LogFile']) ? $Config['ErrorHandling']['LogFile'] : 'errors.log';
-		Application::$EMailErrors = isset($Config['ErrorHandling']['EMailErrors']) ? $Config['ErrorHandling']['EMailErrors'] === '1' : false;
-		Application::$EMailFrom = isset($Config['ErrorHandling']['EMailFrom']) ? $Config['ErrorHandling']['EMailFrom'] : '';
-		Application::$EMailTo = isset($Config['ErrorHandling']['EMailTo']) ? $Config['ErrorHandling']['EMailTo'] : '';
-		Application::$ErrorPage = isset($Config['ErrorHandling']['ErrorPage']) ? $Config['ErrorHandling']['ErrorPage'] : '';
+		if(!isset($_SESSION['Token'])) {
+			$_SESSION['Token'] = md5(rand());
+		}
 
-		if(isset($Config['Connections'])) {
-			foreach($Config['Connections'] as $Name => $Data) {
-				if(!isset($Data['Type'])) {
-					ConfigError(
-						'Connection\'s type not set.',
-						array(
-							'ConfigFile' => $FilePath,
-							'Connection' => $Name,
-						)
-					);
-				}
+		Application::$Instance = $this;
 
-				if(!class_exists($Data['Type'], false)) {
-					ConfigError(
-						'Connection\'s type not found.',
-						array(
-							'ConfigFile' => $FilePath,
-							'Connection' => $Name,
-							'Type' => $Data['Type'],
-						)
-					);
-				}
+		Application::$Url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
 
-				Application::$Connections[$Name] = new $Data['Type']($Data);
-			}
+		Application::LoadConfig($ConfigFilePath);
+
+		if(!Application::LoadPageCache()) {
+			$this->LoadRoutes($RoutesFilePath);
+			$this->ParseUrl();
+			$this->LoadLayout();
+			$this->LoadPage();
 		}
 	}
+
+	public function __toString() {
+		return '';
+	}
+
+	/* Methods */
+
 	private function LoadRoutes($FilePath) {
 		$FilePath = $FilePath.'.ini';
 		$Routes = ParseIniFile($FilePath);
@@ -448,6 +514,7 @@ class Application {
 			);
 		}
 	}
+
 	private function ParseUrl() {
 		foreach(Application::$Routes as $Route) {
 			if($Route->Match(Application::$Url, $Parameters)) {
@@ -502,6 +569,7 @@ class Application {
 			'Unable to match the URL to a route.'
 		);
 	}
+
 	private function LoadLayout() {
 		if(Application::$Layout === null) {
 			return;
@@ -545,6 +613,7 @@ class Application {
 
 		Application::$Layout = $Class;
 	}
+
 	private function LoadPage() {
 		$Path = Application::$Page.'.php';
 		$Class = str_replace('/', '\\', Application::$Page);
@@ -585,6 +654,7 @@ class Application {
 
 		Application::$Page = $Class;
 	}
+
 	public function Run() {
 		global $InitializationTime, $LoadTime, $ExecutionTime, $RenderTime;
 		
