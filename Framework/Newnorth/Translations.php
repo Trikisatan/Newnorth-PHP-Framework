@@ -67,21 +67,43 @@ class Translations implements \ArrayAccess {
 	}
 
 	public function Translate(&$Contents) {
-		foreach($this->Items as $Key => $Translation) {
-			$Contents = str_replace('%'.$Key.'%', $Translation, $Contents);
-			
-			if(0 < preg_match_all('/%'.$Key.'\("(.*?)"\)%/', $Contents, $Matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
-				foreach($Matches as $Match) {
-					$Copy = $Translation;
+		$Offset = 0;
 
-					$Data = explode('","', $Match[1][0]);
+		while(0 < preg_match('/%([A-Z0-9_]+?)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+			$Key = $Match[1][0];
 
-					for($I = 0; $I < count($Data); ++$I) {
-						$Copy = str_replace('\\'.$I, $Data[$I], $Copy);
-					}
+			if(isset($this->Items[$Key])) {
+				$Translation = $this->Items[$Key];
 
-					$Contents = substr($Contents, 0, $Match[0][1]).$Copy.substr($Contents, $Match[0][1] + strlen($Match[0][0]));
+				$Contents = substr($Contents, 0, $Match[0][1]).$Translation.substr($Contents, $Match[0][1] + strlen($Match[0][0]));
+
+				$Offset = $Match[0][1];
+			}
+			else {
+				$Offset = $Match[0][1] + strlen($Match[0][0]);
+			}
+		}
+
+		$Offset = 0;
+
+		while(0 < preg_match('/%([A-Z0-9_]+?)\("(.*?)"\)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+			$Key = $Match[1][0];
+
+			if(isset($this->Items[$Key])) {
+				$Translation = $this->Items[$Key];
+
+				$Data = explode('","', $Match[2][0]);
+
+				for($I = 0; $I < count($Data); ++$I) {
+					$Translation = str_replace('\\'.$I, $Data[$I], $Translation);
 				}
+
+				$Contents = substr($Contents, 0, $Match[0][1]).$Translation.substr($Contents, $Match[0][1] + strlen($Match[0][0]));
+
+				$Offset = $Match[0][1];
+			}
+			else {
+				$Offset = $Match[0][1] + strlen($Match[0][0]);
 			}
 		}
 	}
