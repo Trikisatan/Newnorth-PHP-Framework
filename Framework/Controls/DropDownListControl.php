@@ -2,6 +2,7 @@
 namespace Framework\Controls;
 
 use \Framework\Newnorth\Control;
+use \Framework\Newnorth\ConfigException;
 
 class DropDownListControl extends Control {
 	/* Events */

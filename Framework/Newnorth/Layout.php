@@ -24,9 +24,7 @@ abstract class Layout {
 
 	public function __construct($Directory, $Name) {
 		if(Layout::$Instance !== null) {
-			ConfigError(
-				'An instance of the layout has already been initialized.'
-			);
+			throw new ConfigException('Layout has already been initialized.');
 		}
 
 		Layout::$Instance = $this;

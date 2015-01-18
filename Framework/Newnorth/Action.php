@@ -75,48 +75,49 @@ class Action {
 	}
 
 	public function ValidateRequiredVariables() {
-		foreach($this->RequiredVariables as $Variable => $IsRequired) {
-			$Variable = explode('/', $Variable);
-			$IsRequired = ($IsRequired === '1');
+		foreach($this->RequiredVariables as $Variable => $ShouldExist) {
+			$VariableParts = explode('/', $Variable);
 
-			if($Variable[0] === '_FILES') {
-				if(isset($_FILES[$Variable[1]]) !== $IsRequired) {
+			$ShouldExist = ($ShouldExist === '1');
+
+			if($VariableParts[0] === '_FILES') {
+				if(isset($_FILES[$VariableParts[1]]) !== $ShouldExist) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_GET') {
-				if(isset($_GET[$Variable[1]]) !== $IsRequired) {
+			if($VariableParts[0] === '_GET') {
+				if(isset($_GET[$VariableParts[1]]) !== $ShouldExist) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_POST') {
-				if(isset($_POST[$Variable[1]]) !== $IsRequired) {
+			if($VariableParts[0] === '_POST') {
+				if(isset($_POST[$VariableParts[1]]) !== $ShouldExist) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_SESSION') {
-				if(isset($_SESSION[$Variable[1]]) !== $IsRequired) {
+			if($VariableParts[0] === '_SESSION') {
+				if(isset($_SESSION[$VariableParts[1]]) !== $ShouldExist) {
 					return false;
 				}
 
 				continue;
 			}
 
-			ConfigError(
+			throw new ConfigException(
 				'Unknown variable provided in validation of required variables.',
-				array(
-					'Action' => $this->Directory.$this->Name.'Action',
+				[
+					'Action' => $this->__toString(),
 					'Variable' => $Variable,
-				)
+				]
 			);
 		}
 
@@ -125,46 +126,46 @@ class Action {
 
 	public function ValidateRequiredValues() {
 		foreach($this->RequiredValues as $Variable => $Value) {
-			$Variable = explode('/', $Variable);
+			$VariableParts = explode('/', $Variable);
 
-			if($Variable[0] === '_FILES') {
-				if($_FILES[$Variable[1]] !== $Value) {
+			if($VariableParts[0] === '_FILES') {
+				if($_FILES[$VariableParts[1]] !== $Value) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_GET') {
-				if($_GET[$Variable[1]] !== $Value) {
+			if($VariableParts[0] === '_GET') {
+				if($_GET[$VariableParts[1]] !== $Value) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_POST') {
-				if($_POST[$Variable[1]] !== $Value) {
+			if($VariableParts[0] === '_POST') {
+				if($_POST[$VariableParts[1]] !== $Value) {
 					return false;
 				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_SESSION') {
-				if($_SESSION[$Variable[1]] !== $Value) {
+			if($VariableParts[0] === '_SESSION') {
+				if($_SESSION[$VariableParts[1]] !== $Value) {
 					return false;
 				}
 
 				continue;
 			}
 
-			ConfigError(
+			throw new ConfigException(
 				'Unknown variable provided in validation of required values.',
-				array(
-					'Action' => $this->Directory.$this->Name.'Action',
+				[
+					'Action' => $this->__toString(),
 					'Variable' => $Variable,
-				)
+				]
 			);
 		}
 
@@ -174,32 +175,39 @@ class Action {
 	public function AutoFill() {
 		foreach($this->AutoFill as $Control => $Variable) {
 			$Control = $this->Owner->GetControl($Control);
-			$Variable = explode('/', $Variable);
 
-			if($Variable[0] === '_GET') {
-				$Control->AutoFill(isset($_GET[$Variable[1]]) ? $_GET[$Variable[1]] : null);
+			$VariableParts = explode('/', $Variable);
 
-				continue;
-			}
-
-			if($Variable[0] === '_POST') {
-				$Control->AutoFill(isset($_POST[$Variable[1]]) ? $_POST[$Variable[1]] : null);
+			if($VariableParts[0] === '_GET') {
+				if(isset($_GET[$VariableParts[1]])) {
+					$Control->AutoFill($_GET[$VariableParts[1]]);
+				}
 
 				continue;
 			}
 
-			if($Variable[0] === '_SESSION') {
-				$Control->AutoFill(isset($_SESSION[$Variable[1]]) ? $_SESSION[$Variable[1]] : null);
+			if($VariableParts[0] === '_POST') {
+				if(isset($_POST[$VariableParts[1]])) {
+					$Control->AutoFill($_POST[$VariableParts[1]]);
+				}
 
 				continue;
 			}
 
-			ConfigError(
+			if($VariableParts[0] === '_SESSION') {
+				if(isset($_SESSION[$VariableParts[1]])) {
+					$Control->AutoFill($_SESSION[$VariableParts[1]]);
+				}
+
+				continue;
+			}
+
+			throw new ConfigException(
 				'Unknown variable provided in auto fill.',
-				array(
-					'Action' => $this->Directory.$this->Name.'Action',
+				[
+					'Action' => $this->__toString(),
 					'Variable' => $Variable,
-				)
+				]
 			);
 		}
 	}

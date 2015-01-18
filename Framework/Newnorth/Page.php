@@ -24,9 +24,7 @@ abstract class Page {
 
 	public function __construct($Directory, $Name) {
 		if(Page::$Instance !== null) {
-			ConfigError(
-				'An instance of the page has already been initialized.'
-			);
+			throw new ConfigException('Page has already been initialized.');
 		}
 
 		Page::$Instance = $this;

@@ -1,4 +1,6 @@
 <?
+namespace Framework\Newnorth;
+
 require('Exception.php');
 require('ConfigException.php');
 require('Application.php');
@@ -15,40 +17,7 @@ require('Controls.php');
 require('DataManager.php');
 require('DataType.php');
 
-use \Framework\Newnorth\Application;
-use \Framework\Newnorth\Layout;
-use \Framework\Newnorth\Page;
-
-/* Error handling */
-
-function ConfigError($Message, $Data, $StackTrace) {
-	Application::HandleError(
-		'Configuration error',
-		$Message,
-		$Data,
-		$StackTrace
-	);
-}
-
-function GetLocale() {
-	return Application::GetLocale();
-}
-
-function GetConnection($Name) {
-	return Application::GetConnection($Name);
-}
-
-function GetDataManager($Name) {
-	return Application::GetDataManager($Name);
-}
-
-function GetToken() {
-	return Application::GetToken();
-}
-
-function GenerateUrl(array $Parameters) {
-	return Application::GenerateUrl($Parameters);
-}
+/* Miscellaneous framework specific methods */
 
 function Redirect($Location) {
 	if(is_array($Location)) {
@@ -61,8 +30,7 @@ function Redirect($Location) {
 	exit();
 }
 
-/* String methods.
-/* * * * */
+/* String methods */
 
 function String_StartsWith($Haystack, $Needle) {
 	return substr($Haystack, 0, strlen($Needle)) === $Needle;
@@ -72,8 +40,7 @@ function String_EndsWith($Haystack, $Needle) {
 	return substr($Haystack, -strlen($Needle)) === $Needle;
 }
 
-/* Miscellaneous methods.
-/* * * * */
+/* Miscellaneous methods */
 
 function ParseIniFile($FilePath, $Split = true) {
 	$Data = parse_ini_file($FilePath, true);

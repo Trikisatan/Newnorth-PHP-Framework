@@ -1,5 +1,7 @@
 <?
-namespace Framework;
+namespace Framework\Twitter;
+
+use \Framework\Newnorth\ConfigException
 
 class Twitter {
 	/* Static variables */
@@ -26,41 +28,31 @@ class Twitter {
 		}
 
 		if(!HasConfig('Twitter')) {
-			ConfigError(
-				'Twitter API not configured.'
-			);
+			throw new ConfigException('Twitter API not configured.');
 		}
 
 		$Config = GetConfig('Twitter');
 
 		if(!isset($Config['Token'][0])) {
-			ConfigError(
-				'"Token" for Twitter API not set.'
-			);
+			throw new ConfigException('"Token" for Twitter API not set.');
 		}
 
 		Twitter::$Token = $Config['Token'];
 
 		if(!isset($Config['TokenSecret'][0])) {
-			ConfigError(
-				'"TokenSecret" for Twitter API not set.'
-			);
+			throw new ConfigException('"TokenSecret" for Twitter API not set.');
 		}
 
 		Twitter::$TokenSecret = $Config['TokenSecret'];
 
 		if(!isset($Config['ConsumerKey'][0])) {
-			ConfigError(
-				'"ConsumerKey" for Twitter API not set.'
-			);
+			throw new ConfigException('"ConsumerKey" for Twitter API not set.');
 		}
 
 		Twitter::$ConsumerKey = $Config['ConsumerKey'];
 
 		if(!isset($Config['ConsumerSecret'][0])) {
-			ConfigError(
-				'"ConsumerSecret" for Twitter API not set.'
-			);
+			throw new ConfigException('"ConsumerSecret" for Twitter API not set.');
 		}
 
 		Twitter::$ConsumerSecret = $Config['ConsumerSecret'];

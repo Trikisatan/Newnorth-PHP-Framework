@@ -35,34 +35,22 @@ class Application {
 
 	static private $Cache = null;
 
-	static private $Connections = array();
+	static private $DbConnections = [];
 
-	static private $DataManagers = array();
+	static private $DataManagers = [];
 
-	static private $Routes = array();
+	static private $Routes = [];
 
 	static private $Parameters = null;
 
 	static private $Locale = null;
 
-	static private $Page = null;
-
-	static private $Layout = null;
-
 	/* Static methods */
 
 	static private function LoadConfig($FilePath) {
 		$FilePath = $FilePath.'.ini';
-		$Config = ParseIniFile($FilePath);
 
-		if($Config === false) {
-			ConfigError(
-				'Unable to load the application\'s configuration.',
-				array(
-					'File' => $FilePath,
-				)
-			);
-		}
+		$Config = ParseIniFile($FilePath);
 
 		Application::$Config = $Config;
 
@@ -88,31 +76,8 @@ class Application {
 
 		Application::$ErrorPage = isset($Config['ErrorHandling']['ErrorPage']) ? $Config['ErrorHandling']['ErrorPage'] : '';
 
-		if(isset($Config['Connections'])) {
-			foreach($Config['Connections'] as $Name => $Data) {
-				if(!isset($Data['Type'])) {
-					ConfigError(
-						'Connection\'s type not set.',
-						array(
-							'ConfigFile' => $FilePath,
-							'Connection' => $Name,
-						)
-					);
-				}
-
-				if(!class_exists($Data['Type'], false)) {
-					ConfigError(
-						'Connection\'s type not found.',
-						array(
-							'ConfigFile' => $FilePath,
-							'Connection' => $Name,
-							'Type' => $Data['Type'],
-						)
-					);
-				}
-
-				Application::$Connections[$Name] = new $Data['Type']($Data);
-			}
+		if(isset($Config['DbConnections'])) {
+			Application::LoadConfig_DbConnections($Config['DbConnections']);
 		}
 	}
 
@@ -120,6 +85,31 @@ class Application {
 		Application::$Files['DataManagers'] = isset($Section['DataManagers']) ? $Section['DataManagers'] : Application::$Files['DataManagers'];
 
 		Application::$Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : Application::$Files['DataTypes'];
+	}
+
+	static private function LoadConfig_DbConnections($DbConnections) {
+		foreach($DbConnections as $Name => $Parameters) {
+			if(!isset($Parameters['Type'])) {
+				throw new ConfigException(
+					'Type not set.',
+					[
+						'DbConnection' => $Name,
+					]
+				);
+			}
+
+			if(!class_exists($Parameters['Type'], false)) {
+				throw new ConfigException(
+					'Type not found.',
+					[
+						'DbConnection' => $Name,
+						'Type' => $Parameters['Type'],
+					]
+				);
+			}
+
+			Application::$DbConnections[$Name] = new $Parameters['Type']($Parameters);
+		}
 	}
 
 	static public function HasConfig($Section) {
@@ -205,8 +195,8 @@ class Application {
 		);
 	}
 
-	static public function GetConnection($Name) {
-		return Application::$Connections[$Name];
+	static public function GetDbConnection($Name) {
+		return Application::$DbConnections[$Name];
 	}
 
 	static public function GetDataManager($Name) {
@@ -237,10 +227,6 @@ class Application {
 		}
 
 		return Application::$DataManagers[$Name] = $DataManager;
-	}
-
-	static public function GetToken() {
-		return $_SESSION['Token'];
 	}
 
 	static public function HandleError($Type, $Message, $File, $Line, $Data, $StackTrace) {
@@ -445,13 +431,17 @@ class Application {
 		return '<br /><b>'.$Section.':</b> '.htmlspecialchars($Data);
 	}
 
+	/* Variables */
+
+	private $Layout = null;
+
+	private $Page = null;
+
 	/* Magic methods */
 
 	public function __construct($ConfigFilePath = 'Config', $RoutesFilePath = 'Routes') {
 		if(Application::$Instance !== null) {
-			ConfigError(
-				'An instance of the application has already been initialized.'
-			);
+			throw new ConfigException('Application has already been initialized.');
 		}
 
 		if(!isset($_SESSION['Token'])) {
@@ -466,8 +456,11 @@ class Application {
 
 		if(!Application::LoadPageCache()) {
 			$this->LoadRoutes($RoutesFilePath);
+
 			$this->ParseUrl();
+
 			$this->LoadLayout();
+
 			$this->LoadPage();
 		}
 	}
@@ -480,25 +473,17 @@ class Application {
 
 	private function LoadRoutes($FilePath) {
 		$FilePath = $FilePath.'.ini';
-		$Routes = ParseIniFile($FilePath);
 
-		if($Routes === false) {
-			ConfigError(
-				'Unable to load the application\'s routes.',
-				array(
-					'File' => $FilePath,
-				)
-			);
-		}
+		$Routes = ParseIniFile($FilePath);
 
 		foreach($Routes as $Name => $Data) {
 			if(!isset($Data['Pattern'])) {
-				ConfigError(
-					'No pattern set for route.',
-					array(
+				throw new ConfigException(
+					'Pattern not set.',
+					[
 						'File' => $FilePath,
 						'Route' => $Name,
-					)
+					]
 				);
 			}
 
@@ -527,11 +512,12 @@ class Application {
 					Application::$Locale = Application::$DefaultLocale;
 				}
 				else {
-					ConfigError(
+					throw new ConfigException(
 						'Locale not set.',
-						array(
-							'Route' => $Route->GetName(),
-						)
+						[
+							'URL' => Application::$Url,
+							'Route' => $Route->__toString(),
+						]
 					);
 				}
 
@@ -544,125 +530,96 @@ class Application {
 				// Layout is optional, is for example not used when
 				// presenting pages with JSON-data.
 				if(isset($Parameters['Layout'])) {
-					Application::$Layout = isset($Parameters['Layout'][0]) ? $Parameters['Layout'].'Layout' : null;
+					$this->Layout = isset($Parameters['Layout'][0]) ? $Parameters['Layout'].'Layout' : null;
 				}
 
 				// Page is required.
 				if(!isset($Parameters['Page'])) {
-					ConfigError(
+					throw new ConfigException(
 						'Page not set.',
-						array(
-							'Route' => $Route->GetName(),
-						)
+						[
+							'URL' => Application::$Url,
+							'Route' => $Route->__toString(),
+						]
 					);
 				}
 
-				Application::$Page = $Parameters['Page'].'Page';
+				$this->Page = $Parameters['Page'].'Page';
 				return;
 			}
 		}
 
-		ConfigError(
-			'Unable to match the URL to a route.'
+		throw new ConfigException(
+			'No route found.',
+			[
+				'URL' => Application::$Url,
+			]
 		);
 	}
 
 	private function LoadLayout() {
-		if(Application::$Layout === null) {
+		if($this->Layout === null) {
 			return;
 		}
 
-		$Path = Application::$Layout.'.php';
-		$Class = str_replace('/', '\\', Application::$Layout);
+		$ClassName = str_replace('/', '\\', $this->Layout);
 
-		if(class_exists($Class, false)) {
-			ConfigError(
-				'Layout already loaded.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-				)
+		if(class_exists($ClassName, false)) {
+			return;
+		}
+
+		$FilePath = $this->Layout.'.php';
+
+		include($FilePath);
+
+		if(!class_exists($ClassName, false)) {
+			throw new ConfigException(
+				'Layout not found.',
+				[
+					'File' => $FilePath,
+					'Class' => $ClassName,
+				]
 			);
 		}
 
-		try {
-			include($Path);
-		}
-		catch(\Exception $Exception) {
-			ConfigError(
-				'Unable to load layout.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-				)
-			);
-		}
-
-		if(!class_exists($Class, false)) {
-			ConfigError(
-				'Unable to load layout.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-				)
-			);
-		}
-
-		Application::$Layout = $Class;
+		$this->Layout = $ClassName;
 	}
 
 	private function LoadPage() {
-		$Path = Application::$Page.'.php';
-		$Class = str_replace('/', '\\', Application::$Page);
+		$ClassName = str_replace('/', '\\', $this->Page);
 
-		if(class_exists($Class, false)) {
-			ConfigError(
-				'Page already loaded.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-				)
+		if(class_exists($ClassName, false)) {
+			return;
+		}
+
+		$FilePath = $this->Page.'.php';
+
+		include($FilePath);
+
+		if(!class_exists($ClassName, false)) {
+			throw new ConfigException(
+				'Page not found.',
+				[
+					'File' => $FilePath,
+					'Class' => $ClassName,
+				]
 			);
 		}
 
-		try {
-			include($Path);
-		}
-		catch(\Exception $Exception) {
-			ConfigError(
-				'Unable to load page.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-					'Exception' => $Exception,
-				)
-			);
-		}
-
-		if(!class_exists($Class, false)) {
-			ConfigError(
-				'Unable to load page.',
-				array(
-					'Path' => $Path,
-					'Class' => $Class,
-				)
-			);
-		}
-
-		Application::$Page = $Class;
+		$this->Page = $ClassName;
 	}
 
 	public function Run() {
 		global $InitializationTime, $LoadTime, $ExecutionTime, $RenderTime;
 		
 		if(Application::$Cache === null) {
-			if(Application::$Layout === null) {
+			if($this->Layout === null) {
 				global $Page;
 
-				$Directory = strrpos(Application::$Page, '\\');
-				$Page = new Application::$Page(
-					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
-					$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
+				$Directory = strrpos($this->Page, '\\');
+				$Page = new $this->Page(
+					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
+					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
 				);
 
 				$start = microtime(true);
@@ -690,16 +647,16 @@ class Application {
 			else {
 				global $Layout, $Page;
 
-				$Directory = strrpos(Application::$Page, '\\');
-				$Layout = new Application::$Layout(
-					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Layout, 0, $Directory + 1)),
-					$Directory === false ? Application::$Layout : substr(Application::$Layout, $Directory + 1)
+				$Directory = strrpos($this->Page, '\\');
+				$Layout = new $this->Layout(
+					$Directory === false ? '' : str_replace('\\', '/', substr($this->Layout, 0, $Directory + 1)),
+					$Directory === false ? $this->Layout : substr($this->Layout, $Directory + 1)
 				);
 
-				$Directory = strrpos(Application::$Page, '\\');
-				$Page = new Application::$Page(
-					$Directory === false ? '' : str_replace('\\', '/', substr(Application::$Page, 0, $Directory + 1)),
-					$Directory === false ? Application::$Page : substr(Application::$Page, $Directory + 1)
+				$Directory = strrpos($this->Page, '\\');
+				$Page = new $this->Page(
+					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
+					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
 				);
 
 				$start = microtime(true);

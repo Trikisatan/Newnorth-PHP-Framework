@@ -45,16 +45,16 @@ class Controls implements \ArrayAccess {
 			return;
 		}
 
-		$Items = ParseIniFile($FilePath);
+		$Controls = ParseIniFile($FilePath);
 
-		foreach($Items as $Name => $Data) {
+		foreach($Controls as $Name => $Data) {
 			if(!isset($Data['Class'])) {
-				ConfigError(
-					'Control class not set.',
-					array(
+				throw new ConfigException(
+					'Class not set.',
+					[
 						'File' => $FilePath,
-						'Name' => $Name,
-					)
+						'Control' => $Name,
+					]
 				);
 			}
 
@@ -64,33 +64,33 @@ class Controls implements \ArrayAccess {
 
 	public function Add($Alias, $Name, $Data = array()) {
 		if($Name[0] === '/') {
-			$Class = str_replace('/', '\\', $Name).'Control';
+			$ClassName = str_replace('/', '\\', $Name).'Control';
 			$Directory = '.'.substr($Name, 0, strrpos($Name, '/') + 1);
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}
 		else {
-			$Class = str_replace('/', '\\', $this->Directory.$Name).'Control';
+			$ClassName = str_replace('/', '\\', $this->Directory.$Name).'Control';
 			$Directory = './'.$this->Directory;
 			$Name = $Name.'Control';
 		}
 
-		if(!class_exists($Class, false)) {
-			$Path = $Directory.$Name.'.php';
+		if(!class_exists($ClassName, false)) {
+			$FilePath = $Directory.$Name.'.php';
 
-			include($Path);
+			include($FilePath);
 
-			if(!class_exists($Class, false)) {
-				ConfigError(
-					'Unable to load control.',
-					array(
-						'Path' => $Path,
-						'Class' => $Class,
-					)
+			if(!class_exists($ClassName, false)) {
+				throw new ConfigException(
+					'Control not found.',
+					[
+						'File' => $FilePath,
+						'Class' => $ClassName,
+					]
 				);
 			}
 		}
 
-		$Control = new $Class($this->Owner, $Directory, $Name, $Data);
+		$Control = new $ClassName($this->Owner, $Directory, $Name, $Data);
 
 		return $this->Items[$Alias] = $Control;
 	}
