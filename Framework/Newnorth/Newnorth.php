@@ -1,14 +1,12 @@
 <?php
 require('Application.php');
-
+require('Layout.php');
+require('Page.php');
 require('Validators.php');
-
 require('Action.php');
 require('Actions.php');
 require('EMail.php');
 require('HtmlRenderer.php');
-require('Layout.php');
-require('Page.php');
 require('Route.php');
 require('Translations.php');
 require('Control.php');
@@ -16,9 +14,9 @@ require('Controls.php');
 require('DataManager.php');
 require('DataType.php');
 
-use \Framework\Newnorth\Application as Application;
-use \Framework\Newnorth\Layout as Layout;
-use \Framework\Newnorth\Page as Page;
+use \Framework\Newnorth\Application;
+use \Framework\Newnorth\Layout;
+use \Framework\Newnorth\Page;
 
 /* Error handling */
 function ConfigError($Message, $Data = array()) {
@@ -30,34 +28,58 @@ function ConfigError($Message, $Data = array()) {
 		)
 	);
 }
+
 function ErrorCatcher($Severity, $Message, $File, $Line, $Variables) {
 	throw new ErrorException($Message, 0, $Severity, $File, $Line);
 }
 
-function HasConfig($Section) {
-	return Application::HasConfig($Section);
-}
-function GetConfig($Section = null) {
-	return Application::GetConfig($Section);
-}
+set_error_handler('ErrorCatcher');
+
 function GetLocale() {
 	return Application::GetLocale();
 }
+
 function GetConnection($Name) {
 	return Application::GetConnection($Name);
 }
+
 function GetDataManager($Name) {
 	return Application::GetDataManager($Name);
 }
+
 function GetToken() {
 	return Application::GetToken();
 }
-function GetPageName() {
-	return Page::GetName();
+
+function GenerateUrl(array $Parameters) {
+	return Application::GenerateUrl($Parameters);
 }
-function GetPageDirectory() {
-	return Page::GetDirectory();
+
+function Redirect($Location) {
+	if(is_array($Location)) {
+		header('Location: '.Application::GenerateUrl($Location));
+	}
+	else {
+		header('Location: '.$Location);
+	}
+
+	exit();
 }
+
+/* String methods.
+/* * * * */
+
+function String_StartsWith($Haystack, $Needle) {
+	return substr($Haystack, 0, strlen($Needle)) === $Needle;
+}
+
+function String_EndsWith($Haystack, $Needle) {
+	return substr($Haystack, -strlen($Needle)) === $Needle;
+}
+
+/* Miscellaneous methods.
+/* * * * */
+
 function ParseIniFile($Path, $Split = true) {
 	try {
 		$Data = @parse_ini_file($Path, true);
@@ -94,6 +116,4 @@ function ParseIniFile($Path, $Split = true) {
 
 	return $Data;
 }
-
-set_error_handler("ErrorCatcher");
 ?>
