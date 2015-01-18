@@ -19,21 +19,15 @@ use \Framework\Newnorth\Layout;
 use \Framework\Newnorth\Page;
 
 /* Error handling */
-function ConfigError($Message, $Data = array()) {
+
+function ConfigError($Message, $Data, $StackTrace) {
 	Application::HandleError(
 		'Configuration error',
 		$Message,
-		array(
-			'Data' => $Data,
-		)
+		$Data,
+		$StackTrace
 	);
 }
-
-function ErrorCatcher($Severity, $Message, $File, $Line, $Variables) {
-	throw new ErrorException($Message, 0, $Severity, $File, $Line);
-}
-
-set_error_handler('ErrorCatcher');
 
 function GetLocale() {
 	return Application::GetLocale();
@@ -80,17 +74,8 @@ function String_EndsWith($Haystack, $Needle) {
 /* Miscellaneous methods.
 /* * * * */
 
-function ParseIniFile($Path, $Split = true) {
-	try {
-		$Data = @parse_ini_file($Path, true);
-	}
-	catch(Exception $Exception) {
-		return false;
-	}
-
-	if($Data === false) {
-		return false;
-	}
+function ParseIniFile($FilePath, $Split = true) {
+	$Data = parse_ini_file($FilePath, true);
 
 	if($Split) {
 		foreach($Data as $SectionKey => &$SectionValue) {

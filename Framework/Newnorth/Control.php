@@ -1,75 +1,100 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 abstract class Control {
 	/* Variables */
-	public $Parent;
-	public $Directory;
-	public $Name;
-	public $Translations;
-	public $Controls;
-	public $Actions;
-	public $Validators;
-	public $Renderer = '\Framework\Newnorth\HtmlRenderer';
+
+	public $_Parent;
+
+	public $_Directory;
+
+	public $_Name;
+
+	public $_Parameters;
+
+	public $_Translations;
+
+	public $_Controls;
+
+	public $_Actions;
+
+	public $_Validators;
+
+	public $_Renderer = '\Framework\Newnorth\HtmlRenderer';
 
 	/* Magic methods */
-	public function __construct($Parent, $Directory, $Name) {
-		$this->Parent = $Parent;
-		$this->Directory = $Directory;
-		$this->Name = $Name;
-		$this->Translations = new Translations($Directory.$Name.'/');
-		$this->Controls = new Controls($this, $Directory.$Name.'/');
-		$this->Actions = new Actions($this, $Directory.$Name.'/');
-		$this->Validators = new Validators();
+
+	public function __construct($Parent, $Directory, $Name, $Parameters) {
+		$this->_Parent = $Parent;
+		$this->_Directory = $Directory;
+		$this->_Name = $Name;
+		$this->_Parameters = $Parameters;
+		$this->_Translations = new Translations($Directory.$Name.'/');
+		$this->_Controls = new Controls($this, $Directory.$Name.'/');
+		$this->_Actions = new Actions($this, $Directory.$Name.'/');
+		$this->_Validators = new Validators();
 	}
+
 	public function __toString() {
-		return $this->Directory.$this->Name;
+		return $this->_Directory.$this->_Name;
 	}
 
 	/* Events */
+
 	public function PreInitialize() {
-		$this->Translations->Load();
-		$this->Actions->Load();
-		$this->Controls->PreInitialize();
+		$this->_Controls->PreInitialize();
 	}
+
 	public abstract function Initialize();
+
 	public function PostInitialize() {
-		$this->Controls->Initialize();
-		$this->Controls->PostInitialize();
+		$this->_Controls->Initialize();
+		$this->_Controls->PostInitialize();
 	}
+
 	public function PreLoad() {
-		$this->Controls->PreLoad();
+		$this->_Controls->PreLoad();
 	}
+
 	public abstract function Load();
+
 	public function PostLoad() {
-		$this->Controls->Load();
-		$this->Controls->PostLoad();
+		$this->_Controls->Load();
+		$this->_Controls->PostLoad();
 	}
+
 	public function PreExecute() {
-		$this->Actions->Execute();
-		$this->Controls->PreExecute();
+		$this->_Actions->Execute();
+		$this->_Controls->PreExecute();
 	}
+
 	public abstract function Execute();
+
 	public function PostExecute() {
-		$this->Controls->Execute();
-		$this->Controls->PostExecute();
+		$this->_Controls->Execute();
+		$this->_Controls->PostExecute();
 	}
+
 	public function Render($PlaceHolder = null) {
-		call_user_func($this->Renderer.'::Render', $this, $PlaceHolder);
+		call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder);
 	}
 
 	/* Methods */
+
 	public function GetTranslation($Key, $DefaultValue = null) {
-		return isset($this->Translations[$Key]) ? $this->Translations[$Key] : $DefaultValue;
+		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;
 	}
+
 	public function SetTranslation($Key, $Value) {
-		$this->Translations[$Key] = $Value;
+		$this->_Translations[$Key] = $Value;
 	}
+
 	public function GetControl($Alias) {
-		return $this->Controls[$Alias];
+		return $this->_Controls[$Alias];
 	}
+
 	public function RenderControl($Alias) {
-		$this->Controls[$Alias]->Render();
+		$this->_Controls[$Alias]->Render();
 	}
 }
 ?>

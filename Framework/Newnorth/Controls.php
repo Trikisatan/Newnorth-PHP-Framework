@@ -12,42 +12,56 @@ class Controls implements \ArrayAccess {
 		$this->Owner = $Owner;
 		$this->Directory = $Directory;
 
-		$FilePath = $this->Directory.'Controls.ini';
-		$Items = ParseIniFile($FilePath);
-
-		if($Items !== false) {
-			foreach($Items as $Name => $Data) {
-				if(!isset($Data['Class'])) {
-					ConfigError(
-						'Control\'s class not set.',
-						array(
-							'File' => $FilePath,
-							'Name' => $Name,
-						)
-					);
-				}
-
-				$this->Add($Name, $Data['Class'], $Data);
-			}
-		}
+		$this->TryLoadIniFile();
 	}
 	public function __toString() {
 		return $this->Directory.'Controls.ini';
 	}
 
-	/* Methods */
+	/* Array access methods */
+
 	public function offsetSet($Key, $Value) {
 		throw new Exception('Not allowed.');
-    }
-    public function offsetExists($Key) {
-        return isset($this->Items[$Key]);
-    }
-    public function offsetUnset($Key) {
+	}
+
+	public function offsetExists($Key) {
+		return isset($this->Items[$Key]);
+	}
+
+	public function offsetUnset($Key) {
 		throw new Exception('Not allowed.');
-    }
-    public function offsetGet($Key) {
-        return $this->Items[$Key];
-    }
+	}
+
+	public function offsetGet($Key) {
+		return $this->Items[$Key];
+	}
+
+	/* Methods */
+
+	private function TryLoadIniFile() {
+		$FilePath = $this->Directory.'Controls.ini';
+
+		if(!file_exists($FilePath)) {
+			return;
+		}
+
+		$Items = ParseIniFile($FilePath);
+
+		foreach($Items as $Name => $Data) {
+			if(!isset($Data['Class'])) {
+				ConfigError(
+					'Control class not set.',
+					array(
+						'File' => $FilePath,
+						'Name' => $Name,
+					)
+				);
+			}
+
+			$this->Add($Name, $Data['Class'], $Data);
+		}
+	}
+
 	public function Add($Alias, $Name, $Data = array()) {
 		if($Name[0] === '/') {
 			$Class = str_replace('/', '\\', $Name).'Control';

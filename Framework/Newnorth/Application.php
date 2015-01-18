@@ -243,18 +243,17 @@ class Application {
 		return $_SESSION['Token'];
 	}
 
-	static public function HandleError($Type, $Message, $Data) {
+	static public function HandleError($Type, $Message, $Data, $StackTrace) {
 		ob_clean();
 
-		$Data = array_merge(
-			array(
-				'Url' => Application::$Url,
-				'Referrer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
-			),
-			$Data
-		);
+		Application::FormatStackTrace($StackTrace);
 
-		Application::FormatStackTrace($Data);
+		$Data = [
+			'Url' => Application::$Url,
+			'Referrer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
+			'Data' => $Data,
+			'StackTrace' => $StackTrace,
+		];
 
 		if(Application::$LogErrors) {
 			Application::LogError($Type, $Message, $Data);
@@ -272,6 +271,25 @@ class Application {
 		}
 
 		exit();
+	}
+
+	static private function FormatStackTrace(&$StackTrace) {
+		for($I = 0; $I < count($StackTrace); ++$I) {
+			$Row = $StackTrace[$I];
+			$String = '';
+
+			if(isset($Row['class'])) {
+				$String .= $Row['class'].$Row['type'];
+			}
+
+			$String .= $Row['function'].'(...)';
+
+			if(isset($Row['file'], $Row['line'])) {
+				$String .= ' in '.$Row['file'].' on line '.$Row['line'];
+			}
+
+			$StackTrace[$I] = $String;
+		}
 	}
 
 	static public function LoadCache($Key, $TimeToLive, &$Data) {
@@ -322,29 +340,6 @@ class Application {
 		}
 
 		Application::SaveCache(Application::$Url, ob_get_contents());
-	}
-
-	static private function FormatStackTrace(&$Data) {
-		if(isset($Data['StackTrace'])) {
-			$StackTrace = &$Data['StackTrace'];
-
-			for($I = 0; $I < count($StackTrace); ++$I) {
-				$Row = $StackTrace[$I];
-				$String = '';
-
-				if(isset($Row['class'])) {
-					$String .= $Row['class'].$Row['type'];
-				}
-
-				$String .= $Row['function'].'(...)';
-
-				if(isset($Row['file'], $Row['line'])) {
-					$String .= ' in '.$Row['file'].' on line '.$Row['line'];
-				}
-
-				$StackTrace[$I] = $String;
-			}
-		}
 	}
 
 	static private function LogError($Type, $Message, $Data) {

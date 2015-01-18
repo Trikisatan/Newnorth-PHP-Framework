@@ -2,9 +2,10 @@
 namespace Framework\Newnorth;
 
 class HtmlRenderer {
-	/* Methods */
+	/* Static methods */
+
 	public static function Render($Object, $PlaceHolder) {
-		$Directory = $Object->Directory.$Object->Name;
+		$Directory = $Object->_Directory.$Object->_Name;
 
 		if($PlaceHolder === null) {
 			$File = 'Content.phtml';
@@ -14,6 +15,7 @@ class HtmlRenderer {
 		}
 
 		$Output[0] = ob_get_contents();
+
 		ob_clean();
 
 		if($Object instanceof Control) {
@@ -24,12 +26,14 @@ class HtmlRenderer {
 		}
 
 		$Output[1] = ob_get_contents();
+
 		ob_clean();
 
-		$Object->Translations->Translate($Output[1]);
+		$Object->_Translations->Translate($Output[1]);
 
 		echo $Output[0].$Output[1];
 	}
+
 	private static function RenderContents($Control, $Directory, $File) {
 		global $Application, $Layout, $Page;
 
