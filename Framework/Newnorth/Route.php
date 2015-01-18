@@ -1,15 +1,21 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 class Route {
 	/* Variables */
+
 	private $Name;
+
 	private $Pattern;
+
 	private $ReversablePattern;
+
 	private $Defaults;
+
 	private $Translations;
 
 	/* Magic methods */
+
 	public function __construct($Name, $Pattern, $Requirements, $Translations, $Defaults) {
 		$this->Name = $Name;
 
@@ -31,14 +37,17 @@ class Route {
 		$this->Defaults = $Defaults;
 		$this->Translations = $Translations;
 	}
+
 	public function __toString() {
 		return $this->Name;
 	}
 
 	/* Methods */
+
 	public function GetName() {
 		return $this->Name;
 	}
+
 	public function Match($Subject, &$Match) {
 		if(0 < preg_match($this->Pattern, $Subject, $Match)) {
 			$this->SetDefaults($Match);
@@ -47,6 +56,7 @@ class Route {
 
 		return false;
 	}
+
 	public function SetDefaults(&$Data) {
 		foreach($this->Defaults as $Key => $Value) {
 			if(!isset($Data[$Key])) {
@@ -54,6 +64,7 @@ class Route {
 			}
 		}
 	}
+
 	public function Translate(&$Data, $Locale) {
 		// If there's no translations,
 		// no translation is required.
@@ -88,17 +99,23 @@ class Route {
 
 		return true;
 	}
+
 	public function ReversedTranslate(&$Data, $Locale) {
 		if(!isset($this->Translations[$Locale])) {
 			return;
 		}
 
-		foreach($Data as $Variable => $Translation) {
-			if(isset($this->Translations[$Locale][$Variable][$Translation])) {
-				$Data[$Variable] = $this->Translations[$Locale][$Variable][$Translation];
+		foreach($Data as $Key => $Value) {
+			if(substr($Key, -1) === '?') {
+				$Key = substr($Key, 0, -1);
+			}
+
+			if(isset($this->Translations[$Locale][$Key][$Value])) {
+				$Data[$Key] = $this->Translations[$Locale][$Key][$Value];
 			}
 		}
 	}
+
 	public function ReversedMatch($Parameters, $Locale, &$Url) {
 		$Url = $this->ReversablePattern;
 
@@ -115,11 +132,19 @@ class Route {
 		}
 
 		foreach($Parameters as $Key => $Value) {
-			if(!isset($Match[$Key])) {
-				return false;
+			$IsRequired = true;
+
+			if(substr($Key, -1) === '?') {
+				$Key = substr($Key, 0, -1);
+				$IsRequired = false;
 			}
 
-			if($Match[$Key] !== $Parameters[$Key]) {
+			if(isset($Match[$Key])) {
+				if($Match[$Key] !== $Value) {
+					return false;
+				}
+			}
+			else if($IsRequired) {
 				return false;
 			}
 		}

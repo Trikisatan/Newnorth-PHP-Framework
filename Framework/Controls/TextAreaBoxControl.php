@@ -1,34 +1,59 @@
-<?php
+<?
 namespace Framework\Controls;
 
-class TextAreaBoxControl extends \Framework\Newnorth\Control {
-	/* Variables */
-	public $Id = '';
-	public $Name = '';
-	public $ClassName = '';
-	public $Label = '';
-	public $Value = '';
-	public $Validation = array();
-	public $ErrorMessages = array();
+use \Framework\Newnorth\Control;
+use \Framework\Newnorth\ConfigException;
 
-	/* Actions */
+class TextAreaBoxControl extends Control {
+	/* Events */
+
 	public function Initialize() {
 
 	}
+
 	public function Load() {
 
 	}
+
 	public function Execute() {
 
 	}
 
 	/* Methods */
-	public function AutoFill($Value) {
-		if($Value === null) {
-			return;
-		}
 
-		$this->Value = $Value;
+	public function ParseParameters() {
+		if(isset($this->_Parameters['Validators'])) {
+			$this->ParseParameters_Validators($this->_Parameters['Validators']);
+		}
+	}
+
+	private function ParseParameters_Validators($Validators) {
+		$this->_Parameters['Validators'] = [];
+
+		foreach($Validators as $Method => $Parameters) {
+			$Method = 'Render'.$Method.'Validator';
+
+			if(!$this->GetValidatorRenderMethod($Method, $Owner)) {
+				throw new ConfigException(
+					'Unable to find validator render method.',
+					[
+						'Object' => $this->__toString(),
+						'Method' => $Method,
+					]
+				);
+			}
+
+			$this->_Parameters['Validators'][] = [
+				'Owner' => $Owner,
+				'Method' => $Method,
+				'Parameters' => $Parameters,
+				'ErrorMessage' => $Parameters['ErrorMessage'],
+			];
+		}
+	}
+
+	public function AutoFill($Value) {
+		$this->_Parameters['Value'] = $Value;
 	}
 }
 ?>

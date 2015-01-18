@@ -19,7 +19,8 @@ require('Framework/Newnorth/Newnorth.php');
 
 /* Execution of application */
 
-use \Framework\Newnorth\Application as Application;
+use \Framework\Newnorth\Exception;
+use \Framework\Newnorth\Application;
 
 try {
 	$Layout = null;
@@ -30,25 +31,33 @@ try {
 
 	$Application->Run();
 }
-catch(ErrorException $Exception) {
+catch(Exception $Exception) {
 	Application::HandleError(
-		'Runtime error',
+		$Exception->Type,
 		$Exception->getMessage(),
-		[
-			'File' => $Exception->getFile(),
-			'Line' => $Exception->getLine(),
-		],
+		$Exception->getFile(),
+		$Exception->getLine(),
+		$Exception->Data,
 		$Exception->getTrace()
 	);
 }
-catch(Exception $Exception) {
+catch(\ErrorException $Exception) {
 	Application::HandleError(
-		'Exception',
+		'Error',
 		$Exception->getMessage(),
-		[
-			'File' => $Exception->getFile(),
-			'Line' => $Exception->getLine(),
-		],
+		$Exception->getFile(),
+		$Exception->getLine(),
+		[],
+		$Exception->getTrace()
+	);
+}
+catch(\Exception $Exception) {
+	Application::HandleError(
+		'Unhandled exception',
+		$Exception->getMessage(),
+		$Exception->getFile(),
+		$Exception->getLine(),
+		[],
 		$Exception->getTrace()
 	);
 }

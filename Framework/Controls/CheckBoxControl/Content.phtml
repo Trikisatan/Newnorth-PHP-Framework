@@ -1,12 +1,52 @@
-<div class="<?=$Control->ClassName?>">
-	<div class="Input-CheckBox"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="checkbox" value="<?=$Control->Value?>"<?=($Control->IsChecked ? ' checked="checked"' : '')?> /></div><label class="Input-CheckBoxLabel" for="<?=$Control->Id?>"><?=$Control->Label?></label>
-	<?
-	if(0 < count($Control->ErrorMessages)) {
-		?><div class="Input-ErrorMessages"><?
-			foreach($Control->ErrorMessages as $ErrorMessage) {
-				?><p><?=$ErrorMessage?></p><?
-			}
-		?></div><?
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+?>><?
+	?><div class="CheckBox"><input<?
+	if(isset($Control->_Parameters['Id'])) {
+		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
-	?>
-</div>
+	if(isset($Control->_Parameters['Name'])) {
+		?> name="<?=$Control->_Parameters['Name']?>"<?
+	}
+	?> type="checkbox" <?
+	if(isset($Control->_Parameters['Value'])) {
+		?> value="<?=$Control->_Parameters['Value']?>"<?
+	}
+	if(isset($Control->_Parameters['IsChecked'])) {
+		?> checked="checked"<?
+	}
+	?> Newnorth:Control="CheckBoxControl" /></div><?
+	if(isset($Control->_Parameters['Label'])) {
+		?><label class="CheckBoxLabel"<?
+		if(isset($Control->_Parameters['Id'])) {
+			?> for="<?=$Control->_Parameters['Id']?>"<?
+		}
+		?>><?=$Control->_Parameters['Label']?></label><?
+	}
+	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
+	if(isset($Control->_Parameters['Id'])) {
+		?><script language="javascript"><?
+			?>window.addEventListener(<?
+				?>"load",<?
+				?>function(){<?
+					?>element=document.getElementById("<?=$Control->_Parameters['Id']?>");<?
+					if(isset($Control->_Parameters['Validators'])) {
+						foreach($Control->_Parameters['Validators'] as $Validator) {
+							?>element.AddValidator(function(){<?=$Validator['Owner']->$Validator['Method']($Control, $Validator['Parameters'])?>},"<?=$Validator['ErrorMessage']?>");<?
+						}
+					}
+					if(isset($Control->_Parameters['ErrorMessages'])) {
+						foreach($Control->_Parameters['ErrorMessages'] as $ErrorMessage) {
+							?>element.ivErrorMessages.AddErrorMessage("<?=$ErrorMessage?>");<?
+						}
+					}
+				?>}<?
+			?>);<?
+		?></script><?
+	}
+?></div>

@@ -1,17 +1,25 @@
-<?php
+<?
 namespace Framework;
 
 class Twitter {
 	/* Static variables */
+
 	private static $Protocol = 'https';
+
 	private static $Host = 'api.twitter.com';
+
 	private static $IsConfigLoaded = false;
+
 	private static $Token;
+
 	private static $TokenSecret;
+
 	private static $ConsumerKey;
+
 	private static $ConsumerSecret;
 
 	/* Methods */
+
 	private static function LoadConfig() {
 		if(Twitter::$IsConfigLoaded) {
 			return;
@@ -57,6 +65,7 @@ class Twitter {
 
 		Twitter::$ConsumerSecret = $Config['ConsumerSecret'];
 	}
+
 	private static function CreateAuth($Method, $Url, $Query) {
 		$OAuth = array(
 			'oauth_consumer_key' => Twitter::$ConsumerKey,
@@ -75,6 +84,7 @@ class Twitter {
 
 		return $Auth;
 	}
+
 	private static function CreateSignature($Method, $Url, $Query, $OAuth) {
 		$Data = array_merge($OAuth, $Query);
 		ksort($Data);
@@ -88,6 +98,7 @@ class Twitter {
 
 		return $Hash;
 	}
+
 	private static function ExecuteRequest($Url, $Auth) {
 		$CUrl = curl_init();
 
@@ -108,6 +119,7 @@ class Twitter {
 
 		return $Result;
 	}
+
 	public static function GetUserTimeline($Query) {
 		Twitter::LoadConfig();
 		$Query = array_map('rawurlencode', $Query);

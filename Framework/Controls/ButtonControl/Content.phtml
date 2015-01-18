@@ -1,3 +1,19 @@
-<div class="<?=$Control->ClassName?>">
-	<div class="Input-Button"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="button" value="<?=$Control->Value?>" onclick="<?=$Control->OnClick?>" /></div>
-</div>
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+?>><div class="Button"><input<?
+if(isset($Control->_Parameters['Id'])) {
+	?> id="<?=$Control->_Parameters['Id']?>"<?
+}
+if(isset($Control->_Parameters['Name'])) {
+	?> name="<?=$Control->_Parameters['Name']?>"<?
+}
+?> type="button"<?
+if(isset($Control->_Parameters['Text'])) {
+	?> value="<?=$Control->_Parameters['Text']?>"<?
+}
+?> /></div></div>

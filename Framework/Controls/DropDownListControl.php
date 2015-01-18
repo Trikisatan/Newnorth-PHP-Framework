@@ -1,39 +1,67 @@
-<?php
+<?
 namespace Framework\Controls;
 
-class DropDownListControl extends \Framework\Newnorth\Control {
-	/* Variables */
-	public $Id = '';
-	public $Name = '';
-	public $ClassName = '';
-	public $Label = '';
-	public $Value = '';
-	public $OnChange = '';
-	public $Options = array();
-	public $Validation = array();
-	public $ErrorMessages = array();
+use \Framework\Newnorth\Control;
 
-	/* Actions */
+class DropDownListControl extends Control {
+	/* Events */
+
 	public function Initialize() {
 
 	}
+
 	public function Load() {
 
 	}
+
 	public function Execute() {
 
 	}
 
 	/* Methods */
-	public function AutoFill($Value) {
-		if($Value === null) {
-			return;
-		}
 
-		$this->Value = $Value;
+	public function ParseParameters() {
+		if(isset($this->_Parameters['Validators'])) {
+			$this->ParseParameters_Validators($this->_Parameters['Validators']);
+		}
 	}
+
+	private function ParseParameters_Validators($Validators) {
+		$this->_Parameters['Validators'] = [];
+
+		foreach($Validators as $Method => $Parameters) {
+			$Method = 'Render'.$Method.'Validator';
+
+			if(!$this->GetValidatorRenderMethod($Method, $Owner)) {
+				throw new ConfigException(
+					'Unable to find validator render method.',
+					[
+						'Object' => $this->__toString(),
+						'Method' => $Method,
+					]
+				);
+			}
+
+			$this->_Parameters['Validators'][] = [
+				'Owner' => $Owner,
+				'Method' => $Method,
+				'Parameters' => $Parameters,
+				'ErrorMessage' => $Parameters['ErrorMessage'],
+			];
+		}
+	}
+
+	public function AutoFill($Value) {
+		$this->_Parameters['Value'] = $Value;
+	}
+
 	public function AddOption($Value, $Text) {
-		$this->Options[$Value] = $Text;
+		if(isset($this->_Parameters['Options'])) {
+			$this->_Parameters['Options'][$Value] = $Text;
+		}
+		else {
+			$this->_Parameters['Options'] = [$Value => $Text];
+		}
 	}
 }
 ?>

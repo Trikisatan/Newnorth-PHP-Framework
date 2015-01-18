@@ -1,31 +1,68 @@
-<div class="Input <?=$Control->ClassName?>" Newnorth:Control="DropDownListControl"><?
-	if(isset($Control->Label[0])) {
-		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+?>><?
+	if(isset($Control->_Parameters['Label'])) {
+		?><label<?
+		if(isset($Control->_Parameters['Id'])) {
+			?> for="<?=$Control->_Parameters['Id']?>"<?
+		}
+		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="DropDownList"><?
-		?><select id="<?=$Control->Id?>" name="<?=$Control->Name?>" onchange="<?=$Control->OnChange?>"><?
-			foreach($Control->Options as $Value => $Text) {
-				$Value = (string)$Value;
+	?><div class="DropDownList"><select<?
+	if(isset($Control->_Parameters['Id'])) {
+		?> id="<?=$Control->_Parameters['Id']?>"<?
+	}
+	if(isset($Control->_Parameters['Name'])) {
+		?> name="<?=$Control->_Parameters['Name']?>"<?
+	}
+	if(isset($Control->_Parameters['OnChange'])) {
+		?> onchange="<?=$Control->_Parameters['OnChange']?>"<?
+	}
+	?> Newnorth:Control="DropDownListControl"><?
+		if(isset($Control->_Parameters['Options'])) {
+			if(isset($Control->_Parameters['Value'])) {
+				foreach($Control->_Parameters['Options'] as $Value => $Text) {
+					$Value = (string)$Value;
 
-				if($Value === $Control->Value) {
-					?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?php
-				}
-				else {
-					?><option value="<?=$Value?>"><?=$Text?></option><?php
+					if($Value === $Control->_Parameters['Value']) {
+						?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+					}
+					else {
+						?><option value="<?=$Value?>"><?=$Text?></option><?
+					}
 				}
 			}
-		?></select><?
-	?></div><?
-	?><script language="javascript"><?
-		?>window.addEventListener(<?
-			?>"load",<?
-			?>function(){<?
-				?>element=document.getElementById("<?=$Control->Id?>");<?
-				foreach($Control->Validation as $Method => $Validation) {
-					?>element.AddValidator(function(){<?=$Control->GetValidators()->{'Render'.$Method}($Control, $Validation)?>},"<?=$Validation['ErrorMessage']?>");<?
+			else {
+				foreach($Control->_Parameters['Options'] as $Value => $Text) {
+					?><option value="<?=$Value?>"><?=$Text?></option><?
 				}
-				?>element.Validate();<?
-			?>}<?
-		?>);<?
-	?></script><?
+			}
+		}
+	?></select></div><?
+	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
+	if(isset($Control->_Parameters['Id'])) {
+		?><script language="javascript"><?
+			?>window.addEventListener(<?
+				?>"load",<?
+				?>function(){<?
+					?>element=document.getElementById("<?=$Control->_Parameters['Id']?>");<?
+					if(isset($Control->_Parameters['Validators'])) {
+						foreach($Control->_Parameters['Validators'] as $Validator) {
+							?>element.AddValidator(function(){<?=$Validator['Owner']->$Validator['Method']($Control, $Validator['Parameters'])?>},"<?=$Validator['ErrorMessage']?>");<?
+						}
+					}
+					if(isset($Control->_Parameters['ErrorMessages'])) {
+						foreach($Control->_Parameters['ErrorMessages'] as $ErrorMessage) {
+							?>element.ivErrorMessages.AddErrorMessage("<?=$ErrorMessage?>");<?
+						}
+					}
+				?>}<?
+			?>);<?
+		?></script><?
+	}
 ?></div>

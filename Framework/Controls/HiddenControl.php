@@ -3,7 +3,7 @@ namespace Framework\Controls;
 
 use \Framework\Newnorth\Control;
 
-class TokenControl extends Control {
+class HiddenControl extends Control {
 	/* Events */
 
 	public function Initialize() {
@@ -21,8 +21,7 @@ class TokenControl extends Control {
 	/* Methods */
 
 	public function ParseParameters() {
-		$this->_Parameters['Name'] = isset($this->_Parameters['Name']) ? $this->_Parameters['Name'] : 'Token';
-		$this->_Parameters['Value'] = isset($this->_Parameters['Value']) ? $this->_Parameters['Value'] : $_SESSION['Token'];
+		
 	}
 
 	public function AutoFill($Value) {

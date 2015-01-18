@@ -1,22 +1,58 @@
-<div class="Input <?=$Control->ClassName?>" Newnorth:Control="TextBoxControl"><?
-	if(isset($Control->Label[0])) {
-		?><label for="<?=$Control->Id?>"><?=$Control->Label?></label><?
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+?>><?
+	if(isset($Control->_Parameters['Label'])) {
+		?><label<?
+		if(isset($Control->_Parameters['Id'])) {
+			?> for="<?=$Control->_Parameters['Id']?>"<?
+		}
+		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="TextBox"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="text" value="<?=$Control->Value?>" placeholder="<?=$Control->Placeholder?>" maxlength="<?=$Control->MaxLength?>" /></div><?
-	?><div class="ErrorMessages"></div><?
-	foreach($Control->ErrorMessages as $ErrorMessage) {
-		?><p><?=$ErrorMessage?></p><?
+	?><div class="TextBox"><input<?
+	if(isset($Control->_Parameters['Id'])) {
+		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
-	?><script language="javascript"><?
-		?>window.addEventListener(<?
-			?>"load",<?
-			?>function(){<?
-				?>element=document.getElementById("<?=$Control->Id?>");<?
-				foreach($Control->Validation as $Method => $Validation) {
-					?>element.AddValidator(function(){<?=$Control->GetValidators()->{'Render'.$Method}($Control, $Validation)?>},"<?=$Validation['ErrorMessage']?>");<?
-				}
-				?>element.Validate();<?
-			?>}<?
-		?>);<?
-	?></script><?
+	if(isset($Control->_Parameters['Name'])) {
+		?> name="<?=$Control->_Parameters['Name']?>"<?
+	}
+	?> type="text"<?
+	if(isset($Control->_Parameters['Value'])) {
+		?> value="<?=$Control->_Parameters['Value']?>"<?
+	}
+	if(isset($Control->_Parameters['Placeholder'])) {
+		?> placeholder="<?=$Control->_Parameters['Placeholder']?>"<?
+	}
+	if(isset($Control->_Parameters['MaxLength'])) {
+		?> maxlength="<?=$Control->_Parameters['MaxLength']?>"<?
+	}
+	if(isset($Control->_Parameters['AutoComplete'])) {
+		?> autocomplete="<?=$Control->_Parameters['AutoComplete']?>"<?
+	}
+	?> Newnorth:Control="TextBoxControl" /></div><?
+	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
+	if(isset($Control->_Parameters['Id'])) {
+		?><script language="javascript"><?
+			?>window.addEventListener(<?
+				?>"load",<?
+				?>function(){<?
+					?>element=document.getElementById("<?=$Control->_Parameters['Id']?>");<?
+					if(isset($Control->_Parameters['Validators'])) {
+						foreach($Control->_Parameters['Validators'] as $Validator) {
+							?>element.AddValidator(function(){<?=$Validator['Owner']->$Validator['Method']($Control, $Validator['Parameters'])?>},"<?=$Validator['ErrorMessage']?>");<?
+						}
+					}
+					if(isset($Control->_Parameters['ErrorMessages'])) {
+						foreach($Control->_Parameters['ErrorMessages'] as $ErrorMessage) {
+							?>element.ivErrorMessages.AddErrorMessage("<?=$ErrorMessage?>");<?
+						}
+					}
+				?>}<?
+			?>);<?
+		?></script><?
+	}
 ?></div>

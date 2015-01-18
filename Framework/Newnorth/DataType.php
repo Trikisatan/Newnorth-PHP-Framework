@@ -1,4 +1,4 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 abstract class DataType {

@@ -90,11 +90,7 @@ class Controls implements \ArrayAccess {
 			}
 		}
 
-		$Control = new $Class($this->Owner, $Directory, $Name);
-
-		foreach($Data as $Key => $Value) {
-			$Control->$Key = $Value;
-		}
+		$Control = new $Class($this->Owner, $Directory, $Name, $Data);
 
 		return $this->Items[$Alias] = $Control;
 	}

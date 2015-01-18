@@ -1,4 +1,4 @@
-<?php
+<?
 namespace Framework\Newnorth;
 
 abstract class Page {
@@ -18,8 +18,6 @@ abstract class Page {
 
 	public $_Actions;
 
-	public $_Validators;
-
 	public $_Renderer = '\Framework\Newnorth\HtmlRenderer';
 
 	/* Magic methods */
@@ -38,7 +36,6 @@ abstract class Page {
 		$this->_Translations = new Translations($Directory.$Name.'/');
 		$this->_Controls = new Controls($this, $Directory.$Name.'/');
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');
-		$this->_Validators = new Validators();
 	}
 
 	public function __toString() {
@@ -101,6 +98,48 @@ abstract class Page {
 
 	public function RenderControl($Alias) {
 		$this->_Controls[$Alias]->Render();
+	}
+
+	public function GetValidatorMethod($ActionName, &$MethodName, &$MethodObject) {
+		$PossibleMethodName = $ActionName.'Action_'.$MethodName;
+
+		if(method_exists($this, $PossibleMethodName)) {
+			$MethodObject = $this;
+			$MethodName = $PossibleMethodName;
+			return true;
+		}
+
+		if(method_exists($this, $MethodName)) {
+			$MethodObject = $this;
+			return true;
+		}
+
+		global $Layout;
+
+		if($Layout !== null) {
+			return $Layout->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
+		}
+
+		global $Application;
+
+		return $Application->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
+	}
+
+	public function GetValidatorRenderMethod($MethodName, &$MethodObject) {
+		if(method_exists($this, $MethodName)) {
+			$MethodObject = $this;
+			return true;
+		}
+
+		global $Layout;
+
+		if($Layout !== null) {
+			return $Layout->GetValidatorRenderMethod($MethodName, $MethodObject);
+		}
+
+		global $Application;
+
+		return $Application->GetValidatorRenderMethod($MethodName, $MethodObject);
 	}
 }
 ?>

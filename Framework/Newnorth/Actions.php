@@ -74,26 +74,18 @@ class Actions implements \ArrayAccess {
 
 			$Action->AutoFill();
 
-			if(!$Action->Load()) {
-				continue;
+			$Action->Load();
+
+			$Action->LockDbConnections();
+
+			if($Action->Validate()) {
+				$Redirect = $Action->Execute();
 			}
 
-			$Action->LockConnections();
-
-			if(!$Action->Validate()) {
-				$Action->UnlockConnections();
-
-				continue;
-			}
-
-			$Redirect = $Action->Execute();
-
-			$Action->UnlockConnections();
+			$Action->UnlockDbConnections();
 
 			if(isset($Redirect)) {
-				header('Location: '.$Redirect);
-
-				exit();
+				Redirect($Redirect);
 			}
 		}
 	}

@@ -1,8 +1,9 @@
-<?php
+<?
+require('Exception.php');
+require('ConfigException.php');
 require('Application.php');
 require('Layout.php');
 require('Page.php');
-require('Validators.php');
 require('Action.php');
 require('Actions.php');
 require('EMail.php');

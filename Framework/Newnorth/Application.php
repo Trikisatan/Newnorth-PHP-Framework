@@ -161,7 +161,7 @@ class Application {
 					continue;
 				}
 
-				$RouteParameters[$Key] = $Value;
+				$RouteParameters[$Key.'?'] = $Value;
 			}
 
 			$Route->ReversedTranslate($RouteParameters, $Locale);
@@ -185,7 +185,7 @@ class Application {
 						continue;
 					}
 
-					$RouteParameters[$Key] = $Value;
+					$RouteParameters[$Key.'?'] = $Value;
 				}
 
 				$Route->ReversedTranslate($RouteParameters, $Locale);
@@ -243,7 +243,7 @@ class Application {
 		return $_SESSION['Token'];
 	}
 
-	static public function HandleError($Type, $Message, $Data, $StackTrace) {
+	static public function HandleError($Type, $Message, $File, $Line, $Data, $StackTrace) {
 		ob_clean();
 
 		Application::FormatStackTrace($StackTrace);
@@ -251,6 +251,8 @@ class Application {
 		$Data = [
 			'Url' => Application::$Url,
 			'Referrer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
+			'File' => $File,
+			'Line' => $Line,
 			'Data' => $Data,
 			'StackTrace' => $StackTrace,
 		];
@@ -744,6 +746,176 @@ class Application {
 			echo Application::$Cache;
 			$RenderTime = microtime(true) - $start;
 		}
+	}
+
+	public function GetValidatorMethod($ActionName, $MethodName, &$MethodObject) {
+		if(method_exists($this, $MethodName)) {
+			$MethodObject = $this;
+			return true;
+		}
+
+		return false;
+	}
+
+	public function GetValidatorRenderMethod($MethodName, &$MethodObject) {
+		if(method_exists($this, $MethodName)) {
+			$MethodObject = $this;
+			return true;
+		}
+
+		return false;
+	}
+
+	/* Validator methods */
+
+	public function TokenValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'Validator requires a control.',
+				[
+					'Validator' => 'TokenValidator',
+				]
+			);
+		}
+
+		return $_POST[$Control->_Parameters['Name']] === $_SESSION['Token'];
+	}
+
+	public function DropDownListValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'Validator requires a control.',
+				[
+					'Validator' => 'DropDownListValidator',
+				]
+			);
+		}
+
+		$Value = $_POST[$Control->_Parameters['Name']];
+
+		foreach($Control->_Parameters['Options'] as $Option) {
+			if($Option['Value'] === $Value) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function EMailAddressFormatValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'Validator requires a control.',
+				[
+					'Validator' => 'EMailAddressFormatValidator',
+				]
+			);
+		}
+
+		return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/', $_POST[$Control->_Parameters['Name']]);
+	}
+
+	public function FileUploadedValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'Validator requires a control.',
+				[
+					'Validator' => 'FileUploadedValidator',
+				]
+			);
+		}
+
+		return 0 < $_FILES[$Control->_Parameters['Name']]['size'];
+	}
+
+	public function IsBetweenValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'IsBetweenValidator',
+				]
+			);
+		}
+
+		$Value = (int)$_POST[$Control->_Parameters['Name']];
+
+		return $Control->_Parameters['MinValue'] <= $Value && $Value <= $Control->_Parameters['MaxValue'];
+	}
+
+	public function IsDigitsValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'IsDigitsValidator',
+				]
+			);
+		}
+
+		return ctype_digit($_POST[$Control->_Parameters['Name']]);
+	}
+
+	public function IsNumericValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'IsNumericValidator',
+				]
+			);
+		}
+
+		return is_numeric($_POST[$Control->_Parameters['Name']]);
+	}
+
+	public function MaxLengthValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'MaxLengthValidator',
+				]
+			);
+		}
+
+		return !isset($_POST[$Control->_Parameters['Name']][$Control->_Parameters['MaxLength']]);
+	}
+
+	public function MinLengthValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'MinLengthValidator',
+				]
+			);
+		}
+
+		return isset($_POST[$Control->_Parameters['Name']][$Control->_Parameters['MinLength']]);
+	}
+
+	public function ValueNotEmptyValidator($Control) {
+		if($Control === null) {
+			throw new ConfigException(
+				'This validator requires a control.',
+				[
+					'Validator' => 'ValueNotEmptyValidator',
+				]
+			);
+		}
+
+		return isset($_POST[$Control->_Parameters['Name']][0]);
+	}
+
+	/* Validator render methods */
+
+	public function RenderValueNotEmptyValidator($Control, $Parameters) {
+		return 'return 0<this.value.length';
+	}
+
+	public function RenderValueRegExpValidator($Control, $Parameters) {
+		return 'return -1<this.value.search('.$Parameters['RegExp'].')';
 	}
 }
 ?>

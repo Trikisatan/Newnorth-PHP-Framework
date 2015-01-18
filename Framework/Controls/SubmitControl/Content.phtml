@@ -1,3 +1,19 @@
-<div class="<?=$Control->ClassName?>">
-	<div class="Input-Submit"><input id="<?=$Control->Id?>" name="<?=$Control->Name?>" type="submit" value="<?=$Control->Value?>" /></div>
-</div>
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+?>><div class="Submit"><input<?
+if(isset($Control->_Parameters['Id'])) {
+	?> id="<?=$Control->_Parameters['Id']?>"<?
+}
+if(isset($Control->_Parameters['Name'])) {
+	?> name="<?=$Control->_Parameters['Name']?>"<?
+}
+?> type="submit"<?
+if(isset($Control->_Parameters['Text'])) {
+	?> value="<?=$Control->_Parameters['Text']?>"<?
+}
+?> /></div></div>
