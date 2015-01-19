@@ -258,8 +258,6 @@ Newnorth.Controls.TextBoxControl = function() {
 
 	var isValueChangedMethod = function() {
 		if(this.ivValue !== this.value) {
-			console.log("OldValue: " + this.ivValue);
-			console.log("NewValue: " + this.value);
 			this.ivValue = this.value;
 
 			this.ivIsDefaultValue = false;
@@ -307,8 +305,6 @@ Newnorth.Controls.TextAreaBoxControl = function() {
 
 	var isValueChangedMethod = function() {
 		if(this.ivValue !== this.value) {
-			console.log("OldValue: " + this.ivValue);
-			console.log("NewValue: " + this.value);
 			this.ivValue = this.value;
 
 			this.ivIsDefaultValue = false;
@@ -411,8 +407,6 @@ Newnorth.Controls.DropDownListControl = function() {
 
 	var isValueChangedMethod = function() {
 		if(this.ivValue !== this.selectedIndex) {
-			console.log("OldValue: " + this.ivValue);
-			console.log("NewValue: " + this.selectedIndex);
 			this.ivValue = this.selectedIndex;
 
 			this.ivIsDefaultValue = false;
