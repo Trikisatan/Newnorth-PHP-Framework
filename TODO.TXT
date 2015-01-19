@@ -1,3 +1,0 @@
-Make sure that the global
-validators are usable by
-actions directly

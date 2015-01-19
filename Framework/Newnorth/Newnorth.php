@@ -3,6 +3,7 @@ namespace Framework\Newnorth;
 
 require('Exception.php');
 require('ConfigException.php');
+require('RuntimeException.php');
 require('Application.php');
 require('Layout.php');
 require('Page.php');
@@ -16,6 +17,7 @@ require('Control.php');
 require('Controls.php');
 require('DataManager.php');
 require('DataType.php');
+require('Db.php');
 
 /* Miscellaneous framework specific methods */
 

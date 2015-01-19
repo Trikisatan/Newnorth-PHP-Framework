@@ -196,7 +196,13 @@ class Application {
 	}
 
 	static public function GetDbConnection($Name) {
-		return Application::$DbConnections[$Name];
+		$DbConnection = Application::$DbConnections[$Name];
+
+		if(!$DbConnection->IsConnected) {
+			$DbConnection->Connect();
+		}
+
+		return $DbConnection;
 	}
 
 	static public function GetDataManager($Name) {

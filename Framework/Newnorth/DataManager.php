@@ -3,44 +3,51 @@ namespace Framework\Newnorth;
 
 abstract class DataManager {
 	/* Variables */
+
 	public $DataType = null;
+
 	public $Connection = null;
 
 	/* Magic methods */
+
 	public function __toString() {
 		return '';
 	}
 
 	/* Methods */
-	public function Find($Columns, $Tables, $Conditions) {
-		$Result = $this->Connection->Select($Columns, $Tables, $Conditions);
+
+	public function Find(DbSelectQuery $Query) {
+		$Result = $this->Connection->Find($Query);
 
 		if($Result === false) {
 			return null;
 		}
 
-		$Item = $Result->FetchAssoc() ? new $this->DataType($Result->GetRow()) : null;
+		if($Result->FetchAssoc()) {
+			return new $this->DataType($Result->Row);
+		}
 
-		$Result->Close();
-
-		return isset($Item) ? $Item : null;
+		return null;
 	}
-	public function FindAll($Columns, $Tables, $Conditions) {
-		$Result = $this->Connection->Select($Columns, $Tables, $Conditions);
+
+	public function FindAll(DbSelectQuery $Query) {
+		$Result = $this->Connection->FindAll($Query);
 
 		if($Result === false) {
-			return null;
+			return [];
 		}
 
-		$Items = array();
+		$Items = [];
 
 		while($Result->FetchAssoc()) {
-			$Items[] = new $this->DataType($Result->GetRow());
+			$Items[] = new $this->DataType($Result->Row);
 		}
 
-		$Result->Close();
-
 		return $Items;
+	}
+
+	public function Count(DbSelectQuery $Query) {
+		return $this->Connection->Count($Query);
 	}
 }
 ?>

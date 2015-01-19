@@ -54,10 +54,10 @@ class Action {
 	}
 
 	private function Load_DbConnections($DbConnections) {
-		foreach($DbConnections as $DbConnection => $Tables) {
+		foreach($DbConnections as $DbConnection => $Sources) {
 			$this->DbConnections[] = [
 				'DbConnection' => GetDbConnection($DbConnection),
-				'Tables' => $Tables,
+				'Sources' => $Sources,
 			];
 		}
 	}
@@ -214,13 +214,13 @@ class Action {
 
 	public function LockDbConnections() {
 		for($I = 0, $IC = count($this->DbConnections); $I < $IC; ++$I) {
-			$this->DbConnections[$I]['DbConnection']->Lock($this->DbConnections[$I]['Tables']);
+			$this->DbConnections[$I]['DbConnection']->Lock($this->DbConnections[$I]['Sources']);
 		}
 	}
 
 	public function UnlockDbConnections() {
 		for($I = 0, $IC = count($this->DbConnections); $I < $IC; ++$I) {
-			$this->DbConnections[$I]['DbConnection']->Unlock($this->DbConnections[$I]['Tables']);
+			$this->DbConnections[$I]['DbConnection']->Unlock($this->DbConnections[$I]['Sources']);
 		}
 	}
 
