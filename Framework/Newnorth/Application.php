@@ -41,8 +41,6 @@ class Application {
 
 	static private $Routes = [];
 
-	static private $Parameters = null;
-
 	static private $Locale = null;
 
 	/* Static methods */
@@ -120,20 +118,12 @@ class Application {
 		return Application::$Config[$Section];
 	}
 
-	static public function HasParameter($Name) {
-		return isset(Application::$Parameters[$Name]);
-	}
-
-	static public function GetParameter($Name) {
-		return Application::$Parameters[$Name];
-	}
-
 	static public function GetLocale() {
 		return Application::$Locale;
 	}
 
 	static public function GenerateUrl(array $Parameters) {
-		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Parameters['Page'];
+		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Instance->Parameters['Page'];
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
 		if(isset($Parameters['Route'][0])) {
@@ -142,7 +132,7 @@ class Application {
 
 			$Route->SetDefaults($RouteParameters);
 
-			foreach(Application::$Parameters as $Key => $Value) {
+			foreach(Application::$Instance->Parameters as $Key => $Value) {
 				if(is_int($Key)) {
 					continue;
 				}
@@ -166,7 +156,7 @@ class Application {
 
 				$Route->SetDefaults($RouteParameters);
 
-				foreach(Application::$Parameters as $Key => $Value) {
+				foreach(Application::$Instance->Parameters as $Key => $Value) {
 					if(is_int($Key)) {
 						continue;
 					}
@@ -438,6 +428,8 @@ class Application {
 
 	/* Variables */
 
+	public $Parameters;
+
 	private $Layout = null;
 
 	private $Page = null;
@@ -530,7 +522,7 @@ class Application {
 					continue;
 				}
 
-				Application::$Parameters = $Parameters;
+				$this->Parameters = $Parameters;
 
 				// Layout is optional, is for example not used when
 				// presenting pages with JSON-data.
@@ -560,6 +552,14 @@ class Application {
 				'URL' => Application::$Url,
 			]
 		);
+	}
+
+	public function HasParameter($Name) {
+		return isset($this->Parameters[$Name]);
+	}
+
+	public function GetParameter($Name, $FallbackValue) {
+		return isset($this->Parameters[$Name]) ? $this->Parameters[$Name] : $FallbackValue;
 	}
 
 	private function LoadLayout() {
