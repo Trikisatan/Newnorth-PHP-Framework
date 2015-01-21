@@ -186,8 +186,7 @@ class Application {
 			}
 		}
 
-		Application::HandleError(
-			'Content generation error',
+		throw new ConfigException(
 			'Unable to generate URL.',
 			array(
 				'Parameters' => $Parameters,

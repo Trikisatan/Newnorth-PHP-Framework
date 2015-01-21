@@ -98,6 +98,16 @@ abstract class DbConditionGroup extends DbCondition {
 		$this->Conditions[] = new DbEndsWith($A, $B);
 		return $this;
 	}
+
+	public function GreaterThan($A, $B) {
+		$this->Conditions[] = new DbGreaterThan($A, $B);
+		return $this;
+	}
+
+	public function LessThan($A, $B) {
+		$this->Conditions[] = new DbLessThan($A, $B);
+		return $this;
+	}
 }
 
 class DbAnd extends DbConditionGroup {
@@ -188,6 +198,38 @@ class DbEndsWith extends DbCondition {
 	}
 }
 
+class DbGreaterThan extends DbCondition {
+	/* Variables */
+
+	public $A;
+
+	public $B;
+
+	/* Magic methods */
+
+	public function __construct($A, $B) {
+		$this->A = DbExpression::Parse($A);
+
+		$this->B = DbExpression::Parse($B);
+	}
+}
+
+class DbLessThan extends DbCondition {
+	/* Variables */
+
+	public $A;
+
+	public $B;
+
+	/* Magic methods */
+
+	public function __construct($A, $B) {
+		$this->A = DbExpression::Parse($A);
+
+		$this->B = DbExpression::Parse($B);
+	}
+}
+
 class DbExpression {
 	/* Static methods */
 
@@ -262,7 +304,7 @@ class DbArray extends DbExpression {
 
 	public function __construct(array $Value) {
 		if(count($Value) === 0) {
-			throw new \exception('Invalid value, empty array.');
+			throw new Exception('Invalid value, empty array.');
 		}
 
 		$this->Value = $Value;
@@ -274,7 +316,7 @@ class DbColumn extends DbExpression {
 
 	public function __construct(array $Value) {
 		if(count($Value) === 0) {
-			throw new \exception('Invalid value, empty array.');
+			throw new Exception('Invalid value, empty array.');
 		}
 
 		$this->Value = $Value;

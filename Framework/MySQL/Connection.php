@@ -11,6 +11,8 @@ use \Framework\Newnorth\DbLike;
 use \Framework\Newnorth\DbContains;
 use \Framework\Newnorth\DbStartsWith;
 use \Framework\Newnorth\DbEndsWith;
+use \Framework\Newnorth\DbGreaterThan;
+use \Framework\Newnorth\DbLessThan;
 use \Framework\Newnorth\DbExpression;
 use \Framework\Newnorth\DbArray;
 use \Framework\Newnorth\DbColumn;
@@ -495,6 +497,12 @@ class Connection extends DbConnection {
 		else if($Condition instanceof DbEndsWith) {
 			return $this->ProcessCondition_DbEndsWith($Condition);
 		}
+		else if($Condition instanceof DbGreaterThan) {
+			return $this->ProcessCondition_DbGreaterThan($Condition);
+		}
+		else if($Condition instanceof DbLessThan) {
+			return $this->ProcessCondition_DbLessThan($Condition);
+		}
 	}
 
 	private function ProcessCondition_DbAnd(DbAnd $ConditionGroup) {
@@ -549,6 +557,14 @@ class Connection extends DbConnection {
 
 	private function ProcessCondition_DbEndsWith(DbEndsWith $Condition) {
 		return $this->ProcessExpression($Condition->A).' LIKE CONCAT("%", '.$this->ProcessExpression($Condition->B).')';
+	}
+
+	private function ProcessCondition_DbGreaterThan(DbGreaterThan $Condition) {
+		return $this->ProcessExpression($Condition->A).' > '.$this->ProcessExpression($Condition->B);
+	}
+
+	private function ProcessCondition_DbLessThan(DbLessThan $Condition) {
+		return $this->ProcessExpression($Condition->A).' < '.$this->ProcessExpression($Condition->B);
 	}
 
 	private function ProcessExpression(DbExpression $Expression) {
