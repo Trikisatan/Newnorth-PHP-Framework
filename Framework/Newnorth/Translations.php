@@ -69,7 +69,7 @@ class Translations implements \ArrayAccess {
 	public function Translate(&$Contents) {
 		$Offset = 0;
 
-		while(0 < preg_match('/%([A-Z0-9_]+?)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+		while(0 < preg_match('/%([a-zA-Z0-9_\/]+?)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
 			$Key = $Match[1][0];
 
 			if(isset($this->Items[$Key])) {
@@ -86,7 +86,7 @@ class Translations implements \ArrayAccess {
 
 		$Offset = 0;
 
-		while(0 < preg_match('/%([A-Z0-9_]+?)\("(.*?)"\)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+		while(0 < preg_match('/%([a-zA-Z0-9_\/]+?)\("(.*?)"\)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
 			$Key = $Match[1][0];
 
 			if(isset($this->Items[$Key])) {
