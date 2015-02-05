@@ -17,10 +17,10 @@ else {
 	if(isset($Control->_Parameters['Value'])) {
 		?> value="<?=$Control->_Parameters['Value']?>"<?
 	}
-	if(isset($Control->_Parameters['IsChecked'])) {
+	if($Control->_Parameters['IsChecked']) {
 		?> checked="checked"<?
 	}
-	?> Newnorth:Control="CheckBoxControl" /></div><?
+	?> Newnorth:Control="CheckBoxControl" /><div></div></div><?
 	if(isset($Control->_Parameters['Label'])) {
 		?><label class="CheckBoxLabel"<?
 		if(isset($Control->_Parameters['Id'])) {
