@@ -122,74 +122,6 @@ class Application {
 		return Application::$Locale;
 	}
 
-	static public function GenerateUrl(array $Parameters) {
-		// Typecast all parameters to a string to avoid comparison problems.
-		foreach($Parameters as $Key => $Value) {
-			$Parameters[$Key] = (string)$Value;
-		}
-
-		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Instance->Parameters['Page'];
-
-		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
-
-		if(isset($Parameters['Route'][0])) {
-			$Route = Application::$Routes[$Route];
-			$RouteParameters = array_slice($Parameters, 0);
-
-			$Route->SetDefaults($RouteParameters);
-
-			foreach(Application::$Instance->Parameters as $Key => $Value) {
-				if(is_int($Key)) {
-					continue;
-				}
-
-				if(isset($RouteParameters[$Key])) {
-					continue;
-				}
-
-				$RouteParameters[$Key.'?'] = $Value;
-			}
-
-			$Route->ReversedTranslate($RouteParameters, $Locale);
-
-			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
-				return $Url;
-			}
-		}
-		else {
-			foreach(Application::$Routes as $Route) {
-				$RouteParameters = array_slice($Parameters, 0);
-
-				$Route->SetDefaults($RouteParameters);
-
-				foreach(Application::$Instance->Parameters as $Key => $Value) {
-					if(is_int($Key)) {
-						continue;
-					}
-
-					if(isset($RouteParameters[$Key])) {
-						continue;
-					}
-
-					$RouteParameters[$Key.'?'] = $Value;
-				}
-
-				$Route->ReversedTranslate($RouteParameters, $Locale);
-
-				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
-					return $Url;
-				}
-			}
-		}
-
-		throw new ConfigException(
-			'Unable to generate URL.',
-			array(
-				'Parameters' => $Parameters,
-			)
-		);
-	}
-
 	static public function GetDbConnection($Name) {
 		$DbConnection = Application::$DbConnections[$Name];
 
@@ -557,6 +489,74 @@ class Application {
 			[
 				'URL' => Application::$Url,
 			]
+		);
+	}
+
+	public function GenerateUrl(array $Parameters) {
+		// Typecast all parameters to a string to avoid comparison problems.
+		foreach($Parameters as $Key => $Value) {
+			$Parameters[$Key] = (string)$Value;
+		}
+
+		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : $this->Parameters['Page'];
+
+		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
+
+		if(isset($Parameters['Route'][0])) {
+			$Route = Application::$Routes[$Route];
+			$RouteParameters = array_slice($Parameters, 0);
+
+			$Route->SetDefaults($RouteParameters);
+
+			foreach($this->Parameters as $Key => $Value) {
+				if(is_int($Key)) {
+					continue;
+				}
+
+				if(isset($RouteParameters[$Key])) {
+					continue;
+				}
+
+				$RouteParameters[$Key.'?'] = $Value;
+			}
+
+			$Route->ReversedTranslate($RouteParameters, $Locale);
+
+			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+				return $Url;
+			}
+		}
+		else {
+			foreach(Application::$Routes as $Route) {
+				$RouteParameters = array_slice($Parameters, 0);
+
+				$Route->SetDefaults($RouteParameters);
+
+				foreach($this->Parameters as $Key => $Value) {
+					if(is_int($Key)) {
+						continue;
+					}
+
+					if(isset($RouteParameters[$Key])) {
+						continue;
+					}
+
+					$RouteParameters[$Key.'?'] = $Value;
+				}
+
+				$Route->ReversedTranslate($RouteParameters, $Locale);
+
+				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+					return $Url;
+				}
+			}
+		}
+
+		throw new ConfigException(
+			'Unable to generate URL.',
+			array(
+				'Parameters' => $Parameters,
+			)
 		);
 	}
 

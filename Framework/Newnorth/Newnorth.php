@@ -23,7 +23,7 @@ require('Db.php');
 
 function Redirect($Location) {
 	if(is_array($Location)) {
-		header('Location: '.Application::GenerateUrl($Location));
+		header('Location: '.$GLOBALS['Application']->GenerateUrl($Location));
 	}
 	else {
 		header('Location: '.$Location);
