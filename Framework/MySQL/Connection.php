@@ -232,6 +232,7 @@ class Connection extends DbConnection {
 			'SELECT '.$this->Find_ProcessColumns($Query->Columns).
 			' FROM '.$this->Find_ProcessSources($Query->Sources).
 			$this->Find_ProcessConditions($Query->Conditions).
+			$this->Find_ProcessSorts($Query->Sorts).
 			' LIMIT 1'
 		);
 	}
@@ -260,7 +261,7 @@ class Connection extends DbConnection {
 
 	// TODO: Add support for join method.
 	// TODO: Add support for join conditions.
-	private function Find_ProcessSources($Sources) {
+	private function Find_ProcessSources(array $Sources) {
 		$Count = count($Sources);
 
 		if($Count === 0) {
@@ -293,11 +294,29 @@ class Connection extends DbConnection {
 		}
 	}
 
+	private function Find_ProcessSorts(array $Sorts) {
+		$Count = count($Sorts);
+
+		if(0 < $Count) {
+			$Sql = $this->ProcessExpression($Sorts[0]->Expression).' '.($Sorts[0]->Direction === DB_ASC ? 'ASC' : 'DESC');
+
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql = $this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
+			}
+
+			return ' ORDER BY '.$Sql;
+		}
+		else {
+			return '';
+		}
+	}
+
 	public function FindAll(DbSelectQuery $Query) {
 		return $this->Query(
 			'SELECT '.$this->FindAll_ProcessColumns($Query->Columns).
 			' FROM '.$this->FindAll_ProcessSources($Query->Sources).
 			$this->FindAll_ProcessConditions($Query->Conditions).
+			$this->FindAll_ProcessSorts($Query->Sorts).
 			$this->FindAll_ProcessLimit($Query->MaxRows, $Query->FirstRow)
 		);
 	}
@@ -326,7 +345,7 @@ class Connection extends DbConnection {
 
 	// TODO: Add support for join method.
 	// TODO: Add support for join conditions.
-	private function FindAll_ProcessSources($Sources) {
+	private function FindAll_ProcessSources(array $Sources) {
 		$Count = count($Sources);
 
 		if($Count === 0) {
@@ -356,6 +375,23 @@ class Connection extends DbConnection {
 		}
 		else {
 			return ' WHERE '.$this->ProcessCondition($Conditions);
+		}
+	}
+
+	private function FindAll_ProcessSorts(array $Sorts) {
+		$Count = count($Sorts);
+
+		if(0 < $Count) {
+			$Sql = $this->ProcessExpression($Sorts[0]->Expression).' '.($Sorts[0]->Direction === DB_ASC ? 'ASC' : 'DESC');
+
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql = $this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
+			}
+
+			return ' ORDER BY '.$Sql;
+		}
+		else {
+			return '';
 		}
 	}
 
