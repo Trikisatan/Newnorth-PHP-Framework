@@ -112,15 +112,11 @@ abstract class Page {
 			return true;
 		}
 
-		global $Layout;
-
-		if($Layout !== null) {
-			return $Layout->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
+		if($GLOBALS['Layout'] !== null) {
+			return $GLOBALS['Layout']->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
 		}
 
-		global $Application;
-
-		return $Application->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
+		return $GLOBALS['Application']->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
 	}
 
 	public function GetValidatorRenderMethod($MethodName, &$MethodObject) {
@@ -129,15 +125,11 @@ abstract class Page {
 			return true;
 		}
 
-		global $Layout;
-
-		if($Layout !== null) {
-			return $Layout->GetValidatorRenderMethod($MethodName, $MethodObject);
+		if($GLOBALS['Layout'] !== null) {
+			return $GLOBALS['Layout']->GetValidatorRenderMethod($MethodName, $MethodObject);
 		}
 
-		global $Application;
-
-		return $Application->GetValidatorRenderMethod($MethodName, $MethodObject);
+		return $GLOBALS['Application']->GetValidatorRenderMethod($MethodName, $MethodObject);
 	}
 }
 ?>

@@ -35,8 +35,6 @@ class HtmlRenderer {
 	}
 
 	private static function RenderContents($Control, $Directory, $File) {
-		global $Application, $Layout, $Page;
-
 		include($Directory.'/'.$File);
 	}
 }

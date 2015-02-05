@@ -625,80 +625,76 @@ class Application {
 		
 		if(Application::$Cache === null) {
 			if($this->Layout === null) {
-				global $Page;
-
 				$Directory = strrpos($this->Page, '\\');
-				$Page = new $this->Page(
+				$GLOBALS['Page'] = new $this->Page(
 					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
 					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
 				);
 
 				$start = microtime(true);
-				$Page->PreInitialize();
-				$Page->Initialize();
-				$Page->PostInitialize();
+				$GLOBALS['Page']->PreInitialize();
+				$GLOBALS['Page']->Initialize();
+				$GLOBALS['Page']->PostInitialize();
 				$InitializationTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Page->PreLoad();
-				$Page->Load();
-				$Page->PostLoad();
+				$GLOBALS['Page']->PreLoad();
+				$GLOBALS['Page']->Load();
+				$GLOBALS['Page']->PostLoad();
 				$LoadTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Page->PreExecute();
-				$Page->Execute();
-				$Page->PostExecute();
+				$GLOBALS['Page']->PreExecute();
+				$GLOBALS['Page']->Execute();
+				$GLOBALS['Page']->PostExecute();
 				$ExecutionTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Page->Render();
+				$GLOBALS['Page']->Render();
 				$RenderTime = microtime(true) - $start;
 			}
 			else {
-				global $Layout, $Page;
-
 				$Directory = strrpos($this->Page, '\\');
-				$Layout = new $this->Layout(
+				$GLOBALS['Layout'] = new $this->Layout(
 					$Directory === false ? '' : str_replace('\\', '/', substr($this->Layout, 0, $Directory + 1)),
 					$Directory === false ? $this->Layout : substr($this->Layout, $Directory + 1)
 				);
 
 				$Directory = strrpos($this->Page, '\\');
-				$Page = new $this->Page(
+				$GLOBALS['Page'] = new $this->Page(
 					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
 					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
 				);
 
 				$start = microtime(true);
-				$Page->PreInitialize();
-				$Layout->PreInitialize();
-				$Page->Initialize();
-				$Layout->Initialize();
-				$Page->PostInitialize();
-				$Layout->PostInitialize();
+				$GLOBALS['Page']->PreInitialize();
+				$GLOBALS['Layout']->PreInitialize();
+				$GLOBALS['Page']->Initialize();
+				$GLOBALS['Layout']->Initialize();
+				$GLOBALS['Page']->PostInitialize();
+				$GLOBALS['Layout']->PostInitialize();
 				$InitializationTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Page->PreLoad();
-				$Layout->PreLoad();
-				$Page->Load();
-				$Layout->Load();
-				$Page->PostLoad();
-				$Layout->PostLoad();
+				$GLOBALS['Page']->PreLoad();
+				$GLOBALS['Layout']->PreLoad();
+				$GLOBALS['Page']->Load();
+				$GLOBALS['Layout']->Load();
+				$GLOBALS['Page']->PostLoad();
+				$GLOBALS['Layout']->PostLoad();
 				$LoadTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Page->PreExecute();
-				$Layout->PreExecute();
-				$Page->Execute();
-				$Layout->Execute();
-				$Page->PostExecute();
-				$Layout->PostExecute();
+				$GLOBALS['Page']->PreExecute();
+				$GLOBALS['Layout']->PreExecute();
+				$GLOBALS['Page']->Execute();
+				$GLOBALS['Layout']->Execute();
+				$GLOBALS['Page']->PostExecute();
+				$GLOBALS['Layout']->PostExecute();
 				$ExecutionTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$Layout->Render();
+				$GLOBALS['Layout']->Render();
 				$RenderTime = microtime(true) - $start;
 			}
 
