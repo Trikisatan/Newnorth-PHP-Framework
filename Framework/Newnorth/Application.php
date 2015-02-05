@@ -123,7 +123,13 @@ class Application {
 	}
 
 	static public function GenerateUrl(array $Parameters) {
+		// Typecast all parameters to a string to avoid comparison problems.
+		foreach($Parameters as $Key => $Value) {
+			$Parameters[$Key] = (string)$Value;
+		}
+
 		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : Application::$Instance->Parameters['Page'];
+
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
 		if(isset($Parameters['Route'][0])) {
