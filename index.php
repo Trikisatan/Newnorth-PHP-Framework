@@ -17,22 +17,23 @@ set_error_handler('ErrorHandler');
 
 require('Framework/Newnorth/Newnorth.php');
 
+/* Global variables */
+
+$Layout = null;
+
+$Page = null;
+
+$Application = null;
+
 /* Execution of application */
 
-use \Framework\Newnorth\Exception;
-use \Framework\Newnorth\Application;
-
 try {
-	$Layout = null;
-
-	$Page = null;
-
-	$Application = new Application();
+	$Application = new \Framework\Newnorth\Application();
 
 	$Application->Run();
 }
-catch(Exception $Exception) {
-	Application::HandleError(
+catch(\Framework\Newnorth\Exception $Exception) {
+	\Framework\Newnorth\Application::HandleError(
 		$Exception->Type,
 		$Exception->getMessage(),
 		$Exception->getFile(),
@@ -42,7 +43,7 @@ catch(Exception $Exception) {
 	);
 }
 catch(\ErrorException $Exception) {
-	Application::HandleError(
+	\Framework\Newnorth\Application::HandleError(
 		'Error',
 		$Exception->getMessage(),
 		$Exception->getFile(),
@@ -52,7 +53,7 @@ catch(\ErrorException $Exception) {
 	);
 }
 catch(\Exception $Exception) {
-	Application::HandleError(
+	\Framework\Newnorth\Application::HandleError(
 		'Unhandled exception',
 		$Exception->getMessage(),
 		$Exception->getFile(),
