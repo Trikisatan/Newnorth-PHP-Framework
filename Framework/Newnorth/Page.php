@@ -12,6 +12,8 @@ abstract class Page {
 
 	public $_Name;
 
+	public $_Parameters;
+
 	public $_Translations;
 
 	public $_Controls;
@@ -22,7 +24,7 @@ abstract class Page {
 
 	/* Magic methods */
 
-	public function __construct($Directory, $Name) {
+	public function __construct($Directory, $Name, $Parameters) {
 		if(Page::$Instance !== null) {
 			throw new ConfigException('Page has already been initialized.');
 		}
@@ -31,6 +33,7 @@ abstract class Page {
 
 		$this->_Directory = $Directory;
 		$this->_Name = $Name;
+		$this->_Parameters = $Parameters;
 		$this->_Translations = new Translations($Directory.$Name.'/');
 		$this->_Controls = new Controls($this, $Directory.$Name.'/');
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');

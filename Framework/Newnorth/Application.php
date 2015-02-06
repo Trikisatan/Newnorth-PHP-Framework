@@ -625,11 +625,22 @@ class Application {
 		
 		if(Application::$Cache === null) {
 			if($this->Layout === null) {
-				$Directory = strrpos($this->Page, '\\');
-				$GLOBALS['Page'] = new $this->Page(
-					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
-					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
-				);
+				$PageDirectory = strrpos($this->Page, '\\');
+
+				if($PageDirectory === false) {
+					$GLOBALS['Page'] = new $this->Page(
+						'',
+						$this->Page,
+						$this->Parameters
+					);
+				}
+				else {
+					$GLOBALS['Page'] = new $this->Page(
+						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
+						substr($this->Page, $PageDirectory + 1),
+						$this->Parameters
+					);
+				}
 
 				$start = microtime(true);
 				$GLOBALS['Page']->PreInitialize();
@@ -654,17 +665,39 @@ class Application {
 				$RenderTime = microtime(true) - $start;
 			}
 			else {
-				$Directory = strrpos($this->Page, '\\');
-				$GLOBALS['Layout'] = new $this->Layout(
-					$Directory === false ? '' : str_replace('\\', '/', substr($this->Layout, 0, $Directory + 1)),
-					$Directory === false ? $this->Layout : substr($this->Layout, $Directory + 1)
-				);
+				$LayoutDirectory = strrpos($this->Layout, '\\');
 
-				$Directory = strrpos($this->Page, '\\');
-				$GLOBALS['Page'] = new $this->Page(
-					$Directory === false ? '' : str_replace('\\', '/', substr($this->Page, 0, $Directory + 1)),
-					$Directory === false ? $this->Page : substr($this->Page, $Directory + 1)
-				);
+				if($LayoutDirectory === false) {
+					$GLOBALS['Layout'] = new $this->Layout(
+						'',
+						$this->Layout,
+						$this->Parameters
+					);
+				}
+				else {
+					$GLOBALS['Layout'] = new $this->Layout(
+						str_replace('\\', '/', substr($this->Layout, 0, $LayoutDirectory + 1)),
+						substr($this->Layout, $LayoutDirectory + 1),
+						$this->Parameters
+					);
+				}
+
+				$PageDirectory = strrpos($this->Page, '\\');
+
+				if($PageDirectory === false) {
+					$GLOBALS['Page'] = new $this->Page(
+						'',
+						$this->Page,
+						$this->Parameters
+					);
+				}
+				else {
+					$GLOBALS['Page'] = new $this->Page(
+						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
+						substr($this->Page, $PageDirectory + 1),
+						$this->Parameters
+					);
+				}
 
 				$start = microtime(true);
 				$GLOBALS['Page']->PreInitialize();
