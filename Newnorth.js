@@ -433,6 +433,55 @@ Newnorth.Controls.DropDownListControl = function() {
 	this.ivForm.AddControl(this);
 };
 
+Newnorth.Controls.CheckBoxControl = function() {
+	Newnorth.Controls.Control.call(this);
+
+	this.ivContainer = this.parentNode.parentNode;
+
+	Newnorth.Controls.ValidatableControl.call(this);
+
+	this.ivForm = this.form;
+
+	this.ivChecked = this.checked;
+
+	this.GetValue = function() {
+		return this.value;
+	};
+
+	this.SetValue = function(pvValue) {
+		this.value = pvValue;
+	};
+
+	this.ivOnIsCheckedChanged = new Newnorth.Event();
+
+	var isIsCheckedChangedMethod = function() {
+		if(this.ivChecked !== this.checked) {
+			this.ivChecked = this.checked;
+
+			this.ivIsDefaultValue = false;
+
+			this.ivOnIsCheckedChanged.Invoke(this, this.value);
+
+			if(this.ivForm === null) {
+				this.Validate();
+			}
+			else {
+				this.ivForm.ivOnAnyValueChangedEvent.Invoke(this, this.value);
+
+				this.ivForm.Validate();
+			}
+		}
+	};
+
+	this.addEventListener("click", isIsCheckedChangedMethod);
+
+	this.addEventListener("keydown", isIsCheckedChangedMethod);
+
+	this.addEventListener("keyup", isIsCheckedChangedMethod);
+
+	this.ivForm.AddControl(this);
+};
+
 window.addEventListener(
 	"load",
 	function() {
