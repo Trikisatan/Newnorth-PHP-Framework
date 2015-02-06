@@ -372,6 +372,8 @@ class Application {
 
 	private $Page = null;
 
+	public $Translations;
+
 	/* Magic methods */
 
 	public function __construct($ConfigFilePath = 'Config', $RoutesFilePath = 'Routes') {
@@ -397,6 +399,8 @@ class Application {
 			$this->LoadLayout();
 
 			$this->LoadPage();
+
+			$this->Translations = new Translations('');
 		}
 	}
 
@@ -662,6 +666,10 @@ class Application {
 
 				$start = microtime(true);
 				$GLOBALS['Page']->Render();
+				$Output = ob_get_contents();
+				ob_clean();
+				$this->Translations->Translate($Output);
+				echo $Output;
 				$RenderTime = microtime(true) - $start;
 			}
 			else {
@@ -728,6 +736,10 @@ class Application {
 
 				$start = microtime(true);
 				$GLOBALS['Layout']->Render();
+				$Output = ob_get_contents();
+				ob_clean();
+				$this->Translations->Translate($Output);
+				echo $Output;
 				$RenderTime = microtime(true) - $start;
 			}
 
