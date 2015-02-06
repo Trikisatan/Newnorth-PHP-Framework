@@ -213,6 +213,10 @@ Newnorth.Controls.FormControl = function() {
 	};
 
 	this.onsubmit = function() {
+		for(var i = 0; i < this.ivControls.length; ++i) {
+			this.ivControls[i].ivIsDefaultValue = false;
+		}
+
 		this.Validate();
 
 		return this.ivIsValid;
