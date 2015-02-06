@@ -40,7 +40,7 @@ abstract class Layout {
 		return $this->_Directory.$this->_Name;
 	}
 
-	/* Events */
+	/* Life cycle methods */
 
 	public function PreInitialize() {
 		$this->_Controls->PreInitialize();

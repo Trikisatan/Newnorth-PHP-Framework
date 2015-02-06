@@ -5,7 +5,7 @@ use \Framework\Newnorth\Control;
 use \Framework\Newnorth\ConfigException;
 
 class CheckBoxControl extends Control {
-	/* Events */
+	/* Life cycle methods */
 
 	public function Initialize() {
 

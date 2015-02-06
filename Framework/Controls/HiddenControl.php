@@ -4,7 +4,7 @@ namespace Framework\Controls;
 use \Framework\Newnorth\Control;
 
 class HiddenControl extends Control {
-	/* Events */
+	/* Life cycle methods */
 
 	public function Initialize() {
 

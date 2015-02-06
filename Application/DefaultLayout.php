@@ -6,7 +6,7 @@ use \Framework\Newnorth\Layout;
 use \Framework\Newnorth\Page;
 
 class DefaultLayout extends Layout {
-	/* Events */
+	/* Life cycle methods */
 
 	public function Initialize() {
 
