@@ -926,5 +926,9 @@ class Application {
 	public function RenderValueRegExpValidator($Control, $Parameters) {
 		return 'return -1<this.value.search('.$Parameters['RegExp'].')';
 	}
+
+	public function RenderEmailAddressFormatValidator($Control, $Parameters) {
+		return 'return -1<this.value.search(/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/)';
+	}
 }
 ?>
