@@ -8,7 +8,7 @@ class Actions implements \ArrayAccess {
 
 	private $Directory;
 
-	private $Items = array();
+	public $Items = array();
 
 	/* Magic methods */
 
@@ -30,7 +30,7 @@ class Actions implements \ArrayAccess {
 	}
 
 	public function offsetExists($Key) {
-		return isset($this->Actions[$Key]);
+		return isset($this->Items[$Key]);
 	}
 
 	public function offsetUnset($Key) {
@@ -38,7 +38,7 @@ class Actions implements \ArrayAccess {
 	}
 
 	public function offsetGet($Key) {
-		return $this->Actions[$Key];
+		return $this->Items[$Key];
 	}
 
 	/* Methods */
