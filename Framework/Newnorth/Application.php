@@ -366,8 +366,6 @@ class Application {
 
 	/* Variables */
 
-	public $Parameters;
-
 	private $Layout = null;
 
 	private $Page = null;
@@ -464,7 +462,7 @@ class Application {
 					continue;
 				}
 
-				$this->Parameters = $Parameters;
+				$GLOBALS['Parameters'] = $Parameters;
 
 				// Layout is optional, is for example not used when
 				// presenting pages with JSON-data.
@@ -502,7 +500,7 @@ class Application {
 			$Parameters[$Key] = (string)$Value;
 		}
 
-		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : $this->Parameters['Page'];
+		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : $GLOBALS['Parameters']['Page'];
 
 		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
 
@@ -512,7 +510,7 @@ class Application {
 
 			$Route->SetDefaults($RouteParameters);
 
-			foreach($this->Parameters as $Key => $Value) {
+			foreach($GLOBALS['Parameters'] as $Key => $Value) {
 				if(is_int($Key)) {
 					continue;
 				}
@@ -536,7 +534,7 @@ class Application {
 
 				$Route->SetDefaults($RouteParameters);
 
-				foreach($this->Parameters as $Key => $Value) {
+				foreach($GLOBALS['Parameters'] as $Key => $Value) {
 					if(is_int($Key)) {
 						continue;
 					}
@@ -562,14 +560,6 @@ class Application {
 				'Parameters' => $Parameters,
 			)
 		);
-	}
-
-	public function HasParameter($Name) {
-		return isset($this->Parameters[$Name]);
-	}
-
-	public function GetParameter($Name, $FallbackValue) {
-		return isset($this->Parameters[$Name]) ? $this->Parameters[$Name] : $FallbackValue;
 	}
 
 	private function LoadLayout() {
@@ -634,15 +624,13 @@ class Application {
 				if($PageDirectory === false) {
 					$GLOBALS['Page'] = new $this->Page(
 						'',
-						$this->Page,
-						$this->Parameters
+						$this->Page
 					);
 				}
 				else {
 					$GLOBALS['Page'] = new $this->Page(
 						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
-						substr($this->Page, $PageDirectory + 1),
-						$this->Parameters
+						substr($this->Page, $PageDirectory + 1)
 					);
 				}
 
@@ -678,15 +666,13 @@ class Application {
 				if($LayoutDirectory === false) {
 					$GLOBALS['Layout'] = new $this->Layout(
 						'',
-						$this->Layout,
-						$this->Parameters
+						$this->Layout
 					);
 				}
 				else {
 					$GLOBALS['Layout'] = new $this->Layout(
 						str_replace('\\', '/', substr($this->Layout, 0, $LayoutDirectory + 1)),
-						substr($this->Layout, $LayoutDirectory + 1),
-						$this->Parameters
+						substr($this->Layout, $LayoutDirectory + 1)
 					);
 				}
 
@@ -695,15 +681,13 @@ class Application {
 				if($PageDirectory === false) {
 					$GLOBALS['Page'] = new $this->Page(
 						'',
-						$this->Page,
-						$this->Parameters
+						$this->Page
 					);
 				}
 				else {
 					$GLOBALS['Page'] = new $this->Page(
 						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
-						substr($this->Page, $PageDirectory + 1),
-						$this->Parameters
+						substr($this->Page, $PageDirectory + 1)
 					);
 				}
 
@@ -755,6 +739,14 @@ class Application {
 			echo Application::$Cache;
 			$RenderTime = microtime(true) - $start;
 		}
+	}
+
+	public function GetTranslation($Key, $DefaultValue = null) {
+		return isset($this->Translations[$Key]) ? $this->Translations[$Key] : $DefaultValue;
+	}
+
+	public function SetTranslation($Key, $Value) {
+		$this->Translations[$Key] = $Value;
 	}
 
 	public function GetValidatorMethod($ActionName, $MethodName, &$MethodObject) {

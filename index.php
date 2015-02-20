@@ -19,11 +19,13 @@ require('Framework/Newnorth/Newnorth.php');
 
 /* Global variables */
 
+$Application = null;
+
 $Layout = null;
 
 $Page = null;
 
-$Application = null;
+$Parameters = null;
 
 /* Execution of application */
 
