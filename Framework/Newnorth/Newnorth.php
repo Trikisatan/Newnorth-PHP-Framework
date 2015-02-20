@@ -11,6 +11,7 @@ require('Action.php');
 require('Actions.php');
 require('EMail.php');
 require('HtmlRenderer.php');
+require('JsonRenderer.php');
 require('Route.php');
 require('Translations.php');
 require('Control.php');
