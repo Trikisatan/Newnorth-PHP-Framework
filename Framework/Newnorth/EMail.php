@@ -28,6 +28,16 @@ class EMail {
 		$this->Subject = $Subject;
 	}
 
+	public function SetSubjectTemplate($Template, $Variables = []) {
+		$FilePath = Application::$Files['EMailTemplates'].$Template.'.subject.'.Application::GetLocale().'.phtml';
+
+		$this->Subject = file_get_contents($FilePath);
+
+		foreach($Variables as $Key => $Value) {
+			$this->Subject = str_replace('%'.$Key.'%', $Value, $this->Subject);
+		}
+	}
+
 	public function SetText($Text) {
 		$this->Text = $Text;
 	}
