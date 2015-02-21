@@ -14,6 +14,7 @@ class Application {
 		'DataManagers' => '',
 		'DataTypes' => '',
 		'EMailTemplates' => '',
+		'Pages' => '',
 		'Translations' => '',
 	];
 
@@ -87,6 +88,8 @@ class Application {
 		Application::$Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : Application::$Files['DataTypes'];
 
 		Application::$Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : Application::$Files['EMailTemplates'];
+
+		Application::$Files['Pages'] = isset($Section['Pages']) ? $Section['Pages'] : Application::$Files['Pages'];
 
 		Application::$Files['Translations'] = isset($Section['Translations']) ? $Section['Translations'] : Application::$Files['Translations'];
 	}
@@ -603,7 +606,7 @@ class Application {
 			return;
 		}
 
-		$FilePath = $this->Page.'.php';
+		$FilePath = Application::$Files['Pages'].$this->Page.'.php';
 
 		include($FilePath);
 
