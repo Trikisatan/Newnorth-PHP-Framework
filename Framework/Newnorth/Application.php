@@ -45,8 +45,6 @@ class Application {
 
 	static private $Routes = [];
 
-	static private $Locale = null;
-
 	/* Static methods */
 
 	static private function LoadConfig($FilePath) {
@@ -128,10 +126,6 @@ class Application {
 
 	static public function GetConfig($Section) {
 		return Application::$Config[$Section];
-	}
-
-	static public function GetLocale() {
-		return Application::$Locale;
 	}
 
 	static public function GetDbConnection($Name) {
@@ -452,13 +446,13 @@ class Application {
 				// Locale is required, either through the route
 				// or through a session variable.
 				if(isset($Parameters['Locale'][0])) {
-					Application::$Locale = $Parameters['Locale'];
+					$GLOBALS['Parameters']['Locale'] = $Parameters['Locale'];
 				}
 				else if(isset($_SESSION['Locale'][0])) {
-					Application::$Locale = $_SESSION['Locale'];
+					$GLOBALS['Parameters']['Locale'] = $_SESSION['Locale'];
 				}
 				else if(isset(Application::$DefaultLocale[0])) {
-					Application::$Locale = Application::$DefaultLocale;
+					$GLOBALS['Parameters']['Locale'] = Application::$DefaultLocale;
 				}
 				else {
 					throw new ConfigException(
@@ -470,7 +464,7 @@ class Application {
 					);
 				}
 
-				if(!$Route->Translate($Parameters, Application::$Locale)) {
+				if(!$Route->Translate($Parameters, $GLOBALS['Parameters']['Locale'])) {
 					continue;
 				}
 
@@ -514,7 +508,7 @@ class Application {
 
 		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : $GLOBALS['Parameters']['Page'];
 
-		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : Application::$Locale;
+		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : $GLOBALS['Parameters']['Locale'];
 
 		if(isset($Parameters['Route'][0])) {
 			$Route = Application::$Routes[$Route];

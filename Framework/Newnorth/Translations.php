@@ -17,7 +17,7 @@ class Translations implements \ArrayAccess {
 	}
 
 	public function __toString() {
-		return Application::$Files['Translations'].$this->Directory.'Translations.'.Application::GetLocale().'.ini';
+		return Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
 	}
 
 	/* Array access methods */
@@ -53,7 +53,7 @@ class Translations implements \ArrayAccess {
 	/* Methods */
 
 	private function TryLoadIniFile() {
-		$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.'.Application::GetLocale().'.ini';
+		$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
 
 		if(!file_exists($FilePath)) {
 			return;
