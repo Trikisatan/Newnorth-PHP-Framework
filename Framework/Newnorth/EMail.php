@@ -24,6 +24,12 @@ class EMail {
 		$this->ReplyTo = $ReplyTo;
 	}
 
+	public function SetTemplate($Template, $Variables = []) {
+		$this->SetSubjectTemplate($Template, $Variables);
+		$this->SetTextTemplate($Template, $Variables);
+		$this->SetHtmlTemplate($Template, $Variables);
+	}
+
 	public function SetSubject($Subject) {
 		$this->Subject = $Subject;
 	}
