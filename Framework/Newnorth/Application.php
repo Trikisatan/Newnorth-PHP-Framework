@@ -800,13 +800,7 @@ class Application {
 
 		$Value = $_POST[$Control->_Parameters['Name']];
 
-		foreach($Control->_Parameters['Options'] as $Option) {
-			if($Option['Value'] === $Value) {
-				return true;
-			}
-		}
-
-		return false;
+		return isset($Control->_Parameters['Options'][$Value]);
 	}
 
 	public function EMailAddressFormatValidator($Control) {
