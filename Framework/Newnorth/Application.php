@@ -14,6 +14,7 @@ class Application {
 		'DataManagers' => '',
 		'DataTypes' => '',
 		'EMailTemplates' => '',
+		'Translations' => '',
 	];
 
 	static private $DefaultLocale;
@@ -86,6 +87,8 @@ class Application {
 		Application::$Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : Application::$Files['DataTypes'];
 
 		Application::$Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : Application::$Files['EMailTemplates'];
+
+		Application::$Files['Translations'] = isset($Section['Translations']) ? $Section['Translations'] : Application::$Files['Translations'];
 	}
 
 	static private function LoadConfig_DbConnections($DbConnections) {
