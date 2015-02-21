@@ -33,7 +33,7 @@ class EMail {
 	}
 
 	public function SetTextTemplate($Template, $Variables = []) {
-		$FilePath = $Template.'.text.'.Application::GetLocale().'.phtml';
+		$FilePath = Application::$Files['EMailTemplates'].$Template.'.text.'.Application::GetLocale().'.phtml';
 
 		$this->Text = file_get_contents($FilePath);
 
@@ -47,7 +47,7 @@ class EMail {
 	}
 
 	public function SetHtmlTemplate($Template, $Variables = []) {
-		$FilePath = $Template.'.html.'.Application::GetLocale().'.phtml';
+		$FilePath = Application::$Files['EMailTemplates'].$Template.'.html.'.Application::GetLocale().'.phtml';
 
 		$this->Html = file_get_contents($FilePath);
 

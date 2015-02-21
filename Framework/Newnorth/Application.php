@@ -10,9 +10,10 @@ class Application {
 
 	static private $Config;
 
-	static private $Files = [
+	static public $Files = [
 		'DataManagers' => '',
 		'DataTypes' => '',
+		'EMailTemplates' => '',
 	];
 
 	static private $DefaultLocale;
@@ -83,6 +84,8 @@ class Application {
 		Application::$Files['DataManagers'] = isset($Section['DataManagers']) ? $Section['DataManagers'] : Application::$Files['DataManagers'];
 
 		Application::$Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : Application::$Files['DataTypes'];
+
+		Application::$Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : Application::$Files['EMailTemplates'];
 	}
 
 	static private function LoadConfig_DbConnections($DbConnections) {
