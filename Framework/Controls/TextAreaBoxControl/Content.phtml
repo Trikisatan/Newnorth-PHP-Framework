@@ -20,7 +20,11 @@ else {
 	if(isset($Control->_Parameters['Name'])) {
 		?> name="<?=$Control->_Parameters['Name']?>"<?
 	}
-	?> Newnorth:Control="TextAreaBoxControl"><?=$Control->_Parameters['Value']?></textarea></div><?
+	?> Newnorth:Control="TextAreaBoxControl"><?
+	if(isset($Control->_Parameters['Value'])) {
+		?><?=$Control->_Parameters['Value']?><?
+	}
+	?></textarea></div><?
 	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
 	if(isset($Control->_Parameters['Id'])) {
 		?><script language="javascript"><?
