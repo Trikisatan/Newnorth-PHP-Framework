@@ -404,7 +404,7 @@ class Application {
 
 			$this->LoadPage();
 
-			$this->Translations = new Translations('');
+			$this->Translations = new Translations($this, '');
 		}
 	}
 
@@ -698,30 +698,30 @@ class Application {
 				}
 
 				$start = microtime(true);
-				$GLOBALS['Page']->PreInitialize();
 				$GLOBALS['Layout']->PreInitialize();
-				$GLOBALS['Page']->Initialize();
+				$GLOBALS['Page']->PreInitialize();
 				$GLOBALS['Layout']->Initialize();
-				$GLOBALS['Page']->PostInitialize();
+				$GLOBALS['Page']->Initialize();
 				$GLOBALS['Layout']->PostInitialize();
+				$GLOBALS['Page']->PostInitialize();
 				$InitializationTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$GLOBALS['Page']->PreLoad();
 				$GLOBALS['Layout']->PreLoad();
-				$GLOBALS['Page']->Load();
+				$GLOBALS['Page']->PreLoad();
 				$GLOBALS['Layout']->Load();
-				$GLOBALS['Page']->PostLoad();
+				$GLOBALS['Page']->Load();
 				$GLOBALS['Layout']->PostLoad();
+				$GLOBALS['Page']->PostLoad();
 				$LoadTime = microtime(true) - $start;
 
 				$start = microtime(true);
-				$GLOBALS['Page']->PreExecute();
 				$GLOBALS['Layout']->PreExecute();
-				$GLOBALS['Page']->Execute();
+				$GLOBALS['Page']->PreExecute();
 				$GLOBALS['Layout']->Execute();
-				$GLOBALS['Page']->PostExecute();
+				$GLOBALS['Page']->Execute();
 				$GLOBALS['Layout']->PostExecute();
+				$GLOBALS['Page']->PostExecute();
 				$ExecutionTime = microtime(true) - $start;
 
 				$start = microtime(true);

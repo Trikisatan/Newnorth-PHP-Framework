@@ -31,9 +31,9 @@ abstract class Page {
 
 		$this->_Directory = Application::$Files['Pages'].$Directory;
 		$this->_Name = $Name;
-		$this->_Translations = new Translations($Directory.$Name.'/');
-		$this->_Controls = new Controls($this, $Directory.$Name.'/');
-		$this->_Actions = new Actions($this, $Directory.$Name.'/');
+		$this->_Translations = new Translations($this, $Directory.$Name.'/');
+		$this->_Controls = new Controls($this, Application::$Files['Pages'].$Directory.$Name.'/');
+		$this->_Actions = new Actions($this, Application::$Files['Pages'].$Directory.$Name.'/');
 	}
 
 	public function __toString() {

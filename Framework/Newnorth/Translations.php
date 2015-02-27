@@ -4,20 +4,38 @@ namespace Framework\Newnorth;
 class Translations implements \ArrayAccess {
 	/* Variables */
 
+	private $Owner;
+
 	private $Directory;
 
 	private $Items = array();
 
 	/* Magic methods */
 
-	public function __construct($Directory) {
+	public function __construct($Owner, $Directory) {
+		$this->Owner = $Owner;
 		$this->Directory = $Directory;
 
 		$this->TryLoadIniFile();
 	}
 
 	public function __toString() {
-		return Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		if(isset(Application::$Files['Translations'][0]))
+		{
+			return Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else if($this->Owner instanceof Layout && isset(Application::$Files['Layouts'][0]))
+		{
+			return Application::$Files['Layouts'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else if($this->Owner instanceof Page && isset(Application::$Files['Pages'][0]))
+		{
+			return Application::$Files['Pages'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else
+		{
+			return $this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
 	}
 
 	/* Array access methods */
@@ -53,7 +71,22 @@ class Translations implements \ArrayAccess {
 	/* Methods */
 
 	private function TryLoadIniFile() {
-		$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		if(isset(Application::$Files['Translations'][0]))
+		{
+			$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else if($this->Owner instanceof Layout && isset(Application::$Files['Layouts'][0]))
+		{
+			$FilePath = Application::$Files['Layouts'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else if($this->Owner instanceof Page && isset(Application::$Files['Pages'][0]))
+		{
+			$FilePath = Application::$Files['Pages'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
+		else
+		{
+			$FilePath = $this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+		}
 
 		if(!file_exists($FilePath)) {
 			return;

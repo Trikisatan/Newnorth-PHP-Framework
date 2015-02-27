@@ -27,7 +27,7 @@ abstract class Control {
 		$this->_Directory = $Directory;
 		$this->_Name = $Name;
 		$this->_Parameters = $Parameters;
-		$this->_Translations = new Translations($Directory.$Name.'/');
+		$this->_Translations = new Translations($this, $Directory.$Name.'/');
 		$this->_Controls = new Controls($this, $Directory.$Name.'/');
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');
 

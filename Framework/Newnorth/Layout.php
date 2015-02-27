@@ -31,9 +31,9 @@ abstract class Layout {
 
 		$this->_Directory = Application::$Files['Layouts'].$Directory;
 		$this->_Name = $Name;
-		$this->_Translations = new Translations($Directory.$Name.'/');
-		$this->_Controls = new Controls($this, $Directory.$Name.'/');
-		$this->_Actions = new Actions($this, $Directory.$Name.'/');
+		$this->_Translations = new Translations($this, $Directory.$Name.'/');
+		$this->_Controls = new Controls($this, Application::$Files['Layouts'].$Directory.$Name.'/');
+		$this->_Actions = new Actions($this, Application::$Files['Layouts'].$Directory.$Name.'/');
 	}
 
 	public function __toString() {
