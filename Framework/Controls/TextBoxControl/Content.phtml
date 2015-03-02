@@ -33,6 +33,12 @@ else {
 	if(isset($Control->_Parameters['AutoComplete'])) {
 		?> autocomplete="<?=$Control->_Parameters['AutoComplete']?>"<?
 	}
+	if($Control->_Parameters['IsDisabled']) {
+		?> disabled="disabled"<?
+	}
+	if($Control->_Parameters['IsReadOnly']) {
+		?> readonly="readonly"<?
+	}
 	?> Newnorth:Control="TextBoxControl" /></div><?
 	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
 	if(isset($Control->_Parameters['Id'])) {
