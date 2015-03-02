@@ -19,15 +19,23 @@ abstract class DataManager {
 	protected function _Insert(DbInsertQuery $Query) {
 		$Result = $this->Connection->Insert($Query);
 
-		if($Result === false) {
+		if($Result) {
+			return $this->Connection->LastInsertId();
+		}
+		else {
 			return false;
 		}
-
-		return $this->Connection->LastInsertId();
 	}
 
 	protected function _Delete(DbDeleteQuery $Query) {
-		return $this->Connection->Delete($Query);
+		$Result = $this->Connection->Delete($Query);
+
+		if($Result) {
+			return $this->Connection->AffectedRows();
+		}
+		else {
+			return false;
+		}
 	}
 
 	protected function _Find(DbSelectQuery $Query) {
