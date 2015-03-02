@@ -24,6 +24,8 @@ class CheckBoxControl extends Control {
 	public function ParseParameters() {
 		$this->_Parameters['IsChecked'] = isset($this->_Parameters['IsChecked']) ? $this->_Parameters['IsChecked'] === true || $this->_Parameters['IsChecked'] === '1' : false;
 
+		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] === true : false;
+
 		if(isset($this->_Parameters['Validators'])) {
 			$this->ParseParameters_Validators($this->_Parameters['Validators']);
 		}
