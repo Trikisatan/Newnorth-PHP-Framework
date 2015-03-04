@@ -15,6 +15,7 @@ use \Framework\Newnorth\DbGreaterThan;
 use \Framework\Newnorth\DbLessThan;
 use \Framework\Newnorth\DbExpression;
 use \Framework\Newnorth\DbArray;
+use \Framework\Newnorth\DbBool;
 use \Framework\Newnorth\DbColumn;
 use \Framework\Newnorth\DbFloat;
 use \Framework\Newnorth\DbInt;
@@ -607,6 +608,9 @@ class Connection extends DbConnection {
 		if($Expression instanceof DbArray) {
 			return $this->ProcessExpression_DbArray($Expression);
 		}
+		else if($Expression instanceof DbBool) {
+			return $this->ProcessExpression_DbBool($Expression);
+		}
 		else if($Expression instanceof DbColumn) {
 			return $this->ProcessExpression_DbColumn($Expression);
 		}
@@ -643,6 +647,10 @@ class Connection extends DbConnection {
 		}
 
 		return '('.$Sql.')';
+	}
+
+	private function ProcessExpression_DbBool(DbBool $Expression) {
+		return $Expression->Value ? MYSQL_TRUE : MYSQL_FALSE;
 	}
 
 	private function ProcessExpression_DbColumn(DbColumn $Expression) {

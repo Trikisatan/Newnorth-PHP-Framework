@@ -237,39 +237,55 @@ class DbExpression {
 		if($Expression instanceof DbExpression) {
 			return $Expression;
 		}
-
-		if($Expression === null) {
+		else if($Expression === null) {
 			return new DbNull();
 		}
-
-		if(is_array($Expression)) {
+		else if(is_array($Expression)) {
 			return new DbArray($Expression);
 		}
-
-		if(is_float($Expression)) {
+		else if(is_bool($Expression)) {
+			return new DbBool($Expression);
+		}
+		else if(is_float($Expression)) {
 			return new DbFloat($Expression);
 		}
-
-		if(is_int($Expression)) {
+		else if(is_int($Expression)) {
 			return new DbInt($Expression);
 		}
+		else {
+			$Expression = (string)$Expression;
 
-		$Length = strlen($Expression);
+			$Length = strlen($Expression);
 
-		if(2 < $Length && $Expression[0] === '`' && $Expression[$Length - 1] === '`') {
-			return new DbColumn(explode('`.`', substr($Expression, 1, -1)));
-		}
+			if(2 <= $Length && $Expression[0] === $Expression[$Length - 1]) {
+				if($Expression[0] === '`') {
+					if(2 < $Length) {
+						return new DbColumn(explode('`.`', substr($Expression, 1, -1)));
+					}
+					else {
+						throw RuntimeException(
+							'Invalid format on expression, could not be parsed as DbColumn.',
+							[
+								'Expression' => $Expression,
+							]
+						);
+					}
+				}
+				else if($Expression[0] === '"') {
+					if(2 < $Length) {
+						return new DbString(substr($Expression, 1, -1));
+					}
+					else {
+						return new DbString('');
+					}
+				}
 
-		if(1 < $Length && $Expression[0] === '"' && $Expression[$Length - 1] === '"') {
-			if(2 < $Length) {
-				return new DbString(substr($Expression, 1, -1));
+				return new DbExpression($Expression);
 			}
 			else {
-				return new DbString("");
+				return new DbExpression($Expression);
 			}
 		}
-
-		return new DbExpression($Expression);
 	}
 
 	static public function ParseDbColumn($Expression) {
@@ -280,7 +296,7 @@ class DbExpression {
 		}
 		else {
 			throw RuntimeException(
-				'Invalid format on expression, could not be parsed to DbColumn.',
+				'Invalid format on expression, could not be parsed as DbColumn.',
 				[
 					'Expression' => $Expression,
 				]
@@ -309,6 +325,10 @@ class DbArray extends DbExpression {
 
 		$this->Value = $Value;
 	}
+}
+
+class DbBool extends DbExpression {
+	
 }
 
 class DbColumn extends DbExpression {
