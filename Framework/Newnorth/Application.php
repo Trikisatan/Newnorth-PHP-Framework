@@ -58,7 +58,7 @@ class Application {
 			Application::LoadConfig_Files($Config['Files']);
 		}
 
-		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : '';
+		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : null;
 
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 
@@ -441,54 +441,40 @@ class Application {
 	}
 
 	private function ParseUrl() {
-		foreach(Application::$Routes as $Route) {
+		foreach(Application::$Routes as $RouteName => $Route) {
 			if($Route->Match(Application::$Url, $Parameters)) {
-				// Locale is required, either through the route
-				// or through a session variable.
 				if(isset($Parameters['Locale'][0])) {
-					$GLOBALS['Parameters']['Locale'] = $Parameters['Locale'];
+					$Locale = $Parameters['Locale'];
 				}
 				else if(isset($_SESSION['Locale'][0])) {
-					$GLOBALS['Parameters']['Locale'] = $_SESSION['Locale'];
-				}
-				else if(isset(Application::$DefaultLocale[0])) {
-					$GLOBALS['Parameters']['Locale'] = Application::$DefaultLocale;
+					$Locale = $_SESSION['Locale'];
 				}
 				else {
-					throw new ConfigException(
-						'Locale not set.',
-						[
-							'URL' => Application::$Url,
-							'Route' => $Route->__toString(),
-						]
-					);
+					$Locale = Application::$DefaultLocale;
 				}
 
-				if(!$Route->Translate($Parameters, $GLOBALS['Parameters']['Locale'])) {
-					continue;
+				if($Route->Translate($Parameters, $Locale)) {
+					$GLOBALS['Parameters'] = $Parameters;
+
+					$GLOBALS['Parameters']['Locale'] = $Locale;
+
+					if(isset($Parameters['Layout'])) {
+						$this->Layout = isset($Parameters['Layout'][0]) ? $Parameters['Layout'].'Layout' : null;
+					}
+
+					if(!isset($Parameters['Page'])) {
+						throw new ConfigException(
+							'Page not set.',
+							[
+								'URL' => Application::$Url,
+								'Route' => $Route->__toString(),
+							]
+						);
+					}
+
+					$this->Page = $Parameters['Page'].'Page';
+					return;
 				}
-
-				$GLOBALS['Parameters'] = $Parameters;
-
-				// Layout is optional, is for example not used when
-				// presenting pages with JSON-data.
-				if(isset($Parameters['Layout'])) {
-					$this->Layout = isset($Parameters['Layout'][0]) ? $Parameters['Layout'].'Layout' : null;
-				}
-
-				// Page is required.
-				if(!isset($Parameters['Page'])) {
-					throw new ConfigException(
-						'Page not set.',
-						[
-							'URL' => Application::$Url,
-							'Route' => $Route->__toString(),
-						]
-					);
-				}
-
-				$this->Page = $Parameters['Page'].'Page';
-				return;
 			}
 		}
 

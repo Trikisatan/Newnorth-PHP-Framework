@@ -66,38 +66,37 @@ class Route {
 	}
 
 	public function Translate(&$Data, $Locale) {
-		// If there's no translations,
-		// no translation is required.
+		// If there's no translations, no translation is needed.
 		if(count($this->Translations) == 0) {
 			return true;
 		}
-		// ... But since there are translations,
-		// translation is required.
-		if(!isset($this->Translations[$Locale])) {
+		// If there's translations, translation is needed.
+		else if(!isset($this->Translations[$Locale])) {
 			return false;
 		}
+		else {
+			foreach($this->Translations[$Locale] as $Variable => $Translations) {
+				if(!isset($Data[$Variable])) {
+					continue;
+				}
 
-		foreach($this->Translations[$Locale] as $Variable => $Translations) {
-			if(!isset($Data[$Variable])) {
-				continue;
-			}
+				$IsUpdated = false;
 
-			$IsUpdated = false;
+				foreach($Translations as $Translation => $Value) {
+					if($Data[$Variable] === $Value) {
+						$Data[$Variable] = $Translation;
+						$IsUpdated = true;
+						break;
+					}
+				}
 
-			foreach($Translations as $Translation => $Value) {
-				if($Data[$Variable] === $Value) {
-					$Data[$Variable] = $Translation;
-					$IsUpdated = true;
-					break;
+				if(!$IsUpdated) {
+					return false;
 				}
 			}
 
-			if(!$IsUpdated) {
-				return false;
-			}
+			return true;
 		}
-
-		return true;
 	}
 
 	public function ReversedTranslate(&$Data, $Locale) {

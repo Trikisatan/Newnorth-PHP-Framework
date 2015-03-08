@@ -35,7 +35,12 @@ class EMail {
 	}
 
 	public function SetSubjectTemplate($Template, $Variables = []) {
-		$FilePath = Application::$Files['EMailTemplates'].$Template.'.subject.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		if($GLOBALS['Parameters']['Locale'] === null) {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.subject.phtml';
+		}
+		else {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.subject.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		}
 
 		$this->Subject = file_get_contents($FilePath);
 
@@ -49,7 +54,12 @@ class EMail {
 	}
 
 	public function SetTextTemplate($Template, $Variables = []) {
-		$FilePath = Application::$Files['EMailTemplates'].$Template.'.text.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		if($GLOBALS['Parameters']['Locale'] === null) {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.text.phtml';
+		}
+		else {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.text.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		}
 
 		$this->Text = file_get_contents($FilePath);
 
@@ -63,7 +73,12 @@ class EMail {
 	}
 
 	public function SetHtmlTemplate($Template, $Variables = []) {
-		$FilePath = Application::$Files['EMailTemplates'].$Template.'.html.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		if($GLOBALS['Parameters']['Locale'] === null) {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.html.phtml';
+		}
+		else {
+			$FilePath = Application::$Files['EMailTemplates'].$Template.'.html.'.$GLOBALS['Parameters']['Locale'].'.phtml';
+		}
 
 		$this->Html = file_get_contents($FilePath);
 
