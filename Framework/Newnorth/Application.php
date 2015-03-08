@@ -19,6 +19,10 @@ class Application {
 		'Translations' => '',
 	];
 
+	static public $ErrorHandling = [
+		'404' => [],
+	];
+
 	static private $DefaultLocale;
 
 	static private $DisplayErrors;
@@ -58,7 +62,11 @@ class Application {
 			Application::LoadConfig_Files($Config['Files']);
 		}
 
-		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : null;
+		if(isset($Config['ErrorHandling'])) {
+			Application::LoadConfig_ErrorHandling($Config['ErrorHandling']);
+		}
+
+		Application::$DefaultLocale = isset($Config['DefaultLocale']) ? $Config['DefaultLocale'] : '';
 
 		Application::$DisplayErrors = isset($Config['ErrorHandling']['DisplayErrors']) ? $Config['ErrorHandling']['DisplayErrors'] === '1' : true;
 
@@ -93,6 +101,10 @@ class Application {
 		Application::$Files['Pages'] = isset($Section['Pages']) ? $Section['Pages'] : Application::$Files['Pages'];
 
 		Application::$Files['Translations'] = isset($Section['Translations']) ? $Section['Translations'] : Application::$Files['Translations'];
+	}
+
+	static private function LoadConfig_ErrorHandling($Section) {
+		Application::$ErrorHandling['404'] = isset($Section['404']) ? $Section['404'] : Application::$ErrorHandling['404'];
 	}
 
 	static private function LoadConfig_DbConnections($DbConnections) {
@@ -372,10 +384,6 @@ class Application {
 
 	/* Variables */
 
-	private $Layout = null;
-
-	private $Page = null;
-
 	public $Translations;
 
 	/* Magic methods */
@@ -398,11 +406,9 @@ class Application {
 		if(!Application::LoadPageCache()) {
 			$this->LoadRoutes($RoutesFilePath);
 
-			$this->ParseUrl();
-
-			$this->LoadLayout();
-
-			$this->LoadPage();
+			if(!$this->ParseUrl()) {
+				$this->PageNotFound();
+			}
 
 			$this->Translations = new Translations($this, '');
 		}
@@ -458,32 +464,12 @@ class Application {
 
 					$GLOBALS['Parameters']['Locale'] = $Locale;
 
-					if(isset($Parameters['Layout'])) {
-						$this->Layout = isset($Parameters['Layout'][0]) ? $Parameters['Layout'].'Layout' : null;
-					}
-
-					if(!isset($Parameters['Page'])) {
-						throw new ConfigException(
-							'Page not set.',
-							[
-								'URL' => Application::$Url,
-								'Route' => $Route->__toString(),
-							]
-						);
-					}
-
-					$this->Page = $Parameters['Page'].'Page';
-					return;
+					return true;
 				}
 			}
 		}
 
-		throw new ConfigException(
-			'No route found.',
-			[
-				'URL' => Application::$Url,
-			]
-		);
+		return false;
 	}
 
 	public function GenerateUrl(array $Parameters) {
@@ -521,7 +507,7 @@ class Application {
 			}
 		}
 		else {
-			foreach(Application::$Routes as $Route) {
+			foreach(Application::$Routes as $RouteName => $Route) {
 				$RouteParameters = array_slice($Parameters, 0);
 
 				$Route->SetDefaults($RouteParameters);
@@ -555,76 +541,88 @@ class Application {
 	}
 
 	private function LoadLayout() {
-		if($this->Layout === null) {
-			return;
-		}
+		$FullName = $GLOBALS['Parameters']['Layout'].'Layout';
 
-		$ClassName = str_replace('/', '\\', $this->Layout);
-
-		if(class_exists($ClassName, false)) {
-			return;
-		}
-
-		$FilePath = Application::$Files['Layouts'].$this->Layout.'.php';
-
-		include($FilePath);
+		$ClassName = str_replace('/', '\\', $FullName);
 
 		if(!class_exists($ClassName, false)) {
-			throw new ConfigException(
-				'Layout not found.',
-				[
-					'File' => $FilePath,
-					'Class' => $ClassName,
-				]
-			);
+			$FilePath = Application::$Files['Layouts'].$FullName.'.php';
+
+			@include($FilePath);
+
+			if(!class_exists($ClassName, false)) {
+				throw new ConfigException(
+					'Layout not found.',
+					[
+						'File' => $FilePath,
+						'Class' => $ClassName,
+					]
+				);
+			}
 		}
 
-		$this->Layout = $ClassName;
+		$Directory = strrpos($FullName, '/');
+
+		if($Directory === false) {
+			$GLOBALS['Layout'] = new $ClassName(
+				'',
+				$FullName
+			);
+		}
+		else {
+			$GLOBALS['Layout'] = new $ClassName(
+				substr($FullName, 0, $Directory + 1),
+				substr($FullName, $Directory + 1)
+			);
+		}
 	}
 
 	private function LoadPage() {
-		$ClassName = str_replace('/', '\\', $this->Page);
+		$FullName = $GLOBALS['Parameters']['Page'].'Page';
 
-		if(class_exists($ClassName, false)) {
-			return;
-		}
-
-		$FilePath = Application::$Files['Pages'].$this->Page.'.php';
-
-		include($FilePath);
+		$ClassName = str_replace('/', '\\', $FullName);
 
 		if(!class_exists($ClassName, false)) {
-			throw new ConfigException(
-				'Page not found.',
-				[
-					'File' => $FilePath,
-					'Class' => $ClassName,
-				]
-			);
+			$FilePath = Application::$Files['Pages'].$FullName.'.php';
+
+			@include($FilePath);
+
+			if(!class_exists($ClassName, false)) {
+				throw new ConfigException(
+					'Page not found.',
+					[
+						'File' => $FilePath,
+						'Class' => $ClassName,
+					]
+				);
+			}
 		}
 
-		$this->Page = $ClassName;
+		$Directory = strrpos($FullName, '/');
+
+		if($Directory === false) {
+			$GLOBALS['Page'] = new $ClassName(
+				'',
+				$FullName
+			);
+		}
+		else {
+			$GLOBALS['Page'] = new $ClassName(
+				substr($FullName, 0, $Directory + 1),
+				substr($FullName, $Directory + 1)
+			);
+		}
 	}
 
 	public function Run() {
 		global $InitializationTime, $LoadTime, $ExecutionTime, $RenderTime;
 		
 		if(Application::$Cache === null) {
-			if($this->Layout === null) {
-				$PageDirectory = strrpos($this->Page, '\\');
-
-				if($PageDirectory === false) {
-					$GLOBALS['Page'] = new $this->Page(
-						'',
-						$this->Page
-					);
-				}
-				else {
-					$GLOBALS['Page'] = new $this->Page(
-						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
-						substr($this->Page, $PageDirectory + 1)
-					);
-				}
+			if(!isset($GLOBALS['Parameters']['Page'][0])) {
+				
+			}
+			else if(!isset($GLOBALS['Parameters']['Layout'][0])) {
+				$this->LoadPage();
 
 				$start = microtime(true);
 				$GLOBALS['Page']->PreInitialize();
@@ -653,35 +651,9 @@ class Application {
 				$RenderTime = microtime(true) - $start;
 			}
 			else {
-				$LayoutDirectory = strrpos($this->Layout, '\\');
+				$this->LoadLayout();
 
-				if($LayoutDirectory === false) {
-					$GLOBALS['Layout'] = new $this->Layout(
-						'',
-						$this->Layout
-					);
-				}
-				else {
-					$GLOBALS['Layout'] = new $this->Layout(
-						str_replace('\\', '/', substr($this->Layout, 0, $LayoutDirectory + 1)),
-						substr($this->Layout, $LayoutDirectory + 1)
-					);
-				}
-
-				$PageDirectory = strrpos($this->Page, '\\');
-
-				if($PageDirectory === false) {
-					$GLOBALS['Page'] = new $this->Page(
-						'',
-						$this->Page
-					);
-				}
-				else {
-					$GLOBALS['Page'] = new $this->Page(
-						str_replace('\\', '/', substr($this->Page, 0, $PageDirectory + 1)),
-						substr($this->Page, $PageDirectory + 1)
-					);
-				}
+				$this->LoadPage();
 
 				$start = microtime(true);
 				$GLOBALS['Layout']->PreInitialize();
@@ -731,6 +703,19 @@ class Application {
 			echo Application::$Cache;
 			$RenderTime = microtime(true) - $start;
 		}
+	}
+
+	public function PageNotFound() {
+		header('HTTP/1.0 404 Not Found');
+
+		$GLOBALS['Parameters'] = Application::$ErrorHandling['404'];
+
+		/*throw new ConfigException(
+			'No route found.',
+			[
+				'URL' => Application::$Url,
+			]
+		);*/
 	}
 
 	public function GetTranslation($Key, $DefaultValue = null) {

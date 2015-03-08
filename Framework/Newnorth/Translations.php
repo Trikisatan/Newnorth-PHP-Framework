@@ -71,25 +71,7 @@ class Translations implements \ArrayAccess {
 	/* Methods */
 
 	private function TryLoadIniFile() {
-		if($GLOBALS['Parameters']['Locale'] === null) {
-			if(isset(Application::$Files['Translations'][0]))
-			{
-				$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.ini';
-			}
-			else if($this->Owner instanceof Layout && isset(Application::$Files['Layouts'][0]))
-			{
-				$FilePath = Application::$Files['Layouts'].$this->Directory.'Translations.ini';
-			}
-			else if($this->Owner instanceof Page && isset(Application::$Files['Pages'][0]))
-			{
-				$FilePath = Application::$Files['Pages'].$this->Directory.'Translations.ini';
-			}
-			else
-			{
-				$FilePath = $this->Directory.'Translations.ini';
-			}
-		}
-		else {
+		if(isset($GLOBALS['Parameters']['Locale'][0])) {
 			if(isset(Application::$Files['Translations'][0]))
 			{
 				$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
@@ -105,6 +87,24 @@ class Translations implements \ArrayAccess {
 			else
 			{
 				$FilePath = $this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
+			}
+		}
+		else {
+			if(isset(Application::$Files['Translations'][0]))
+			{
+				$FilePath = Application::$Files['Translations'].$this->Directory.'Translations.ini';
+			}
+			else if($this->Owner instanceof Layout && isset(Application::$Files['Layouts'][0]))
+			{
+				$FilePath = Application::$Files['Layouts'].$this->Directory.'Translations.ini';
+			}
+			else if($this->Owner instanceof Page && isset(Application::$Files['Pages'][0]))
+			{
+				$FilePath = Application::$Files['Pages'].$this->Directory.'Translations.ini';
+			}
+			else
+			{
+				$FilePath = $this->Directory.'Translations.ini';
 			}
 		}
 
