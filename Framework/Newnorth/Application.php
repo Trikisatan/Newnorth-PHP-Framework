@@ -20,6 +20,10 @@ class Application {
 	];
 
 	static public $ErrorHandling = [
+		'RouteNotFound' => [
+			'ThrowException' => true,
+			'Report' => true,
+		],
 		'404' => [],
 	];
 
@@ -113,6 +117,10 @@ class Application {
 	}
 
 	static private function LoadConfig_ErrorHandling($Section) {
+		Application::$ErrorHandling['RouteNotFound']['ThrowException'] = isset($Section['RouteNotFound']['ThrowException']) ? $Section['RouteNotFound']['ThrowException'] : Application::$ErrorHandling['RouteNotFound']['ThrowException'];
+
+		Application::$ErrorHandling['RouteNotFound']['Report'] = isset($Section['RouteNotFound']['Report']) ? $Section['RouteNotFound']['Report'] : Application::$ErrorHandling['RouteNotFound']['Report'];
+
 		Application::$ErrorHandling['404'] = isset($Section['404']) ? $Section['404'] : Application::$ErrorHandling['404'];
 	}
 
@@ -424,6 +432,22 @@ class Application {
 			$this->LoadRoutes($RoutesFilePath);
 
 			if(!$this->ParseUrl()) {
+				if(Application::$ErrorHandling['RouteNotFound']['ThrowException']) {
+					throw new ConfigException(
+						'Route not found.',
+						[]
+					);
+				}
+				else if(Application::$ErrorHandling['RouteNotFound']['Report']) {
+					Application::LogError(
+						'Route not found',
+						'A route is missing.',
+						[
+							'Url' => Application::$Url,
+						]
+					);
+				}
+
 				$this->PageNotFound();
 			}
 
