@@ -160,5 +160,18 @@ class Translations implements \ArrayAccess {
 			}
 		}
 	}
+
+	public function IsTranslated($Contents, &$Translations) {
+		if(0 < preg_match_all('/%([a-zA-Z0-9_\/]+?)(?:\("(.*?)"\))?%/', $Contents, $Matches)) {
+			$Translations = $Matches[0];
+
+			return false;
+		}
+		else {
+			$Translations = [];
+
+			return true;
+		}
+	}
 }
 ?>

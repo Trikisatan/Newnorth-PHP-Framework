@@ -23,6 +23,11 @@ class Application {
 		'404' => [],
 	];
 
+	static public $Translation = [
+		'ThrowException' => true,
+		'Report' => true,
+	];
+
 	static private $DefaultLocale;
 
 	static private $DisplayErrors;
@@ -84,6 +89,10 @@ class Application {
 
 		Application::$ErrorPage = isset($Config['ErrorHandling']['ErrorPage']) ? $Config['ErrorHandling']['ErrorPage'] : '';
 
+		if(isset($Config['Translation'])) {
+			Application::LoadConfig_Translation($Config['Translation']);
+		}
+
 		if(isset($Config['DbConnections'])) {
 			Application::LoadConfig_DbConnections($Config['DbConnections']);
 		}
@@ -105,6 +114,12 @@ class Application {
 
 	static private function LoadConfig_ErrorHandling($Section) {
 		Application::$ErrorHandling['404'] = isset($Section['404']) ? $Section['404'] : Application::$ErrorHandling['404'];
+	}
+
+	static private function LoadConfig_Translation($Section) {
+		Application::$Translation['ThrowException'] = isset($Section['ThrowException']) ? ($Section['ThrowException'] === '1') : Application::$Translation['ThrowException'];
+
+		Application::$Translation['Report'] = isset($Section['Report']) ? ($Section['Report'] === '1') : Application::$Translation['Report'];
 	}
 
 	static private function LoadConfig_DbConnections($DbConnections) {
@@ -297,7 +312,9 @@ class Application {
 				FILE_APPEND
 			);
 		}
-		catch(Exception $Exception) { }
+		catch(Exception $Exception) {
+			
+		}
 	}
 
 	static private function EMailError($Type, $Message, $Data) {
@@ -645,13 +662,7 @@ class Application {
 				$GLOBALS['Page']->PostExecute();
 				$ExecutionTime = microtime(true) - $start;
 
-				$start = microtime(true);
-				$GLOBALS['Page']->Render();
-				$Output = ob_get_contents();
-				ob_clean();
-				$this->Translations->Translate($Output);
-				echo $Output;
-				$RenderTime = microtime(true) - $start;
+				$this->Run_Render();
 			}
 			else {
 				$this->LoadLayout();
@@ -685,13 +696,7 @@ class Application {
 				$GLOBALS['Page']->PostExecute();
 				$ExecutionTime = microtime(true) - $start;
 
-				$start = microtime(true);
-				$GLOBALS['Layout']->Render();
-				$Output = ob_get_contents();
-				ob_clean();
-				$this->Translations->Translate($Output);
-				echo $Output;
-				$RenderTime = microtime(true) - $start;
+				$this->Run_Render();
 			}
 
 			Application::SavePageCache();
@@ -706,6 +711,47 @@ class Application {
 			echo Application::$Cache;
 			$RenderTime = microtime(true) - $start;
 		}
+	}
+
+	private function Run_Render()
+	{
+		if($GLOBALS['Layout'] !== null) {
+			$GLOBALS['Layout']->Render();
+		}
+		else {
+			$GLOBALS['Page']->Render();
+		}
+
+		$Output = ob_get_contents();ob_clean();
+
+		$this->Translations->Translate($Output);
+
+		if(Application::$Translation['ThrowException']) {
+			if(!$this->Translations->IsTranslated($Output, $Translations)) {
+				throw new ConfigException(
+					'Translation(s) missing.',
+					[
+						'Translations' => $Translations,
+					]
+				);
+			}
+		}
+		else if(Application::$Translation['Report']) {
+			if(!$this->Translations->IsTranslated($Output, $Translations)) {
+				foreach($Translations as $Translation) {
+					Application::LogError(
+						'Translation not found',
+						'A translation is missing.',
+						[
+							'Url' => Application::$Url,
+							'Translation' => $Translation,
+						]
+					);
+				}
+			}
+		}
+
+		echo $Output;
 	}
 
 	public function PageNotFound() {
