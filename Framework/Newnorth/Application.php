@@ -619,7 +619,10 @@ class Application {
 		
 		if(Application::$Cache === null) {
 			if(!isset($GLOBALS['Parameters']['Page'][0])) {
-				
+				throw new ConfigException(
+					'Page not set.',
+					[]
+				);
 			}
 			else if(!isset($GLOBALS['Parameters']['Layout'][0])) {
 				$this->LoadPage();
@@ -709,13 +712,6 @@ class Application {
 		header('HTTP/1.0 404 Not Found');
 
 		$GLOBALS['Parameters'] = Application::$ErrorHandling['404'];
-
-		/*throw new ConfigException(
-			'No route found.',
-			[
-				'URL' => Application::$Url,
-			]
-		);*/
 	}
 
 	public function GetTranslation($Key, $DefaultValue = null) {
