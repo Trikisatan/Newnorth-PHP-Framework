@@ -519,9 +519,20 @@ class Application {
 			$Parameters[$Key] = (string)$Value;
 		}
 
-		$Parameters['Page'] = isset($Parameters['Page']) ? $Parameters['Page'] : $GLOBALS['Parameters']['Page'];
+		if(!isset($Parameters['Page'])) {
+			if(isset($GLOBALS['Parameters']['Page'])) {
+				$Parameters['Page'] = $GLOBALS['Parameters']['Page'];
+			}
+		}
 
-		$Locale = isset($Parameters['Locale']) ? $Parameters['Locale'] : $GLOBALS['Parameters']['Locale'];
+		if(!isset($Parameters['Locale'])) {
+			if(isset($GLOBALS['Parameters']['Locale'])) {
+				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+			}
+			else {
+				$Parameters['Locale'] = '';
+			}
+		}
 
 		if(isset($Parameters['Route'][0])) {
 			$Route = Application::$Routes[$Route];
@@ -541,9 +552,9 @@ class Application {
 				$RouteParameters[$Key.'?'] = $Value;
 			}
 
-			$Route->ReversedTranslate($RouteParameters, $Locale);
+			$Route->ReversedTranslate($RouteParameters, $Parameters['Locale']);
 
-			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+			if($Route->ReversedMatch($RouteParameters, $Parameters['Locale'], $Url)) {
 				return $Url;
 			}
 		}
@@ -565,9 +576,9 @@ class Application {
 					$RouteParameters[$Key.'?'] = $Value;
 				}
 
-				$Route->ReversedTranslate($RouteParameters, $Locale);
+				$Route->ReversedTranslate($RouteParameters, $Parameters['Locale']);
 
-				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
+				if($Route->ReversedMatch($RouteParameters, $Parameters['Locale'], $Url)) {
 					return $Url;
 				}
 			}
