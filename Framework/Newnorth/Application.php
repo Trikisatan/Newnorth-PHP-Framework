@@ -266,7 +266,7 @@ class Application {
 		if($Data === false) {
 			return false;
 		}
-		
+
 		$Newline = strpos($Data, "\n");
 		$Time = (int)substr($Data, 0, $Newline);
 		$Data = substr($Data, $Newline + 1);
@@ -321,7 +321,7 @@ class Application {
 			);
 		}
 		catch(Exception $Exception) {
-			
+
 		}
 	}
 
@@ -525,17 +525,19 @@ class Application {
 			}
 		}
 
-		if(!isset($Parameters['Locale'])) {
-			if(isset($GLOBALS['Parameters']['Locale'])) {
-				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
-			}
-			else {
-				$Parameters['Locale'] = '';
-			}
+		if(isset($Parameters['Locale'])) {
+			$Locale = $Parameters['Locale'];
+		}
+		else if(isset($GLOBALS['Parameters']['Locale'])) {
+			$Locale = $GLOBALS['Parameters']['Locale'];
+		}
+		else {
+			$Locale = '';
 		}
 
 		if(isset($Parameters['Route'][0])) {
-			$Route = Application::$Routes[$Route];
+			$Route = Application::$Routes[$Parameters['Route']];
+
 			$RouteParameters = array_slice($Parameters, 0);
 
 			$Route->SetDefaults($RouteParameters);
@@ -552,9 +554,9 @@ class Application {
 				$RouteParameters[$Key.'?'] = $Value;
 			}
 
-			$Route->ReversedTranslate($RouteParameters, $Parameters['Locale']);
+			$Route->ReversedTranslate($RouteParameters, $Locale);
 
-			if($Route->ReversedMatch($RouteParameters, $Parameters['Locale'], $Url)) {
+			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
 				return $Url;
 			}
 		}
@@ -576,9 +578,9 @@ class Application {
 					$RouteParameters[$Key.'?'] = $Value;
 				}
 
-				$Route->ReversedTranslate($RouteParameters, $Parameters['Locale']);
+				$Route->ReversedTranslate($RouteParameters, $Locale);
 
-				if($Route->ReversedMatch($RouteParameters, $Parameters['Locale'], $Url)) {
+				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
 					return $Url;
 				}
 			}
@@ -668,7 +670,7 @@ class Application {
 
 	public function Run() {
 		global $InitializationTime, $LoadTime, $ExecutionTime, $RenderTime;
-		
+
 		if(Application::$Cache === null) {
 			if(!isset($GLOBALS['Parameters']['Page'][0])) {
 				throw new ConfigException(
