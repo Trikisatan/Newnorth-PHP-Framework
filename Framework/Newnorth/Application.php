@@ -505,8 +505,6 @@ class Application {
 
 					$GLOBALS['Parameters'] = $Parameters;
 
-					$GLOBALS['Parameters']['Locale'] = $Locale;
-
 					return true;
 				}
 			}
