@@ -63,9 +63,14 @@ class Controls implements \ArrayAccess {
 	}
 
 	public function Add($Alias, $Name, $Data = array()) {
-		if($Name[0] === '/') {
+		if($Name[0] === '.') {
+			$ClassName = str_replace('/', '\\', substr($Name, 1)).'Control';
+			$Directory = substr($Name, 0, strrpos($Name, '/') + 1);
+			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
+		}
+		else if($Name[0] === '/') {
 			$ClassName = str_replace('/', '\\', $Name).'Control';
-			$Directory = '.'.substr($Name, 0, strrpos($Name, '/') + 1);
+			$Directory = substr($Name, 0, strrpos($Name, '/') + 1);
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}
 		else {
