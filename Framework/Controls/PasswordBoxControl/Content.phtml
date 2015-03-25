@@ -33,9 +33,16 @@ else {
 	if(isset($Control->_Parameters['AutoComplete'])) {
 		?> autocomplete="<?=$Control->_Parameters['AutoComplete']?>"<?
 	}
-	?> Newnorth:Control="PasswordBoxControl" /></div><?
-	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
-	if(isset($Control->_Parameters['Id'])) {
+	if($Control->_Parameters['UseJavaScript']) {
+		?> Newnorth:Control="PasswordBoxControl"<?
+	}
+	?> /></div><?
+	?><div class="ErrorMessages"<?
+	if($Control->_Parameters['UseJavaScript']) {
+		?> Newnorth:Control="ErrorMessagesControl"<?
+	}
+	?>></div><?
+	if($Control->_Parameters['UseJavaScript'] && isset($Control->_Parameters['Id'])) {
 		?><script language="javascript"><?
 			?>window.addEventListener(<?
 				?>"load",<?

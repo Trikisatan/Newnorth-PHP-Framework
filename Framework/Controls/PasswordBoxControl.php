@@ -22,6 +22,8 @@ class PasswordBoxControl extends Control {
 	/* Methods */
 
 	public function ParseParameters() {
+		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] === true : false;
+
 		if(isset($this->_Parameters['Validators'])) {
 			$this->ParseParameters_Validators($this->_Parameters['Validators']);
 		}

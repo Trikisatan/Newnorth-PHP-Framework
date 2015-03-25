@@ -39,9 +39,16 @@ else {
 	if($Control->_Parameters['IsReadOnly']) {
 		?> readonly="readonly"<?
 	}
-	?> Newnorth:Control="TextBoxControl" /></div><?
-	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
-	if(isset($Control->_Parameters['Id'])) {
+	if($Control->_Parameters['UseJavaScript']) {
+		?> Newnorth:Control="TextBoxControl"<?
+	}
+	?> /></div><?
+	?><div class="ErrorMessages"<?
+	if($Control->_Parameters['UseJavaScript']) {
+		?> Newnorth:Control="ErrorMessagesControl"<?
+	}
+	?>></div><?
+	if($Control->_Parameters['UseJavaScript'] && isset($Control->_Parameters['Id'])) {
 		?><script language="javascript"><?
 			?>window.addEventListener(<?
 				?>"load",<?
