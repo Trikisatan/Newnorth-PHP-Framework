@@ -110,8 +110,21 @@ class Route {
 	public function ReversedMatch($Parameters, $Locale, &$Url) {
 		$Url = $this->ReversablePattern;
 
-		foreach($Parameters as $Part => $Value) {
-			$Url = preg_replace('/\/(?:\+|\*)'.$Part.'\//', '/'.$Value.'/', $Url);
+		foreach($Parameters as $ParameterName => $ParameterValue) {
+			if(substr($ParameterName, -1) === '?') {
+				$ParameterName = substr($ParameterName, 0, -1);
+			}
+
+			if(isset($this->Translations[$Locale][$ParameterName][$ParameterValue])) {
+				$ParameterValue = $this->Translations[$Locale][$ParameterName][$ParameterValue];
+			}
+
+			if(isset($ParameterValue[0])) {
+				$Url = preg_replace('/\/(?:\+|\*)'.$ParameterName.'\//', '/'.$ParameterValue.'/', $Url);
+			}
+			else {
+				$Url = preg_replace('/\/\*'.$ParameterName.'\//', '/', $Url);
+			}
 		}
 
 		$Url = preg_replace('/\/(?:\+|\*)Locale\//', '/'.$Locale.'/', $Url);
@@ -119,28 +132,33 @@ class Route {
 		$Url = preg_replace('/\/(?:\*)(?:\/|$)/', '/', $Url);
 
 		if($this->Match($Url, $Match)) {
-			$this->SetDefaults($Match);
+			if($this->Translate($Match, $Locale)) {
+				$this->SetDefaults($Match);
 
-			foreach($Parameters as $Key => $Value) {
-				$IsRequired = true;
+				foreach($Parameters as $Key => $Value) {
+					$IsRequired = true;
 
-				if(substr($Key, -1) === '?') {
-					$Key = substr($Key, 0, -1);
+					if(substr($Key, -1) === '?') {
+						$Key = substr($Key, 0, -1);
 
-					$IsRequired = false;
-				}
+						$IsRequired = false;
+					}
 
-				if(isset($Match[$Key])) {
-					if($Match[$Key] !== $Value) {
+					if(isset($Match[$Key])) {
+						if($Match[$Key] !== $Value) {
+							return false;
+						}
+					}
+					else if($IsRequired) {
 						return false;
 					}
 				}
-				else if($IsRequired) {
-					return false;
-				}
-			}
 
-			return true;
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else {
 			return false;

@@ -556,8 +556,6 @@ class Application {
 				$RouteParameters[$Key.'?'] = $Value;
 			}
 
-			$Route->ReversedTranslate($RouteParameters, $Locale);
-
 			if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
 				return $Url;
 			}
@@ -579,8 +577,6 @@ class Application {
 
 					$RouteParameters[$Key.'?'] = $Value;
 				}
-
-				$Route->ReversedTranslate($RouteParameters, $Locale);
 
 				if($Route->ReversedMatch($RouteParameters, $Locale, $Url)) {
 					return $Url;
