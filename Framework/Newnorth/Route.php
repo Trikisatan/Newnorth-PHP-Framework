@@ -48,55 +48,47 @@ class Route {
 		return $this->Name;
 	}
 
-	public function Match($Subject, &$Match) {
-		if(0 < preg_match($this->Pattern, $Subject, $Match)) {
-			$this->SetDefaults($Match);
-			return true;
-		}
-
-		return false;
+	public function Match($Url, &$Parameters) {
+		return 0 < preg_match($this->Pattern, $Url, $Parameters);
 	}
 
-	public function SetDefaults(&$Data) {
-		foreach($this->Defaults as $Key => $Value) {
-			if(!isset($Data[$Key])) {
-				$Data[$Key] = $Value;
+	public function SetDefaults(&$Parameters) {
+		foreach($this->Defaults as $ParameterName => $ParameterValue) {
+			if(!isset($Parameters[$ParameterName])) {
+				$Parameters[$ParameterName] = $ParameterValue;
 			}
 		}
 	}
 
-	public function Translate(&$Data, $Locale) {
-		// If there's no translations, no translation is needed.
-		if(count($this->Translations) == 0) {
-			return true;
-		}
-		// If there's translations, translation is needed.
-		else if(!isset($this->Translations[$Locale])) {
-			return false;
-		}
-		else {
-			foreach($this->Translations[$Locale] as $Variable => $Translations) {
-				if(!isset($Data[$Variable])) {
-					continue;
-				}
+	public function Translate(&$Parameters, $Locale) {
+		if(isset($this->Translations[$Locale])) {
+			foreach($this->Translations[$Locale] as $ParameterName => $Translations) {
+				$ParameterValue = isset($Parameters[$ParameterName]) ? $Parameters[$ParameterName] : '';
+
+				$IsRequired = isset($Parameters[$ParameterName]);
 
 				$IsUpdated = false;
 
-				foreach($Translations as $Translation => $Value) {
-					if($Data[$Variable] === $Value) {
-						$Data[$Variable] = $Translation;
+				foreach($Translations as $UpdatedValue => $OriginalValue) {
+					if($ParameterValue === $OriginalValue) {
+						$ParameterValue = $UpdatedValue;
+
 						$IsUpdated = true;
+
 						break;
 					}
 				}
 
-				if(!$IsUpdated) {
+				if($IsUpdated) {
+					$Parameters[$ParameterName] = $ParameterValue;
+				}
+				else if($IsRequired) {
 					return false;
 				}
 			}
-
-			return true;
 		}
+
+		return true;
 	}
 
 	public function ReversedTranslate(&$Data, $Locale) {
@@ -126,29 +118,33 @@ class Route {
 		$Url = preg_replace('/\/(?:\*)(?:[^\/]+)(?:\/|$)/', '/', $Url);
 		$Url = preg_replace('/\/(?:\*)(?:\/|$)/', '/', $Url);
 
-		if(!$this->Match($Url, $Match)) {
-			return false;
-		}
+		if($this->Match($Url, $Match)) {
+			$this->SetDefaults($Match);
 
-		foreach($Parameters as $Key => $Value) {
-			$IsRequired = true;
+			foreach($Parameters as $Key => $Value) {
+				$IsRequired = true;
 
-			if(substr($Key, -1) === '?') {
-				$Key = substr($Key, 0, -1);
-				$IsRequired = false;
-			}
+				if(substr($Key, -1) === '?') {
+					$Key = substr($Key, 0, -1);
 
-			if(isset($Match[$Key])) {
-				if($Match[$Key] !== $Value) {
+					$IsRequired = false;
+				}
+
+				if(isset($Match[$Key])) {
+					if($Match[$Key] !== $Value) {
+						return false;
+					}
+				}
+				else if($IsRequired) {
 					return false;
 				}
 			}
-			else if($IsRequired) {
-				return false;
-			}
-		}
 
-		return true;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
 ?>

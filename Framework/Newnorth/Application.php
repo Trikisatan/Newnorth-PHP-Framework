@@ -501,6 +501,8 @@ class Application {
 				}
 
 				if($Route->Translate($Parameters, $Locale)) {
+					$Route->SetDefaults($Parameters);
+
 					$GLOBALS['Parameters'] = $Parameters;
 
 					$GLOBALS['Parameters']['Locale'] = $Locale;
@@ -750,8 +752,7 @@ class Application {
 		}
 	}
 
-	private function Run_Render()
-	{
+	private function Run_Render() {
 		if($GLOBALS['Layout'] !== null) {
 			$GLOBALS['Layout']->Render();
 		}
