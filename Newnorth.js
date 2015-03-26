@@ -51,6 +51,18 @@ Newnorth.Controls.Find = function(pvParent, pvType) {
 
 Newnorth.Controls.Control = function() {
 	this.ivIsControl = true;
+
+	this.FindChildNodeByAttributeName = function(pvAttributeName) {
+		var elements = this.getElementsByTagName("*");
+
+		for(var i = 0; i < elements.length; ++i) {
+			if(elements[i].getAttribute(pvAttributeName) !== null) {
+				return elements[i];
+			}
+		}
+
+		return null;
+	}
 };
 
 Newnorth.Controls.ErrorMessagesControl = function() {
@@ -69,18 +81,17 @@ Newnorth.Controls.ErrorMessagesControl = function() {
 	};
 
 	this.AddErrorMessage = function(pvText) {
-		if(this.HasErrorMessage(pvText)) {
-			return;
+		if(!this.HasErrorMessage(pvText)) {
+			var element = document.createElement("p");
+
+			element.innerHTML = pvText;
+
+			this.appendChild(element);
+
+			this.style.display = "block";
+
+			this.ivErrorMessages.push({ivElement: element, ivText: pvText});
 		}
-
-		var element = document.createElement("p");
-		element.innerHTML = pvText;
-
-		this.appendChild(element);
-
-		this.style.display = "block";
-
-		this.ivErrorMessages.push({ivElement: element, ivText: pvText});
 	};
 
 	this.RemoveErrorMessage = function(pvText) {
@@ -190,7 +201,7 @@ Newnorth.Controls.FormControl = function() {
 
 		if(this.ivIsValid !== isValid) {
 			this.ivIsValid = isValid;
-			
+
 			if(this.ivIsValid) {
 				this.ivOnEnterValidStateEvent.Invoke(this, null);
 			}
@@ -484,6 +495,74 @@ Newnorth.Controls.CheckBoxControl = function() {
 	this.addEventListener("keyup", isIsCheckedChangedMethod);
 
 	this.ivForm.AddControl(this);
+};
+
+Newnorth.Controls.CollapsableSectionControl = function() {
+	Newnorth.Controls.Control.call(this);
+
+	this.ivIsExpanded = true;
+
+	this.ivToggleElement = this.FindChildNodeByAttributeName("Newnorth:ToggleElement");
+
+	this.ivToggleElement.ivCollapsableSectionControl = this;
+
+	this.ivToggleElement.addEventListener("click", function(){this.ivCollapsableSectionControl.Toggle()});
+
+	this.ivContentsElement = this.FindChildNodeByAttributeName("Newnorth:ContentsElement");
+
+	this.Expand = function() {
+		this.className = this.className.replace(/(^| )CollapsedSection( |$)/, " ").trim() + " ExpandedSection";
+
+		this.ivContentsElement.style.height = this.ivContentsElement.scrollHeight + "px";
+	};
+
+	this.Collapse = function() {
+		this.className = this.className.replace(/(^| )ExpandedSection( |$)/, " ").trim() + " CollapsedSection";
+
+		this.ivContentsElement.style.height = "0px";
+	};
+
+	this.Toggle = function() {
+		if(this.ivIsExpanded) {
+			this.ivIsExpanded = false;
+
+			this.Collapse();
+		}
+		else {
+			this.ivIsExpanded = true;
+
+			this.Expand();
+		}
+	};
+
+	this.Refresh = function() {
+		if(this.ivIsExpanded) {
+			var height = 0;
+
+			for(var i = 0; i < this.ivContentsElement.childNodes.length; ++i) {
+				var child = this.ivContentsElement.childNodes[i];
+
+				if(child.offsetTop !== undefined && child.offsetHeight !== undefined) {
+					height = Math.max(height, child.offsetTop + child.offsetHeight);
+				}
+			}
+
+			this.ivContentsElement.style.height = height + "px";
+		}
+	};
+
+	if(this.ivIsExpanded) {
+		this.Expand();
+	}
+	else {
+		this.Collapse();
+	}
+
+	var observer = new MutationObserver(function(){this.ivCollapsableSectionControl.Refresh()});
+
+	observer.ivCollapsableSectionControl = this;
+
+	observer.observe(this.ivContentsElement, {childList: true, subtree: true});
 };
 
 window.addEventListener(
