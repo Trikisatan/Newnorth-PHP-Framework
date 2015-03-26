@@ -19,7 +19,7 @@ class DropDownListControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 		if(isset($this->_Parameters['Validators'])) {

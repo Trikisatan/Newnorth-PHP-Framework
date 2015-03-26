@@ -18,7 +18,7 @@ class TokenControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 		$this->_Parameters['Name'] = isset($this->_Parameters['Name']) ? $this->_Parameters['Name'] : 'Token';

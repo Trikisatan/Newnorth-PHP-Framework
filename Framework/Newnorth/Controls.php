@@ -2,18 +2,28 @@
 namespace Framework\Newnorth;
 
 class Controls implements \ArrayAccess {
-	/* Variables */
+	/* Instance variables */
+
 	private $Owner;
+
+	private $Namespace;
+
 	private $Directory;
+
 	private $Items = array();
 
 	/* Magic methods */
-	public function __construct($Owner, $Directory) {
+
+	public function __construct($Owner, $Directory, $Namespace) {
 		$this->Owner = $Owner;
+
 		$this->Directory = $Directory;
+
+		$this->Namespace = $Namespace;
 
 		$this->TryLoadIniFile();
 	}
+
 	public function __toString() {
 		return $this->Directory.'Controls.ini';
 	}
@@ -36,7 +46,7 @@ class Controls implements \ArrayAccess {
 		return $this->Items[$Key];
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	private function TryLoadIniFile() {
 		$FilePath = $this->Directory.'Controls.ini';
@@ -64,18 +74,24 @@ class Controls implements \ArrayAccess {
 
 	public function Add($Alias, $Name, $Data = array()) {
 		if($Name[0] === '.') {
-			$ClassName = str_replace('/', '\\', substr($Name, 1)).'Control';
+			$ClassName = str_replace('/', '\\', trim($Name, "./")).'Control';
+
 			$Directory = substr($Name, 0, strrpos($Name, '/') + 1);
+
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}
 		else if($Name[0] === '/') {
 			$ClassName = str_replace('/', '\\', $Name).'Control';
-			$Directory = substr($Name, 0, strrpos($Name, '/') + 1);
+
+			$Directory = '/'.Application::$Files['Controls'].substr($Name, 1, strrpos($Name, '/'));
+
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}
 		else {
-			$ClassName = str_replace('/', '\\', $this->Directory.$Name).'Control';
+			$ClassName = $this->Namespace.$Name.'Control';
+
 			$Directory = './'.$this->Directory;
+
 			$Name = $Name.'Control';
 		}
 
@@ -95,7 +111,7 @@ class Controls implements \ArrayAccess {
 			}
 		}
 
-		$Control = new $ClassName($this->Owner, $Directory, $Name, $Data);
+		$Control = new $ClassName($this->Owner, $Directory, $this->Namespace, $Name, $Data);
 
 		return $this->Items[$Alias] = $Control;
 	}

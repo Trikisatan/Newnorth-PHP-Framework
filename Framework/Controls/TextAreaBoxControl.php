@@ -19,7 +19,7 @@ class TextAreaBoxControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] === true : false;

@@ -18,7 +18,7 @@ class SubmitControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 

@@ -4,7 +4,7 @@ namespace Framework\MySQL;
 use \Framework\Newnorth\DbResult;
 
 class Result extends DbResult {
-	/* Variables */
+	/* Instance variables */
 
 	private $Base;
 
@@ -23,7 +23,7 @@ class Result extends DbResult {
 		return '';
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function Fetch() {
 		return ($this->Row = $this->Base->fetch_row()) !== null;

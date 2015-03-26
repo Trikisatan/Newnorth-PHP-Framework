@@ -2,17 +2,17 @@
 namespace Framework\Newnorth;
 
 class Route {
-	/* Variables */
+	/* Instance variables */
 
-	private $Name;
+	public $Name;
 
-	private $Pattern;
+	public $Pattern;
 
-	private $ReversablePattern;
+	public $ReversablePattern;
 
-	private $Defaults;
+	public $Defaults;
 
-	private $Translations;
+	public $Translations;
 
 	/* Magic methods */
 
@@ -42,7 +42,7 @@ class Route {
 		return $this->Name;
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function GetName() {
 		return $this->Name;

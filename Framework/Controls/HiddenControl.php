@@ -18,7 +18,7 @@ class HiddenControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 		

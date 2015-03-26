@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 abstract class DataManager {
-	/* Variables */
+	/* Instance variables */
 
 	public $DataType = null;
 
@@ -14,7 +14,7 @@ abstract class DataManager {
 		return '';
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	protected function _Insert(DbInsertQuery $Query) {
 		$Result = $this->Connection->Insert($Query);

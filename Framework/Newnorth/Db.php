@@ -5,11 +5,11 @@ define('DB_ASC', 1);
 define('DB_DESC', 2);
 
 abstract class DbConnection {
-	/* Variables */
+	/* Instance variables */
 
 	public $IsConnected = false;
 
-	/* Methods */
+	/* Instance methods */
 
 	public abstract function Connect();
 
@@ -31,13 +31,13 @@ abstract class DbConnection {
 }
 
 abstract class DbResult {
-	/* Variables */
+	/* Instance variables */
 
 	public $Rows;
 
 	public $Row;
 
-	/* Methods */
+	/* Instance methods */
 
 	public abstract function Fetch();
 
@@ -63,11 +63,11 @@ abstract class DbCondition {
 }
 
 abstract class DbConditionGroup extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $Conditions = [];
 
-	/* Methods */
+	/* Instance methods */
 
 	public function Add(DbCondition $Condition) {
 		$this->Conditions[] = $Condition;
@@ -119,7 +119,7 @@ class DbOr extends DbConditionGroup {
 }
 
 class DbEqualTo extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -135,7 +135,7 @@ class DbEqualTo extends DbCondition {
 }
 
 class DbLike extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -151,7 +151,7 @@ class DbLike extends DbCondition {
 }
 
 class DbContains extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -167,7 +167,7 @@ class DbContains extends DbCondition {
 }
 
 class DbStartsWith extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -183,7 +183,7 @@ class DbStartsWith extends DbCondition {
 }
 
 class DbEndsWith extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -199,7 +199,7 @@ class DbEndsWith extends DbCondition {
 }
 
 class DbGreaterThan extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -215,7 +215,7 @@ class DbGreaterThan extends DbCondition {
 }
 
 class DbLessThan extends DbCondition {
-	/* Variables */
+	/* Instance variables */
 
 	public $A;
 
@@ -304,7 +304,7 @@ class DbExpression {
 		}
 	}
 
-	/* Variables */
+	/* Instance variables */
 
 	public $Value;
 
@@ -364,7 +364,7 @@ class DbString extends DbExpression {
 }
 
 class DbSort {
-	/* Variables */
+	/* Instance variables */
 
 	public $Expression;
 
@@ -380,7 +380,7 @@ class DbSort {
 }
 
 class DbInsertQuery {
-	/* Variables */
+	/* Instance variables */
 
 	public $Source = null;
 
@@ -388,7 +388,7 @@ class DbInsertQuery {
 
 	public $Values = [];
 
-	/* Methods */
+	/* Instance methods */
 
 	public function AddColumn($Expression) {
 		if($Expression instanceof DbColumn) {
@@ -410,7 +410,7 @@ class DbInsertQuery {
 }
 
 class DbUpdateQuery {
-	/* Variables */
+	/* Instance variables */
 
 	public $Sources = [];
 
@@ -418,7 +418,7 @@ class DbUpdateQuery {
 
 	public $Conditions = null;
 
-	/* Methods */
+	/* Instance methods */
 
 	public function AddSource($Expression, $Alias = null) {
 		if($Expression instanceof DbUpdateSource) {
@@ -443,7 +443,7 @@ class DbUpdateQuery {
 }
 
 class DbUpdateSource {
-	/* Variables */
+	/* Instance variables */
 
 	public $Reference;
 
@@ -459,7 +459,7 @@ class DbUpdateSource {
 }
 
 class DbUpdateChange {
-	/* Variables */
+	/* Instance variables */
 
 	public $Column;
 
@@ -475,7 +475,7 @@ class DbUpdateChange {
 }
 
 class DbDeleteQuery {
-	/* Variables */
+	/* Instance variables */
 
 	public $Targets = [];
 
@@ -483,7 +483,7 @@ class DbDeleteQuery {
 
 	public $Conditions = null;
 
-	/* Methods */
+	/* Instance methods */
 
 	public function AddTarget($Target) {
 		return $this->Targets[] = $Target;
@@ -500,7 +500,7 @@ class DbDeleteQuery {
 }
 
 class DbDeleteSource {
-	/* Variables */
+	/* Instance variables */
 
 	public $Reference;
 
@@ -516,7 +516,7 @@ class DbDeleteSource {
 }
 
 class DbSelectQuery {
-	/* Variables */
+	/* Instance variables */
 
 	public $Columns = [];
 
@@ -530,7 +530,7 @@ class DbSelectQuery {
 
 	public $FirstRow = 0;
 
-	/* Methods */
+	/* Instance methods */
 
 	public function AddColumn($Expression, $Alias = null) {
 		if($Expression instanceof DbSelectColumn) {
@@ -566,7 +566,7 @@ class DbSelectQuery {
 }
 
 class DbSelectColumn {
-	/* Variables */
+	/* Instance variables */
 
 	public $Expression;
 
@@ -582,7 +582,7 @@ class DbSelectColumn {
 }
 
 class DbSelectSource {
-	/* Variables */
+	/* Instance variables */
 
 	public $Reference;
 

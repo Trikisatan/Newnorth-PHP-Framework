@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 class EMail {
-	/* Variables */
+	/* Instance variables */
 
 	private $From = null;
 
@@ -14,7 +14,7 @@ class EMail {
 
 	private $Html = null;
 
-	/* Methods */
+	/* Instance methods */
 
 	public function SetFrom($From) {
 		$this->From = $From;

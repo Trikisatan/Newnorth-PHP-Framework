@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 class Translations implements \ArrayAccess {
-	/* Variables */
+	/* Instance variables */
 
 	private $Owner;
 
@@ -68,7 +68,7 @@ class Translations implements \ArrayAccess {
 		return $this->Items[$Key];
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	private function TryLoadIniFile() {
 		if(isset($GLOBALS['Parameters']['Locale'][0])) {
@@ -122,7 +122,7 @@ class Translations implements \ArrayAccess {
 	public function Translate(&$Contents) {
 		$Offset = 0;
 
-		while(0 < preg_match('/%([a-zA-Z0-9_\/]+?)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+		while(0 < preg_match('/%([a-zA-Z0-9_\\/\\\\]+?)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
 			$Key = $Match[1][0];
 
 			if(isset($this->Items[$Key])) {
@@ -139,7 +139,7 @@ class Translations implements \ArrayAccess {
 
 		$Offset = 0;
 
-		while(0 < preg_match('/%([a-zA-Z0-9_\/]+?)\("(.*?)"\)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
+		while(0 < preg_match('/%([a-zA-Z0-9_\\/\\\\]+?)\("(.*?)"\)%/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
 			$Key = $Match[1][0];
 
 			if(isset($this->Items[$Key])) {
@@ -162,7 +162,7 @@ class Translations implements \ArrayAccess {
 	}
 
 	public function IsTranslated($Contents, &$Translations) {
-		if(0 < preg_match_all('/%([a-zA-Z0-9_\/]+?)(?:\("(.*?)"\))?%/', $Contents, $Matches)) {
+		if(0 < preg_match_all('/%([a-zA-Z0-9_\\/\\\\]+?)(?:\("(.*?)"\))?%/', $Contents, $Matches)) {
 			$Translations = $Matches[0];
 
 			return false;

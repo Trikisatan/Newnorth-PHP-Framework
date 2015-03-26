@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 class Action {
-	/* Variables */
+	/* Instance variables */
 
 	private $Owner;
 
@@ -37,7 +37,7 @@ class Action {
 		return $this->Directory.$this->Name;
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function Load() {
 		$FilePath = $this->Directory.$this->Name.'Action.ini';

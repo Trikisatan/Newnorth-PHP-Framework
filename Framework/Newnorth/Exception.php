@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 class Exception extends \Exception {
-	/* Variables */
+	/* Instance variables */
 
 	public $Type;
 

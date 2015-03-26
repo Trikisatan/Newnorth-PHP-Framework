@@ -6,9 +6,11 @@ abstract class Layout {
 
 	public static $Instance = null;
 
-	/* Variables */
+	/* Instance variables */
 
 	public $_Directory;
+
+	public $_Namespace;
 
 	public $_Name;
 
@@ -22,7 +24,7 @@ abstract class Layout {
 
 	/* Magic methods */
 
-	public function __construct($Directory, $Name) {
+	public function __construct($Directory, $Namespace, $Name) {
 		if(Layout::$Instance !== null) {
 			throw new ConfigException('Layout has already been initialized.');
 		}
@@ -30,9 +32,15 @@ abstract class Layout {
 		Layout::$Instance = $this;
 
 		$this->_Directory = Application::$Files['Layouts'].$Directory;
+
+		$this->_Namespace = $Namespace;
+
 		$this->_Name = $Name;
+
 		$this->_Translations = new Translations($this, $Directory.$Name.'/');
-		$this->_Controls = new Controls($this, Application::$Files['Layouts'].$Directory.$Name.'/');
+
+		$this->_Controls = new Controls($this, Application::$Files['Layouts'].$Directory.$Name.'/', $Namespace.$Name.'\\');
+
 		$this->_Actions = new Actions($this, Application::$Files['Layouts'].$Directory.$Name.'/');
 	}
 
@@ -80,7 +88,7 @@ abstract class Layout {
 		call_user_func($this->_Renderer.'::Render', $this, null);
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function GetTranslation($Key, $DefaultValue = null) {
 		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;

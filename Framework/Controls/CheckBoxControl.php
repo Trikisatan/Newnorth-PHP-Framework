@@ -19,7 +19,7 @@ class CheckBoxControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 		$this->_Parameters['IsChecked'] = isset($this->_Parameters['IsChecked']) ? $this->_Parameters['IsChecked'] === true || $this->_Parameters['IsChecked'] === '1' : false;

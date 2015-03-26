@@ -16,6 +16,7 @@ class Application {
 		'EMailTemplates' => '',
 		'Layouts' => '',
 		'Pages' => '',
+		'Controls' => '',
 		'Translations' => '',
 	];
 
@@ -112,6 +113,8 @@ class Application {
 		Application::$Files['Layouts'] = isset($Section['Layouts']) ? $Section['Layouts'] : Application::$Files['Layouts'];
 
 		Application::$Files['Pages'] = isset($Section['Pages']) ? $Section['Pages'] : Application::$Files['Pages'];
+
+		Application::$Files['Controls'] = isset($Section['Controls']) ? $Section['Controls'] : Application::$Files['Controls'];
 
 		Application::$Files['Translations'] = isset($Section['Translations']) ? $Section['Translations'] : Application::$Files['Translations'];
 	}
@@ -407,7 +410,7 @@ class Application {
 		return '<br /><b>'.$Section.':</b> '.htmlspecialchars($Data);
 	}
 
-	/* Variables */
+	/* Instance variables */
 
 	public $Translations;
 
@@ -459,7 +462,7 @@ class Application {
 		return '';
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	private function LoadRoutes($FilePath) {
 		$FilePath = $FilePath.'.ini';
@@ -493,6 +496,9 @@ class Application {
 				if(isset($Parameters['Locale'][0])) {
 					$Locale = $Parameters['Locale'];
 				}
+				else if(isset($Route->Defaults['Locale'][0])) {
+					$Locale = $Route->Defaults['Locale'];
+				}
 				else if(isset($_SESSION['Locale'][0])) {
 					$Locale = $_SESSION['Locale'];
 				}
@@ -504,6 +510,10 @@ class Application {
 					$Route->SetDefaults($Parameters);
 
 					$GLOBALS['Parameters'] = $Parameters;
+
+					if(!isset($GLOBALS['Parameters']['Locale'])) {
+						$GLOBALS['Parameters']['Locale'] = $Locale;
+					}
 
 					return true;
 				}
@@ -611,20 +621,19 @@ class Application {
 			}
 		}
 
+		$Name = strrpos($FullName, '/');
+
+		$Name = $Name === false ? $FullName : substr($FullName, $Name + 1);
+
 		$Directory = strrpos($FullName, '/');
 
-		if($Directory === false) {
-			$GLOBALS['Layout'] = new $ClassName(
-				'',
-				$FullName
-			);
-		}
-		else {
-			$GLOBALS['Layout'] = new $ClassName(
-				substr($FullName, 0, $Directory + 1),
-				substr($FullName, $Directory + 1)
-			);
-		}
+		$Directory = $Directory === false ? '' : substr($FullName, 0, $Directory + 1);
+
+		$Namespace = strrpos($ClassName, '\\');
+
+		$Namespace = $Namespace === false ? '\\' : substr($ClassName, 0, $Namespace + 1);
+
+		$GLOBALS['Layout'] = new $ClassName($Directory, $Namespace, $Name);
 	}
 
 	private function LoadPage() {
@@ -648,20 +657,19 @@ class Application {
 			}
 		}
 
+		$Name = strrpos($FullName, '/');
+
+		$Name = $Name === false ? $FullName : substr($FullName, $Name + 1);
+
 		$Directory = strrpos($FullName, '/');
 
-		if($Directory === false) {
-			$GLOBALS['Page'] = new $ClassName(
-				'',
-				$FullName
-			);
-		}
-		else {
-			$GLOBALS['Page'] = new $ClassName(
-				substr($FullName, 0, $Directory + 1),
-				substr($FullName, $Directory + 1)
-			);
-		}
+		$Directory = $Directory === false ? '' : substr($FullName, 0, $Directory + 1);
+
+		$Namespace = strrpos($ClassName, '\\');
+
+		$Namespace = $Namespace === false ? '\\' : substr($ClassName, 0, $Namespace + 1);
+
+		$GLOBALS['Page'] = new $ClassName($Directory, $Namespace, $Name);
 	}
 
 	public function Run() {

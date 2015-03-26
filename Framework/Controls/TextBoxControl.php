@@ -19,14 +19,14 @@ class TextBoxControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
-		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] === true : false;
+		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] == true : false;
 
-		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] === true : false;
+		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] == true : false;
 
-		$this->_Parameters['IsReadOnly'] = isset($this->_Parameters['IsReadOnly']) ? $this->_Parameters['IsReadOnly'] === true : false;
+		$this->_Parameters['IsReadOnly'] = isset($this->_Parameters['IsReadOnly']) ? $this->_Parameters['IsReadOnly'] == true : false;
 
 		if(isset($this->_Parameters['Validators'])) {
 			$this->ParseParameters_Validators($this->_Parameters['Validators']);

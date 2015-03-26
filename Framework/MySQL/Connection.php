@@ -27,7 +27,7 @@ use \Framework\Newnorth\DbDeleteQuery;
 use \Framework\Newnorth\DbSelectQuery;
 
 class Connection extends DbConnection {
-	/* Variables */
+	/* Instance variables */
 
 	private $Data;
 
@@ -43,7 +43,7 @@ class Connection extends DbConnection {
 		return '';
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function Connect() {
 		$this->Base = @new \mysqli(

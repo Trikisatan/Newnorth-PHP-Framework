@@ -2,11 +2,13 @@
 namespace Framework\Newnorth;
 
 abstract class Control {
-	/* Variables */
+	/* Instance variables */
 
 	public $_Parent;
 
 	public $_Directory;
+
+	public $_Namespace;
 
 	public $_Name;
 
@@ -22,13 +24,21 @@ abstract class Control {
 
 	/* Magic methods */
 
-	public function __construct($Parent, $Directory, $Name, $Parameters) {
+	public function __construct($Parent, $Directory, $Namespace, $Name, $Parameters) {
 		$this->_Parent = $Parent;
+
 		$this->_Directory = $Directory;
+
+		$this->_Namespace = $Namespace;
+
 		$this->_Name = $Name;
+
 		$this->_Parameters = $Parameters;
+
 		$this->_Translations = new Translations($this, $Directory.$Name.'/');
-		$this->_Controls = new Controls($this, $Directory.$Name.'/');
+
+		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
+
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');
 
 		$this->ParseParameters();
@@ -78,7 +88,7 @@ abstract class Control {
 		call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder);
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public abstract function ParseParameters();
 

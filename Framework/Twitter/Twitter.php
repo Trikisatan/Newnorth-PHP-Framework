@@ -20,7 +20,7 @@ class Twitter {
 
 	private static $TokenSecret = '';
 
-	/* Methods */
+	/* Instance methods */
 
 	private static function LoadConfig() {
 		if(Twitter::$IsConfigLoaded) {

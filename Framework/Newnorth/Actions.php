@@ -2,7 +2,7 @@
 namespace Framework\Newnorth;
 
 class Actions implements \ArrayAccess {
-	/* Variables */
+	/* Instance variables */
 
 	private $Owner;
 
@@ -41,7 +41,7 @@ class Actions implements \ArrayAccess {
 		return $this->Items[$Key];
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	private function TryLoadIniFile() {
 		$FilePath = $this->Directory.'Actions.ini';

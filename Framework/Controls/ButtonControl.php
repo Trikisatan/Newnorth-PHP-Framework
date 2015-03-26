@@ -18,7 +18,7 @@ class ButtonControl extends Control {
 
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function ParseParameters() {
 

@@ -6,9 +6,11 @@ abstract class Page {
 
 	public static $Instance = null;
 
-	/* Variables */
+	/* Instance variables */
 
 	public $_Directory;
+
+	public $_Namespace;
 
 	public $_Name;
 
@@ -22,7 +24,7 @@ abstract class Page {
 
 	/* Magic methods */
 
-	public function __construct($Directory, $Name) {
+	public function __construct($Directory, $Namespace, $Name) {
 		if(Page::$Instance !== null) {
 			throw new ConfigException('Page has already been initialized.');
 		}
@@ -30,9 +32,15 @@ abstract class Page {
 		Page::$Instance = $this;
 
 		$this->_Directory = Application::$Files['Pages'].$Directory;
+
+		$this->_Namespace = $Namespace;
+
 		$this->_Name = $Name;
+
 		$this->_Translations = new Translations($this, $Directory.$Name.'/');
-		$this->_Controls = new Controls($this, Application::$Files['Pages'].$Directory.$Name.'/');
+
+		$this->_Controls = new Controls($this, Application::$Files['Pages'].$Directory.$Name.'/', $Namespace.$Name.'\\');
+
 		$this->_Actions = new Actions($this, Application::$Files['Pages'].$Directory.$Name.'/');
 	}
 
@@ -80,7 +88,7 @@ abstract class Page {
 		call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder);
 	}
 
-	/* Methods */
+	/* Instance methods */
 
 	public function GetTranslation($Key, $DefaultValue = null) {
 		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;
