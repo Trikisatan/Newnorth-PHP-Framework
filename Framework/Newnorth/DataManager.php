@@ -16,7 +16,7 @@ abstract class DataManager {
 
 	/* Instance methods */
 
-	protected function _Insert(DbInsertQuery $Query) {
+	public function InsertByQuery(DbInsertQuery $Query) {
 		$Result = $this->Connection->Insert($Query);
 
 		if($Result) {
@@ -27,7 +27,7 @@ abstract class DataManager {
 		}
 	}
 
-	protected function _Delete(DbDeleteQuery $Query) {
+	public function DeleteByQuery(DbDeleteQuery $Query) {
 		$Result = $this->Connection->Delete($Query);
 
 		if($Result) {
@@ -38,7 +38,7 @@ abstract class DataManager {
 		}
 	}
 
-	protected function _Find(DbSelectQuery $Query) {
+	public function FindByQuery(DbSelectQuery $Query) {
 		$Result = $this->Connection->Find($Query);
 
 		if($Result === false) {
@@ -52,7 +52,7 @@ abstract class DataManager {
 		return null;
 	}
 
-	protected function _FindAll(DbSelectQuery $Query) {
+	public function FindAllByQuery(DbSelectQuery $Query) {
 		$Result = $this->Connection->FindAll($Query);
 
 		if($Result === false) {
@@ -68,7 +68,7 @@ abstract class DataManager {
 		return $Items;
 	}
 
-	protected function _Count(DbSelectQuery $Query) {
+	public function CountByQuery(DbSelectQuery $Query) {
 		return $this->Connection->Count($Query);
 	}
 }
