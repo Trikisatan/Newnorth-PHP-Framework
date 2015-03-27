@@ -441,7 +441,7 @@ class Connection extends DbConnection {
 		}
 
 		for($I = 1; $I < $Count; ++$I) {
-			$Sql = ', `'.$Sources[$I]->Reference.'`';
+			$Sql .= ', `'.$Sources[$I]->Reference.'`';
 
 			if($Sources[$I]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
