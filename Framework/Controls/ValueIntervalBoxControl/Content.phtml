@@ -1,0 +1,88 @@
+<div<?
+if(isset($Control->_Parameters['CSS'])) {
+	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+}
+else {
+	?> class="Input"<?
+}
+if($Control->_Parameters['UseJavaScript']) {
+	?> Newnorth:Control="ValueIntervalBoxControl"<?
+}
+?>><?
+	if(isset($Control->_Parameters['Label'])) {
+		?><label<?
+		if(isset($Control->_Parameters['Id'])) {
+			?> for="<?=$Control->_Parameters['Id']?>"<?
+		}
+		?>><?=$Control->_Parameters['Label']?></label><?
+	}
+	?><div class="ValueIntervalBox"><input<?
+	if(isset($Control->_Parameters['Id'])) {
+		?> id="<?=$Control->_Parameters['Id']?>"<?
+	}
+	if(isset($Control->_Parameters['LowerName'])) {
+		?> name="<?=$Control->_Parameters['LowerName']?>"<?
+	}
+	?> type="text"<?
+	if(isset($Control->_Parameters['LowerValue'])) {
+		?> value="<?=$Control->_Parameters['LowerValue']?>"<?
+	}
+	if(isset($Control->_Parameters['LowerPlaceholder'])) {
+		?> placeholder="<?=$Control->_Parameters['LowerPlaceholder']?>"<?
+	}
+	if(isset($Control->_Parameters['LowerAutoComplete'])) {
+		?> autocomplete="<?=$Control->_Parameters['LowerAutoComplete']?>"<?
+	}
+	if($Control->_Parameters['LowerIsDisabled']) {
+		?> disabled="disabled"<?
+	}
+	if($Control->_Parameters['LowerIsReadOnly']) {
+		?> readonly="readonly"<?
+	}
+	?> /><input<?
+	if(isset($Control->_Parameters['UpperName'])) {
+		?> name="<?=$Control->_Parameters['UpperName']?>"<?
+	}
+	?> type="text"<?
+	if(isset($Control->_Parameters['UpperValue'])) {
+		?> value="<?=$Control->_Parameters['UpperValue']?>"<?
+	}
+	if(isset($Control->_Parameters['UpperPlaceholder'])) {
+		?> placeholder="<?=$Control->_Parameters['UpperPlaceholder']?>"<?
+	}
+	if(isset($Control->_Parameters['UpperAutoComplete'])) {
+		?> autocomplete="<?=$Control->_Parameters['UpperAutoComplete']?>"<?
+	}
+	if($Control->_Parameters['UpperIsDisabled']) {
+		?> disabled="disabled"<?
+	}
+	if($Control->_Parameters['UpperIsReadOnly']) {
+		?> readonly="readonly"<?
+	}
+	?> /></div><?
+	?><div class="ErrorMessages"<?
+	if($Control->_Parameters['UseJavaScript']) {
+		?> Newnorth:Control="ErrorMessagesControl"<?
+	}
+	?>></div><?
+	if($Control->_Parameters['UseJavaScript'] && isset($Control->_Parameters['Id'])) {
+		?><script language="javascript"><?
+			?>window.addEventListener(<?
+				?>"load",<?
+				?>function(){<?
+					?>element=document.getElementById("<?=$Control->_Parameters['Id']?>");<?
+					if(isset($Control->_Parameters['Validators'])) {
+						foreach($Control->_Parameters['Validators'] as $Validator) {
+							?>element.AddValidator(function(){<?=$Validator['Owner']->$Validator['Method']($Control, $Validator['Parameters'])?>},"<?=$Validator['ErrorMessage']?>");<?
+						}
+					}
+					if(isset($Control->_Parameters['ErrorMessages'])) {
+						foreach($Control->_Parameters['ErrorMessages'] as $ErrorMessage) {
+							?>element.ivErrorMessages.AddErrorMessage("<?=$ErrorMessage?>");<?
+						}
+					}
+				?>}<?
+			?>);<?
+		?></script><?
+	}
+?></div>
