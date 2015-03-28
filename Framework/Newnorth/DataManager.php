@@ -46,7 +46,7 @@ abstract class DataManager {
 		}
 
 		if($Result->FetchAssoc()) {
-			return new $this->DataType($Result->Row);
+			return new $this->DataType($Result->GetProcessedRow());
 		}
 
 		return null;
@@ -62,7 +62,7 @@ abstract class DataManager {
 		$Items = [];
 
 		while($Result->FetchAssoc()) {
-			$Items[] = new $this->DataType($Result->Row);
+			$Items[] = new $this->DataType($Result->GetProcessedRow());
 		}
 
 		return $Items;

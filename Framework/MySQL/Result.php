@@ -33,6 +33,29 @@ class Result extends DbResult {
 		return ($this->Row = $this->Base->fetch_assoc()) !== null;
 	}
 
+	public function GetProcessedRow() {
+		$Row = [];
+
+		foreach($this->Row as $Key => $Value) {
+			$this->ProcessRow($Row, 0, explode('-', $Key), $Value);
+		}
+
+		return $Row;
+	}
+
+	private function ProcessRow(&$Row, $KeyLevel, $Key, $Value) {
+		if($KeyLevel === count($Key) - 1) {
+			$Row[$Key[$KeyLevel]] = $Value;
+		}
+		else {
+			if(!isset($Row[$Key[$KeyLevel]])) {
+				$Row[$Key[$KeyLevel]] = [];
+			}
+
+			$this->ProcessRow($Row[$Key[$KeyLevel]], $KeyLevel + 1, $Key, $Value);
+		}
+	}
+
 	public function GetBoolean($Column) {
 		return $this->Row[$Column] === null ? null : (bool)$this->Row[$Column];
 	}
