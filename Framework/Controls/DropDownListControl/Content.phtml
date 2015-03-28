@@ -5,6 +5,9 @@ if(isset($Control->_Parameters['CSS'])) {
 else {
 	?> class="Input"<?
 }
+if(isset($Control->_Parameters['AnchorVariable'][0])) {
+	?> Newnorth:AnchorVariable="<?=$Control->_Parameters['AnchorVariable']?>"<?
+}
 ?>><?
 	if(isset($Control->_Parameters['Label'])) {
 		?><label<?

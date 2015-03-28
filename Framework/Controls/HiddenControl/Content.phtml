@@ -10,4 +10,7 @@
 		?> value="<?=$Control->_Parameters['Value']?>"<?
 	}
 	?> Newnorth:Control="HiddenControl"<?
+	if(isset($Control->_Parameters['AnchorVariable'][0])) {
+		?> Newnorth:AnchorVariable="<?=$Control->_Parameters['AnchorVariable']?>"<?
+	}
 ?>/>

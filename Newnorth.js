@@ -2,6 +2,34 @@ if(typeof Newnorth === "undefined") {
 	Newnorth = {};
 }
 
+/* window
+/* * * * */
+
+window.GetAnchorVariableValue = function(pvAnchorVariableName, pvDefaultValue) {
+	var match = window.location.hash.match("(?:#|&)" + pvAnchorVariableName + "=(.*?)(?:&|$)");
+
+	if(match === null) {
+		return pvDefaultValue;
+	}
+	else {
+		return match[1];
+	}
+};
+
+/* Node
+/* * * * */
+
+Node.prototype.GetAttributeValue = function(pvAttributeName, pvDefaultValue) {
+	var value = this.getAttribute(pvAttributeName);
+
+	if(value === null) {
+		return pvDefaultValue;
+	}
+	else {
+		return value;
+	}
+};
+
 /* Newnorth.Event
 /* * * * */
 
@@ -239,25 +267,7 @@ Newnorth.Controls.HiddenControl = function() {
 
 	this.ivForm = this.form;
 
-	this.GetValue = function() {
-		return this.value;
-	};
-
-	this.SetValue = function(pvValue) {
-		this.value = pvValue;
-	};
-
-	this.ivForm.AddControl(this);
-};
-
-Newnorth.Controls.TextBoxControl = function() {
-	Newnorth.Controls.Control.call(this);
-
-	this.ivContainer = this.parentNode.parentNode;
-
-	Newnorth.Controls.ValidatableControl.call(this);
-
-	this.ivForm = this.form;
+	this.ivAnchorVariable = this.GetAttributeValue("Newnorth:AnchorVariable", "");
 
 	this.ivValue = this.value;
 
@@ -271,7 +281,67 @@ Newnorth.Controls.TextBoxControl = function() {
 
 	this.ivOnValueChanged = new Newnorth.Event();
 
-	var isValueChangedMethod = function() {
+	this.IsValueChangedMethod = function() {
+		if(this.ivValue !== this.value) {
+			this.ivValue = this.value;
+
+			this.ivOnValueChanged.Invoke(this, this.value);
+
+			if(this.ivForm !== null) {
+				this.ivForm.ivOnAnyValueChangedEvent.Invoke(this, this.value);
+			}
+		}
+	};
+
+	if(0 < this.ivAnchorVariable.length) {
+		var value = window.GetAnchorVariableValue(this.ivAnchorVariable, this.GetValue());
+
+		this.SetValue(value);
+
+		this.ivValue = this.value;
+
+		window.addEventListener(
+			"hashchange",
+			{
+				ivControl: this,
+				handleEvent: function() {
+					var value = window.GetAnchorVariableValue(this.ivControl.ivAnchorVariable, this.ivControl.GetValue());
+
+					this.ivControl.SetValue(value);
+
+					this.ivControl.IsValueChangedMethod();
+				}
+			}
+		);
+	}
+
+	this.ivForm.AddControl(this);
+};
+
+Newnorth.Controls.TextBoxControl = function() {
+	Newnorth.Controls.Control.call(this);
+
+	this.ivContainer = this.parentNode.parentNode;
+
+	Newnorth.Controls.ValidatableControl.call(this);
+
+	this.ivForm = this.form;
+
+	this.ivAnchorVariable = this.ivContainer.GetAttributeValue("Newnorth:AnchorVariable", "");
+
+	this.ivValue = this.value;
+
+	this.GetValue = function() {
+		return this.value;
+	};
+
+	this.SetValue = function(pvValue) {
+		this.value = pvValue;
+	};
+
+	this.ivOnValueChanged = new Newnorth.Event();
+
+	this.IsValueChangedMethod = function() {
 		if(this.ivValue !== this.value) {
 			this.ivValue = this.value;
 
@@ -290,9 +360,31 @@ Newnorth.Controls.TextBoxControl = function() {
 		}
 	};
 
-	this.addEventListener("keydown", isValueChangedMethod);
+	this.addEventListener("keydown", this.IsValueChangedMethod);
 
-	this.addEventListener("keyup", isValueChangedMethod);
+	this.addEventListener("keyup", this.IsValueChangedMethod);
+
+	if(0 < this.ivAnchorVariable.length) {
+		var value = window.GetAnchorVariableValue(this.ivAnchorVariable, this.GetValue());
+
+		this.SetValue(value);
+
+		this.ivValue = this.value;
+
+		window.addEventListener(
+			"hashchange",
+			{
+				ivControl: this,
+				handleEvent: function() {
+					var value = window.GetAnchorVariableValue(this.ivControl.ivAnchorVariable, this.ivControl.GetValue());
+
+					this.ivControl.SetValue(value);
+
+					this.ivControl.IsValueChangedMethod();
+				}
+			}
+		);
+	}
 
 	this.ivForm.AddControl(this);
 };
@@ -400,6 +492,8 @@ Newnorth.Controls.DropDownListControl = function() {
 
 	this.ivForm = this.form;
 
+	this.ivAnchorVariable = this.ivContainer.GetAttributeValue("Newnorth:AnchorVariable", "");
+
 	this.ivValue = this.selectedIndex;
 
 	this.GetValue = function() {
@@ -420,7 +514,7 @@ Newnorth.Controls.DropDownListControl = function() {
 
 	this.ivOnValueChanged = new Newnorth.Event();
 
-	var isValueChangedMethod = function() {
+	this.IsValueChangedMethod = function() {
 		if(this.ivValue !== this.selectedIndex) {
 			this.ivValue = this.selectedIndex;
 
@@ -439,11 +533,33 @@ Newnorth.Controls.DropDownListControl = function() {
 		}
 	};
 
-	this.addEventListener("change", isValueChangedMethod);
+	this.addEventListener("change", this.IsValueChangedMethod);
 
-	this.addEventListener("keydown", isValueChangedMethod);
+	this.addEventListener("keydown", this.IsValueChangedMethod);
 
-	this.addEventListener("keyup", isValueChangedMethod);
+	this.addEventListener("keyup", this.IsValueChangedMethod);
+
+	if(0 < this.ivAnchorVariable.length) {
+		var value = window.GetAnchorVariableValue(this.ivAnchorVariable, this.GetValue());
+
+		this.SetValue(value);
+
+		this.ivValue = this.selectedIndex;
+
+		window.addEventListener(
+			"hashchange",
+			{
+				ivControl: this,
+				handleEvent: function() {
+					var value = window.GetAnchorVariableValue(this.ivControl.ivAnchorVariable, this.ivControl.GetValue());
+
+					this.ivControl.SetValue(value);
+
+					this.ivControl.IsValueChangedMethod();
+				}
+			}
+		);
+	}
 
 	this.ivForm.AddControl(this);
 };
