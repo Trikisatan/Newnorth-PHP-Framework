@@ -43,6 +43,8 @@ abstract class DbResult {
 
 	public abstract function FetchAssoc();
 
+	public abstract function GetProcessedRow();
+
 	public abstract function GetBoolean($Column);
 
 	public abstract function GetFloat($Column);
@@ -59,7 +61,7 @@ abstract class DbResult {
 }
 
 abstract class DbCondition {
-	
+
 }
 
 abstract class DbConditionGroup extends DbCondition {
@@ -111,11 +113,11 @@ abstract class DbConditionGroup extends DbCondition {
 }
 
 class DbAnd extends DbConditionGroup {
-	
+
 }
 
 class DbOr extends DbConditionGroup {
-	
+
 }
 
 class DbEqualTo extends DbCondition {
@@ -328,7 +330,7 @@ class DbArray extends DbExpression {
 }
 
 class DbBool extends DbExpression {
-	
+
 }
 
 class DbColumn extends DbExpression {
@@ -344,11 +346,11 @@ class DbColumn extends DbExpression {
 }
 
 class DbFloat extends DbExpression {
-	
+
 }
 
 class DbInt extends DbExpression {
-	
+
 }
 
 class DbNull extends DbExpression {
@@ -360,7 +362,7 @@ class DbNull extends DbExpression {
 }
 
 class DbString extends DbExpression {
-	
+
 }
 
 class DbSort {
@@ -524,6 +526,8 @@ class DbSelectQuery {
 
 	public $Conditions = null;
 
+	public $Groups = [];
+
 	public $Sorts = [];
 
 	public $MaxRows = 0;
@@ -547,6 +551,15 @@ class DbSelectQuery {
 		}
 		else {
 			return $this->Sources[] = new DbSelectSource($Expression, $Alias);
+		}
+	}
+
+	public function AddGroup($Expression) {
+		if($Expression instanceof DbExpression) {
+			return $this->Groups[] = $Expression;
+		}
+		else {
+			return $this->Groups[] = DbExpression::Parse($Expression);
 		}
 	}
 

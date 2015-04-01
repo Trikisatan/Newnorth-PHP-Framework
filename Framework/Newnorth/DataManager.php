@@ -8,12 +8,6 @@ abstract class DataManager {
 
 	public $Connection = null;
 
-	/* Magic methods */
-
-	public function __toString() {
-		return '';
-	}
-
 	/* Instance methods */
 
 	public function InsertByQuery(DbInsertQuery $Query) {
