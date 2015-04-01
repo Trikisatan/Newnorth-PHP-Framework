@@ -302,7 +302,7 @@ class Connection extends DbConnection {
 			$Sql = $this->ProcessExpression($Sorts[0]->Expression).' '.($Sorts[0]->Direction === DB_ASC ? 'ASC' : 'DESC');
 
 			for($I = 1; $I < $Count; ++$I) {
-				$Sql = $this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
+				$Sql .= ', '.$this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
 			}
 
 			return ' ORDER BY '.$Sql;
@@ -386,7 +386,7 @@ class Connection extends DbConnection {
 			$Sql = $this->ProcessExpression($Sorts[0]->Expression).' '.($Sorts[0]->Direction === DB_ASC ? 'ASC' : 'DESC');
 
 			for($I = 1; $I < $Count; ++$I) {
-				$Sql = $this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
+				$Sql .= ', '.$this->ProcessExpression($Sorts[$I]->Expression).' '.($Sorts[$I]->Direction === DB_ASC ? 'ASC' : 'DESC');
 			}
 
 			return ' ORDER BY '.$Sql;
