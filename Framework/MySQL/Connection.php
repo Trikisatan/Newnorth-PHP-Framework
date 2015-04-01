@@ -233,6 +233,7 @@ class Connection extends DbConnection {
 			'SELECT '.$this->Find_ProcessColumns($Query->Columns).
 			' FROM '.$this->Find_ProcessSources($Query->Sources).
 			$this->Find_ProcessConditions($Query->Conditions).
+			$this->Find_ProcessGroups($Query->Groups).
 			$this->Find_ProcessSorts($Query->Sorts).
 			' LIMIT 1'
 		);
@@ -295,6 +296,23 @@ class Connection extends DbConnection {
 		}
 	}
 
+	private function Find_ProcessGroups(array $Groups) {
+		$Count = count($Groups);
+
+		if(0 < $Count) {
+			$Sql = $this->ProcessExpression($Groups[0]);
+
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ', '.$this->ProcessExpression($Groups[$I]);
+			}
+
+			return ' GROUP BY '.$Sql;
+		}
+		else {
+			return '';
+		}
+	}
+
 	private function Find_ProcessSorts(array $Sorts) {
 		$Count = count($Sorts);
 
@@ -318,6 +336,7 @@ class Connection extends DbConnection {
 			' FROM '.$this->FindAll_ProcessSources($Query->Sources).
 			$this->FindAll_ProcessConditions($Query->Conditions).
 			$this->FindAll_ProcessSorts($Query->Sorts).
+			$this->FindAll_ProcessGroups($Query->Groups).
 			$this->FindAll_ProcessLimit($Query->MaxRows, $Query->FirstRow)
 		);
 	}
@@ -376,6 +395,23 @@ class Connection extends DbConnection {
 		}
 		else {
 			return ' WHERE '.$this->ProcessCondition($Conditions);
+		}
+	}
+
+	private function FindAll_ProcessGroups(array $Groups) {
+		$Count = count($Groups);
+
+		if(0 < $Count) {
+			$Sql = $this->ProcessExpression($Groups[0]);
+
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ', '.$this->ProcessExpression($Groups[$I]);
+			}
+
+			return ' GROUP BY '.$Sql;
+		}
+		else {
+			return '';
 		}
 	}
 
