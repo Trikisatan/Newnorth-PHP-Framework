@@ -35,7 +35,7 @@ class Connection extends DbConnection {
 
 	/* Magic methods */
 
-	public function __construct($Data) {
+	public function __construct(Array $Data) {
 		$this->Data = $Data;
 	}
 
