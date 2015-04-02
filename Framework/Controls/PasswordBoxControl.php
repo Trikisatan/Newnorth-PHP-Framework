@@ -1,25 +1,8 @@
 <?
 namespace Framework\Controls;
 
-use \Framework\Newnorth\Control;
-use \Framework\Newnorth\ConfigException;
-
-class PasswordBoxControl extends Control {
+class PasswordBoxControl extends InputControl {
 	/* Life cycle methods */
-
-	public function Initialize() {
-
-	}
-
-	public function Load() {
-
-	}
-
-	public function Execute() {
-
-	}
-
-	/* Instance methods */
 
 	public function ParseParameters() {
 		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] == true : false;
@@ -29,30 +12,7 @@ class PasswordBoxControl extends Control {
 		}
 	}
 
-	private function ParseParameters_Validators($Validators) {
-		$this->_Parameters['Validators'] = [];
-
-		foreach($Validators as $Method => $Parameters) {
-			$Method = 'Render'.$Method.'Validator';
-
-			if(!$this->GetValidatorRenderMethod($Method, $Owner)) {
-				throw new ConfigException(
-					'Unable to find validator render method.',
-					[
-						'Object' => $this->__toString(),
-						'Method' => $Method,
-					]
-				);
-			}
-
-			$this->_Parameters['Validators'][] = [
-				'Owner' => $Owner,
-				'Method' => $Method,
-				'Parameters' => $Parameters,
-				'ErrorMessage' => $Parameters['ErrorMessage'],
-			];
-		}
-	}
+	/* Instance methods */
 
 	public function AutoFill($Value) {
 		$this->_Parameters['Value'] = $Value;

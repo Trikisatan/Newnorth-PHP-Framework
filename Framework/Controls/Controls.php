@@ -1,0 +1,3 @@
+<?
+include('InputControl.php');
+?>

@@ -1,22 +1,8 @@
 <?
 namespace Framework\Controls;
 
-class ValueIntervalBoxControl extends \Framework\Newnorth\Control {
+class ValueIntervalBoxControl extends InputControl {
 	/* Life cycle methods */
-
-	public function Initialize() {
-
-	}
-
-	public function Load() {
-
-	}
-
-	public function Execute() {
-
-	}
-
-	/* Instance methods */
 
 	public function ParseParameters() {
 		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] == true : false;
@@ -34,30 +20,17 @@ class ValueIntervalBoxControl extends \Framework\Newnorth\Control {
 		}
 	}
 
-	private function ParseParameters_Validators($Validators) {
-		$this->_Parameters['Validators'] = [];
+	public function SetValue() {
+		if(method_exists($this->_Parent, $this->_Alias.'_SetLowerValue')) {
+			$this->_Parent->{$this->_Alias.'_SetLowerValue'}($this);
+		}
 
-		foreach($Validators as $Method => $Parameters) {
-			$Method = 'Render'.$Method.'Validator';
-
-			if(!$this->GetValidatorRenderMethod($Method, $Owner)) {
-				throw new \Framework\Newnorth\ConfigException(
-					'Unable to find validator render method.',
-					[
-						'Object' => $this->__toString(),
-						'Method' => $Method,
-					]
-				);
-			}
-
-			$this->_Parameters['Validators'][] = [
-				'Owner' => $Owner,
-				'Method' => $Method,
-				'Parameters' => $Parameters,
-				'ErrorMessage' => $Parameters['ErrorMessage'],
-			];
+		if(method_exists($this->_Parent, $this->_Alias.'_SetUpperValue')) {
+			$this->_Parent->{$this->_Alias.'_SetUpperValue'}($this);
 		}
 	}
+
+	/* Instance methods */
 
 	public function AutoFill($Value) {
 		$this->_Parameters['Value'] = $Value;
