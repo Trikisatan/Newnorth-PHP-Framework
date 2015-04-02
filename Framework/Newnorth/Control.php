@@ -12,6 +12,8 @@ abstract class Control {
 
 	public $_Name;
 
+	public $_Alias;
+
 	public $_Parameters;
 
 	public $_Translations;
@@ -24,7 +26,7 @@ abstract class Control {
 
 	/* Magic methods */
 
-	public function __construct($Parent, $Directory, $Namespace, $Name, $Parameters) {
+	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
 		$this->_Parent = $Parent;
 
 		$this->_Directory = $Directory;
@@ -32,6 +34,8 @@ abstract class Control {
 		$this->_Namespace = $Namespace;
 
 		$this->_Name = $Name;
+
+		$this->_Alias = $Alias;
 
 		$this->_Parameters = $Parameters;
 
@@ -50,14 +54,19 @@ abstract class Control {
 
 	/* Life cycle methods */
 
+	public function ParseParameters() {
+
+	}
+
 	public function PreInitialize() {
 		$this->_Controls->PreInitialize();
 	}
 
-	public abstract function Initialize();
+	public function Initialize() {
+		$this->_Controls->Initialize();
+	}
 
 	public function PostInitialize() {
-		$this->_Controls->Initialize();
 		$this->_Controls->PostInitialize();
 	}
 
@@ -65,22 +74,25 @@ abstract class Control {
 		$this->_Controls->PreLoad();
 	}
 
-	public abstract function Load();
+	public function Load() {
+		$this->_Controls->Load();
+	}
 
 	public function PostLoad() {
-		$this->_Controls->Load();
 		$this->_Controls->PostLoad();
 	}
 
 	public function PreExecute() {
-		$this->_Actions->Execute();
 		$this->_Controls->PreExecute();
 	}
 
-	public abstract function Execute();
+	public function Execute() {
+		$this->_Actions->Execute();
+
+		$this->_Controls->Execute();
+	}
 
 	public function PostExecute() {
-		$this->_Controls->Execute();
 		$this->_Controls->PostExecute();
 	}
 
@@ -89,8 +101,6 @@ abstract class Control {
 	}
 
 	/* Instance methods */
-
-	public abstract function ParseParameters();
 
 	public function GetTranslation($Key, $DefaultValue = null) {
 		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;

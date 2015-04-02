@@ -54,10 +54,11 @@ abstract class Layout {
 		$this->_Controls->PreInitialize();
 	}
 
-	public abstract function Initialize();
+	public function Initialize() {
+		$this->_Controls->Initialize();
+	}
 
 	public function PostInitialize() {
-		$this->_Controls->Initialize();
 		$this->_Controls->PostInitialize();
 	}
 
@@ -65,22 +66,25 @@ abstract class Layout {
 		$this->_Controls->PreLoad();
 	}
 
-	public abstract function Load();
+	public function Load() {
+		$this->_Controls->Load();
+	}
 
 	public function PostLoad() {
-		$this->_Controls->Load();
 		$this->_Controls->PostLoad();
 	}
 
 	public function PreExecute() {
-		$this->_Actions->Execute();
 		$this->_Controls->PreExecute();
 	}
 
-	public abstract function Execute();
+	public function Execute() {
+		$this->_Actions->Execute();
+
+		$this->_Controls->Execute();
+	}
 
 	public function PostExecute() {
-		$this->_Controls->Execute();
 		$this->_Controls->PostExecute();
 	}
 

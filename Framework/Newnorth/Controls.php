@@ -111,7 +111,7 @@ class Controls implements \ArrayAccess {
 			}
 		}
 
-		$Control = new $ClassName($this->Owner, $Directory, $this->Namespace, $Name, $Data);
+		$Control = new $ClassName($this->Owner, $Directory, $this->Namespace, $Name, $Alias, $Data);
 
 		return $this->Items[$Alias] = $Control;
 	}
