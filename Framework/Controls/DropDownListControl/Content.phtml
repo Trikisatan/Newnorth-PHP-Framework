@@ -1,9 +1,9 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input DropDownListInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input DropDownListInput"<?
 }
 if(isset($Control->_Parameters['AnchorVariable'][0])) {
 	?> Newnorth:AnchorVariable="<?=$Control->_Parameters['AnchorVariable']?>"<?
@@ -16,7 +16,7 @@ if(isset($Control->_Parameters['AnchorVariable'][0])) {
 		}
 		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="DropDownList"><select<?
+	?><select<?
 	if(isset($Control->_Parameters['Id'])) {
 		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
@@ -52,7 +52,7 @@ if(isset($Control->_Parameters['AnchorVariable'][0])) {
 			}
 		}
 	}
-	?></select></div><?
+	?></select><?
 	?><div class="ErrorMessages"<?
 	if($Control->_Parameters['UseJavaScript']) {
 		?> Newnorth:Control="ErrorMessagesControl"<?

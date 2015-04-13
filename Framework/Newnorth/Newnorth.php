@@ -4,6 +4,14 @@ namespace Framework\Newnorth;
 require('Exception.php');
 require('ConfigException.php');
 require('RuntimeException.php');
+require('RerouteException.php');
+require('ErrorHandler.php');
+require('Logger.php');
+require('EMailer.php');
+require('Translator.php');
+require('Routing.php');
+require('Config.php');
+require('Router.php');
 require('Application.php');
 require('Layout.php');
 require('Page.php');
@@ -19,29 +27,6 @@ require('Controls.php');
 require('DataManager.php');
 require('DataType.php');
 require('Db.php');
-
-/* Miscellaneous framework specific methods */
-
-function Redirect($Location) {
-	if(is_array($Location)) {
-		header('Location: '.$GLOBALS['Application']->GenerateUrl($Location));
-	}
-	else {
-		header('Location: '.$Location);
-	}
-
-	exit();
-}
-
-/* String methods */
-
-function String_StartsWith($Haystack, $Needle) {
-	return substr($Haystack, 0, strlen($Needle)) === $Needle;
-}
-
-function String_EndsWith($Haystack, $Needle) {
-	return substr($Haystack, -strlen($Needle)) === $Needle;
-}
 
 /* Miscellaneous methods */
 

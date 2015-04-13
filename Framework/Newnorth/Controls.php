@@ -10,7 +10,7 @@ class Controls implements \ArrayAccess {
 
 	private $Directory;
 
-	private $Items = array();
+	private $Items = [];
 
 	/* Magic methods */
 
@@ -72,7 +72,7 @@ class Controls implements \ArrayAccess {
 		}
 	}
 
-	public function Add($Alias, $Name, $Data = array()) {
+	public function Add($Alias, $Name, $Data = []) {
 		if($Name[0] === '.') {
 			$ClassName = str_replace('/', '\\', trim($Name, "./")).'Control';
 
@@ -83,7 +83,7 @@ class Controls implements \ArrayAccess {
 		else if($Name[0] === '/') {
 			$ClassName = str_replace('/', '\\', $Name).'Control';
 
-			$Directory = '/'.Application::$Files['Controls'].substr($Name, 1, strrpos($Name, '/'));
+			$Directory = '/'.$GLOBALS['Config']->Files['Controls'].substr($Name, 1, strrpos($Name, '/'));
 
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}

@@ -8,7 +8,7 @@ class Actions implements \ArrayAccess {
 
 	private $Directory;
 
-	public $Items = array();
+	public $Items = [];
 
 	/* Magic methods */
 
@@ -85,7 +85,7 @@ class Actions implements \ArrayAccess {
 			$Action->UnlockDbConnections();
 
 			if(isset($Redirect)) {
-				Redirect($Redirect);
+				\Framework\Newnorth\Router::Redirect($Redirect);
 			}
 		}
 	}

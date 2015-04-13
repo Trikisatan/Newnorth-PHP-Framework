@@ -37,15 +37,7 @@ class Connection extends DbConnection {
 
 	public function __construct(Array $Data) {
 		$this->Data = $Data;
-	}
 
-	public function __toString() {
-		return '';
-	}
-
-	/* Instance methods */
-
-	public function Connect() {
 		$this->Base = @new \mysqli(
 			$this->Data['Hostname'],
 			$this->Data['Username'],
@@ -64,9 +56,9 @@ class Connection extends DbConnection {
 		}
 
 		$this->Base->set_charset($this->Data['CharSet']);
-
-		$this->IsConnected = true;
 	}
+
+	/* Instance methods */
 
 	// TODO: Add support for using a select query as an input.
 	public function Insert(DbInsertQuery $Query) {
@@ -335,8 +327,8 @@ class Connection extends DbConnection {
 			'SELECT '.$this->FindAll_ProcessColumns($Query->Columns).
 			' FROM '.$this->FindAll_ProcessSources($Query->Sources).
 			$this->FindAll_ProcessConditions($Query->Conditions).
-			$this->FindAll_ProcessSorts($Query->Sorts).
 			$this->FindAll_ProcessGroups($Query->Groups).
+			$this->FindAll_ProcessSorts($Query->Sorts).
 			$this->FindAll_ProcessLimit($Query->MaxRows, $Query->FirstRow)
 		);
 	}

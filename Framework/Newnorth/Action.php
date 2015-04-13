@@ -26,11 +26,16 @@ class Action {
 
 	public function __construct($Owner, $Directory, $Name, $Data) {
 		$this->Owner = $Owner;
+
 		$this->Directory = $Directory;
+
 		$this->Name = $Name;
-		$this->RequiredVariables = isset($Data['RequiredVariables']) ? $Data['RequiredVariables'] : array();
-		$this->RequiredValues = isset($Data['RequiredValues']) ? $Data['RequiredValues'] : array();
-		$this->AutoFill = isset($Data['AutoFill']) ? $Data['AutoFill'] : array();
+
+		$this->RequiredVariables = isset($Data['RequiredVariables']) ? $Data['RequiredVariables'] : [];
+
+		$this->RequiredValues = isset($Data['RequiredValues']) ? $Data['RequiredValues'] : [];
+
+		$this->AutoFill = isset($Data['AutoFill']) ? $Data['AutoFill'] : [];
 	}
 
 	public function __toString() {

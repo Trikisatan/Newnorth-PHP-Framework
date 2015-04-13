@@ -5,13 +5,7 @@ define('DB_ASC', 1);
 define('DB_DESC', 2);
 
 abstract class DbConnection {
-	/* Instance variables */
-
-	public $IsConnected = false;
-
 	/* Instance methods */
-
-	public abstract function Connect();
 
 	public abstract function Insert(DbInsertQuery $Query);
 

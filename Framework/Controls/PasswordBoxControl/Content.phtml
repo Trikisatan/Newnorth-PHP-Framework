@@ -1,9 +1,9 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input PasswordBoxInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input PasswordBoxInput"<?
 }
 ?>><?
 	if(isset($Control->_Parameters['Label'])) {
@@ -13,7 +13,7 @@ else {
 		}
 		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="PasswordBox"><input<?
+	?><input<?
 	if(isset($Control->_Parameters['Id'])) {
 		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
@@ -36,7 +36,7 @@ else {
 	if($Control->_Parameters['UseJavaScript']) {
 		?> Newnorth:Control="PasswordBoxControl"<?
 	}
-	?> /></div><?
+	?> /><?
 	?><div class="ErrorMessages"<?
 	if($Control->_Parameters['UseJavaScript']) {
 		?> Newnorth:Control="ErrorMessagesControl"<?

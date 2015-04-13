@@ -1,9 +1,9 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input TextAreaBoxInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input TextAreaBoxInput"<?
 }
 ?>><?
 	if(isset($Control->_Parameters['Label'])) {
@@ -13,7 +13,7 @@ else {
 		}
 		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="TextAreaBox"><textarea<?
+	?><textarea<?
 	if(isset($Control->_Parameters['Id'])) {
 		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
@@ -30,7 +30,7 @@ else {
 	if(isset($Control->_Parameters['Value'])) {
 		?><?=$Control->_Parameters['Value']?><?
 	}
-	?></textarea></div><?
+	?></textarea><?
 	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
 	if(isset($Control->_Parameters['Id'])) {
 		?><script language="javascript"><?

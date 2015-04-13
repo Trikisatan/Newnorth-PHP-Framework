@@ -2,10 +2,6 @@
 namespace Framework\Newnorth;
 
 abstract class Page {
-	/* Static variables */
-
-	public static $Instance = null;
-
 	/* Instance variables */
 
 	public $_Directory;
@@ -25,13 +21,7 @@ abstract class Page {
 	/* Magic methods */
 
 	public function __construct($Directory, $Namespace, $Name) {
-		if(Page::$Instance !== null) {
-			throw new ConfigException('Page has already been initialized.');
-		}
-
-		Page::$Instance = $this;
-
-		$this->_Directory = Application::$Files['Pages'].$Directory;
+		$this->_Directory = $GLOBALS['Config']->Files['Pages'].$Directory;
 
 		$this->_Namespace = $Namespace;
 
@@ -39,9 +29,9 @@ abstract class Page {
 
 		$this->_Translations = new Translations($this, $Directory.$Name.'/');
 
-		$this->_Controls = new Controls($this, Application::$Files['Pages'].$Directory.$Name.'/', $Namespace.$Name.'\\');
+		$this->_Controls = new Controls($this, $GLOBALS['Config']->Files['Pages'].$Directory.$Name.'/', $Namespace.$Name.'\\');
 
-		$this->_Actions = new Actions($this, Application::$Files['Pages'].$Directory.$Name.'/');
+		$this->_Actions = new Actions($this, $GLOBALS['Config']->Files['Pages'].$Directory.$Name.'/');
 	}
 
 	public function __toString() {

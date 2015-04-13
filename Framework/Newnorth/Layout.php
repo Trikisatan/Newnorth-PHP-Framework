@@ -2,10 +2,6 @@
 namespace Framework\Newnorth;
 
 abstract class Layout {
-	/* Static variables */
-
-	public static $Instance = null;
-
 	/* Instance variables */
 
 	public $_Directory;
@@ -25,13 +21,7 @@ abstract class Layout {
 	/* Magic methods */
 
 	public function __construct($Directory, $Namespace, $Name) {
-		if(Layout::$Instance !== null) {
-			throw new ConfigException('Layout has already been initialized.');
-		}
-
-		Layout::$Instance = $this;
-
-		$this->_Directory = Application::$Files['Layouts'].$Directory;
+		$this->_Directory = $GLOBALS['Config']->Files['Layouts'].$Directory;
 
 		$this->_Namespace = $Namespace;
 
@@ -39,9 +29,9 @@ abstract class Layout {
 
 		$this->_Translations = new Translations($this, $Directory.$Name.'/');
 
-		$this->_Controls = new Controls($this, Application::$Files['Layouts'].$Directory.$Name.'/', $Namespace.$Name.'\\');
+		$this->_Controls = new Controls($this, $GLOBALS['Config']->Files['Layouts'].$Directory.$Name.'/', $Namespace.$Name.'\\');
 
-		$this->_Actions = new Actions($this, Application::$Files['Layouts'].$Directory.$Name.'/');
+		$this->_Actions = new Actions($this, $GLOBALS['Config']->Files['Layouts'].$Directory.$Name.'/');
 	}
 
 	public function __toString() {

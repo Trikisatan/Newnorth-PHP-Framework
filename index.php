@@ -19,6 +19,10 @@ require('Framework/Newnorth/Newnorth.php');
 
 /* Global variables */
 
+$Config = null;
+
+$Routing = null;
+
 $Application = null;
 
 $Layout = null;
@@ -30,12 +34,20 @@ $Parameters = null;
 /* Execution of application */
 
 try {
+	$Config = new \Framework\Newnorth\Config('Config.ini');
+
+	$Config->Initialize();
+
+	$Routing = new \Framework\Newnorth\Routing('Routes.ini');
+
+	$Routing->Initialize();
+
 	$Application = new \Framework\Newnorth\Application();
 
-	$Application->Run();
+	$Application->Initialize();
 }
 catch(\Framework\Newnorth\Exception $Exception) {
-	\Framework\Newnorth\Application::HandleError(
+	\Framework\Newnorth\ErrorHandler::HandleError(
 		$Exception->Type,
 		$Exception->getMessage(),
 		$Exception->getFile(),
@@ -45,7 +57,7 @@ catch(\Framework\Newnorth\Exception $Exception) {
 	);
 }
 catch(\ErrorException $Exception) {
-	\Framework\Newnorth\Application::HandleError(
+	\Framework\Newnorth\ErrorHandler::HandleError(
 		'Error',
 		$Exception->getMessage(),
 		$Exception->getFile(),
@@ -55,7 +67,7 @@ catch(\ErrorException $Exception) {
 	);
 }
 catch(\Exception $Exception) {
-	\Framework\Newnorth\Application::HandleError(
+	\Framework\Newnorth\ErrorHandler::HandleError(
 		'Unhandled exception',
 		$Exception->getMessage(),
 		$Exception->getFile(),
@@ -64,4 +76,6 @@ catch(\Exception $Exception) {
 		$Exception->getTrace()
 	);
 }
+
+$Application->Execute();
 ?>
