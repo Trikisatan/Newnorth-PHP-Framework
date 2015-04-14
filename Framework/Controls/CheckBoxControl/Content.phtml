@@ -13,6 +13,9 @@ else {
 	if(isset($Control->_Parameters['Name'])) {
 		?> name="<?=$Control->_Parameters['Name']?>"<?
 	}
+	if(isset($Control->_Parameters['Form'])) {
+		?> form="<?=$Control->_Parameters['Form']?>"<?
+	}
 	?> type="checkbox" <?
 	if(isset($Control->_Parameters['Value'])) {
 		?> value="<?=$Control->_Parameters['Value']?>"<?

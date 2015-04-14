@@ -23,6 +23,9 @@ if(isset($Control->_Parameters['AnchorVariable'][0])) {
 	if(isset($Control->_Parameters['Name'])) {
 		?> name="<?=$Control->_Parameters['Name']?>"<?
 	}
+	if(isset($Control->_Parameters['Form'])) {
+		?> form="<?=$Control->_Parameters['Form']?>"<?
+	}
 	if($Control->_Parameters['IsDisabled']) {
 		?> disabled="disabled"<?
 	}

@@ -23,6 +23,9 @@ if($Control->_Parameters['UseJavaScript']) {
 	if(isset($Control->_Parameters['LowerName'])) {
 		?> name="<?=$Control->_Parameters['LowerName']?>"<?
 	}
+	if(isset($Control->_Parameters['Form'])) {
+		?> form="<?=$Control->_Parameters['Form']?>"<?
+	}
 	?> type="text"<?
 	if(isset($Control->_Parameters['LowerValue'])) {
 		?> value="<?=$Control->_Parameters['LowerValue']?>"<?
@@ -42,6 +45,9 @@ if($Control->_Parameters['UseJavaScript']) {
 	?> /><input<?
 	if(isset($Control->_Parameters['UpperName'])) {
 		?> name="<?=$Control->_Parameters['UpperName']?>"<?
+	}
+	if(isset($Control->_Parameters['Form'])) {
+		?> form="<?=$Control->_Parameters['Form']?>"<?
 	}
 	?> type="text"<?
 	if(isset($Control->_Parameters['UpperValue'])) {

@@ -5,6 +5,9 @@
 	if(isset($Control->_Parameters['Name'])) {
 		?> name="<?=$Control->_Parameters['Name']?>"<?
 	}
+	if(isset($Control->_Parameters['Form'])) {
+		?> form="<?=$Control->_Parameters['Form']?>"<?
+	}
 	?> type="hidden"<?
 	if(isset($Control->_Parameters['Value'])) {
 		?> value="<?=$Control->_Parameters['Value']?>"<?
