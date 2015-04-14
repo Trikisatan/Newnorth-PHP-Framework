@@ -321,7 +321,7 @@ Newnorth.Controls.HiddenControl = function() {
 Newnorth.Controls.TextBoxControl = function() {
 	Newnorth.Controls.Control.call(this);
 
-	this.ivContainer = this.parentNode.parentNode;
+	this.ivContainer = this.parentNode;
 
 	Newnorth.Controls.ValidatableControl.call(this);
 
@@ -392,7 +392,7 @@ Newnorth.Controls.TextBoxControl = function() {
 Newnorth.Controls.TextAreaBoxControl = function() {
 	Newnorth.Controls.Control.call(this);
 
-	this.ivContainer = this.parentNode.parentNode;
+	this.ivContainer = this.parentNode;
 
 	Newnorth.Controls.ValidatableControl.call(this);
 
@@ -439,7 +439,7 @@ Newnorth.Controls.TextAreaBoxControl = function() {
 Newnorth.Controls.PasswordBoxControl = function() {
 	Newnorth.Controls.Control.call(this);
 
-	this.ivContainer = this.parentNode.parentNode;
+	this.ivContainer = this.parentNode;
 
 	Newnorth.Controls.ValidatableControl.call(this);
 
@@ -486,7 +486,7 @@ Newnorth.Controls.PasswordBoxControl = function() {
 Newnorth.Controls.DropDownListControl = function() {
 	Newnorth.Controls.Control.call(this);
 
-	this.ivContainer = this.parentNode.parentNode;
+	this.ivContainer = this.parentNode;
 
 	Newnorth.Controls.ValidatableControl.call(this);
 
