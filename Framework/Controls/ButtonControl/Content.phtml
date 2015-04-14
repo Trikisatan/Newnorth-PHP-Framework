@@ -1,11 +1,11 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input ButtonInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input ButtonInput"<?
 }
-?>><div class="Button"><input<?
+?>><input<?
 if(isset($Control->_Parameters['Id'])) {
 	?> id="<?=$Control->_Parameters['Id']?>"<?
 }
@@ -16,4 +16,4 @@ if(isset($Control->_Parameters['Name'])) {
 if(isset($Control->_Parameters['Text'])) {
 	?> value="<?=$Control->_Parameters['Text']?>"<?
 }
-?> /></div></div>
+?> /></div>
