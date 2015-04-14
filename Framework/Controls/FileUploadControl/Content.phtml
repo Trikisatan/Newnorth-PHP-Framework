@@ -1,9 +1,9 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input FileUploadInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input FileUploadInput"<?
 }
 ?>><?
 	if(isset($Control->_Parameters['Label'])) {
@@ -13,7 +13,7 @@ else {
 		}
 		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="FileUpload"><input<?
+	?><input<?
 	if(isset($Control->_Parameters['Id'])) {
 		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
@@ -21,7 +21,7 @@ else {
 		?> name="<?=$Control->_Parameters['Name']?>"<?
 	}
 	?> type="file"<?
-	?> Newnorth:Control="FileUploadControl" /></div><?
+	?> Newnorth:Control="FileUploadControl" /><?
 	?><div class="ErrorMessages" Newnorth:Control="ErrorMessagesControl"></div><?
 	if(isset($Control->_Parameters['Id'])) {
 		?><script language="javascript"><?
