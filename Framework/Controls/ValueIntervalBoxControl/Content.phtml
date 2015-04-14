@@ -1,9 +1,9 @@
 <div<?
 if(isset($Control->_Parameters['CSS'])) {
-	?> class="Input <?=$Control->_Parameters['CSS']?>"<?
+	?> class="Input ValueIntervalBoxInput <?=$Control->_Parameters['CSS']?>"<?
 }
 else {
-	?> class="Input"<?
+	?> class="Input ValueIntervalBoxInput"<?
 }
 if($Control->_Parameters['UseJavaScript']) {
 	?> Newnorth:Control="ValueIntervalBoxControl"<?
@@ -16,7 +16,7 @@ if($Control->_Parameters['UseJavaScript']) {
 		}
 		?>><?=$Control->_Parameters['Label']?></label><?
 	}
-	?><div class="ValueIntervalBox"><input<?
+	?><div class="Inputs"><input<?
 	if(isset($Control->_Parameters['Id'])) {
 		?> id="<?=$Control->_Parameters['Id']?>"<?
 	}
