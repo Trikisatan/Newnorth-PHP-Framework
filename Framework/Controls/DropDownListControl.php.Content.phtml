@@ -2,7 +2,10 @@
 if(isset($Control->_Parameters['Label'])) {
 	$Attributes = '';
 
-	if(isset($Control->_Parameters['Id'])) {
+	if(isset($Parameters['Id'])) {
+		$Attributes .= ' for="'.$Parameters['Id'].'"';
+	}
+	else if(isset($Control->_Parameters['Id'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 
@@ -13,7 +16,10 @@ if(isset($Control->_Parameters['Label'])) {
 
 $Attributes = '';
 
-if(isset($Control->_Parameters['Id'])) {
+if(isset($Parameters['Id'])) {
+	$Attributes .= ' id="'.$Parameters['Id'].'"';
+}
+else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
@@ -32,11 +38,28 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 }
 
 ?><select<?=$Attributes?>><?
-	foreach($Control->_Parameters['Options'] as $Value => $Text) {
-		if($Value === $Control->_Parameters['Value']) {
-			?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+	if(isset($Parameters['Value'])) {
+		foreach($Control->_Parameters['Options'] as $Value => $Text) {
+			if($Value === $Parameters['Value']) {
+				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+			}
+			else {
+				?><option value="<?=$Value?>"><?=$Text?></option><?
+			}
 		}
-		else {
+	}
+	else if(isset($Control->_Parameters['Value'])) {
+		foreach($Control->_Parameters['Options'] as $Value => $Text) {
+			if($Value === $Control->_Parameters['Value']) {
+				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+			}
+			else {
+				?><option value="<?=$Value?>"><?=$Text?></option><?
+			}
+		}
+	}
+	else {
+		foreach($Control->_Parameters['Options'] as $Value => $Text) {
 			?><option value="<?=$Value?>"><?=$Text?></option><?
 		}
 	}

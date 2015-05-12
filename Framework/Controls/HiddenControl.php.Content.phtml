@@ -1,7 +1,10 @@
 <?
 $Attributes = '';
 
-if(isset($Control->_Parameters['Id'])) {
+if(isset($Parameters['Id'])) {
+	$Attributes .= ' id="'.$Parameters['Id'].'"';
+}
+else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
@@ -15,7 +18,10 @@ if(isset($Control->_Parameters['Form'])) {
 
 $Attributes .= ' type="hidden"';
 
-if(isset($Control->_Parameters['Value'])) {
+if(isset($Parameters['Value'])) {
+	$Attributes .= ' value="'.$Parameters['Value'].'"';
+}
+else if(isset($Control->_Parameters['Value'])) {
 	$Attributes .= ' value="'.$Control->_Parameters['Value'].'"';
 }
 

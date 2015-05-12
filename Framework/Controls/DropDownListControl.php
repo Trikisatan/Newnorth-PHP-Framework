@@ -13,8 +13,6 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 
 		parent::__construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters);
 
-		$this->_Parameters['Value'] = isset($this->_Parameters['Value']) ? (string)$this->_Parameters['Value'] : null;
-
 		if(isset($this->_Parameters['Options'])) {
 			$Options = [];
 

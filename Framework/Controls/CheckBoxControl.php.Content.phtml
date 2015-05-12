@@ -1,7 +1,10 @@
 <?
 $Attributes = '';
 
-if(isset($Control->_Parameters['Id'])) {
+if(isset($Parameters['Id'])) {
+	$Attributes .= ' id="'.$Parameters['Id'].'"';
+}
+else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
@@ -17,15 +20,24 @@ $Attributes .= ' class="CheckBox"';
 
 $Attributes .= ' type="checkbox"';
 
-if(isset($Control->_Parameters['Value'])) {
+if(isset($Parameters['Value'])) {
+	$Attributes .= ' value="'.$Parameters['Value'].'"';
+}
+else if(isset($Control->_Parameters['Value'])) {
 	$Attributes .= ' value="'.$Control->_Parameters['Value'].'"';
 }
 
-if(isset($Control->_Parameters['IsChecked']) && $Control->_Parameters['IsChecked']) {
+if(isset($Parameters['IsChecked']) && $Parameters['IsChecked']) {
+	$Attributes .= ' checked="checked"';
+}
+else if(isset($Control->_Parameters['IsChecked']) && $Control->_Parameters['IsChecked']) {
 	$Attributes .= ' checked="checked"';
 }
 
-if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
+if(isset($Parameters['IsDisabled']) && $Parameters['IsDisabled']) {
+	$Attributes .= ' disabled="disabled"';
+}
+else if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
 	$Attributes .= ' disabled="disabled"';
 }
 
@@ -34,7 +46,10 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 if(isset($Control->_Parameters['Label'])) {
 	$Attributes = '';
 
-	if(isset($Control->_Parameters['Id'])) {
+	if(isset($Parameters['Id'])) {
+		$Attributes .= ' for="'.$Parameters['Id'].'"';
+	}
+	else if(isset($Control->_Parameters['Id'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 

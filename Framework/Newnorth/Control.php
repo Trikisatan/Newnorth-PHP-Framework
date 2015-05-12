@@ -174,8 +174,8 @@ abstract class Control {
 		$this->_Controls->PostExecute();
 	}
 
-	public function Render($PlaceHolder = null, $Return = false) {
-		return call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder, $Return);
+	public function Render($PlaceHolder = null, $Return = false, $Parameters = []) {
+		return call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder, $Return, $Parameters);
 	}
 
 	/* Instance methods */
@@ -192,8 +192,8 @@ abstract class Control {
 		return $this->_Controls->Items[$Alias];
 	}
 
-	public function RenderControl($Alias, $Placeholder = null, $Return = false) {
-		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return);
+	public function RenderControl($Alias, $Placeholder = null, $Return = false, $Parameters = []) {
+		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return, $Parameters);
 	}
 
 	/* Validator methods */

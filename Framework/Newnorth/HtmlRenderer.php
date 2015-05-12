@@ -4,7 +4,7 @@ namespace Framework\Newnorth;
 class HtmlRenderer {
 	/* Static methods */
 
-	public static function Render($Object, $PlaceHolder, $Return) {
+	public static function Render($Object, $PlaceHolder, $Return, $Parameters) {
 		$Directory = $Object->_Directory;
 
 		if($PlaceHolder === null) {
@@ -20,7 +20,7 @@ class HtmlRenderer {
 
 				ob_clean();
 
-				HtmlRenderer::RenderContents($Object, $Directory, $File);
+				HtmlRenderer::RenderContents($Object, $Directory, $File, $Parameters);
 
 				$NewOutput = ob_get_contents();
 
@@ -31,7 +31,7 @@ class HtmlRenderer {
 				return $NewOutput;
 			}
 			else {
-				HtmlRenderer::RenderContents($Object, $Directory, $File);
+				HtmlRenderer::RenderContents($Object, $Directory, $File, $Parameters);
 			}
 		}
 		else {
@@ -40,7 +40,7 @@ class HtmlRenderer {
 
 				ob_clean();
 
-				HtmlRenderer::RenderContents(null, $Directory, $File);
+				HtmlRenderer::RenderContents(null, $Directory, $File, $Parameters);
 
 				$NewOutput = ob_get_contents();
 
@@ -51,12 +51,12 @@ class HtmlRenderer {
 				return $NewOutput;
 			}
 			else {
-				HtmlRenderer::RenderContents(null, $Directory, $File);
+				HtmlRenderer::RenderContents(null, $Directory, $File, $Parameters);
 			}
 		}
 	}
 
-	private static function RenderContents($Control, $Directory, $File) {
+	private static function RenderContents($Control, $Directory, $File, $Parameters) {
 		include($Directory.$File);
 	}
 }

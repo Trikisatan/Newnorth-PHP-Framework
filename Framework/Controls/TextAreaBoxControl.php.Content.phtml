@@ -2,7 +2,10 @@
 if(isset($Control->_Parameters['Label'])) {
 	$Attributes = '';
 
-	if(isset($Control->_Parameters['Id'])) {
+	if(isset($Parameters['Id'])) {
+		$Attributes .= ' for="'.$Parameters['Id'].'"';
+	}
+	else if(isset($Control->_Parameters['Id'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 
@@ -13,7 +16,10 @@ if(isset($Control->_Parameters['Label'])) {
 
 $Attributes = '';
 
-if(isset($Control->_Parameters['Id'])) {
+if(isset($Parameters['Id'])) {
+	$Attributes .= ' id="'.$Parameters['Id'].'"';
+}
+else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
@@ -36,8 +42,11 @@ if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOn
 }
 
 ?><textarea<?=$Attributes?> /><?
-	if(isset($Control->_Parameters['Value'])) {
-		?><?=$Control->_Parameters['Value']?><?
+	if(isset($Parameters['Value'])) {
+		echo $Parameters['Value'];
+	}
+	else if(isset($Control->_Parameters['Value'])) {
+		echo $Control->_Parameters['Value'];
 	}
 ?></textarea><?
 

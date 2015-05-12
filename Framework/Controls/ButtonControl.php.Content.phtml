@@ -1,7 +1,10 @@
 <?
 $Attributes = '';
 
-if(isset($Control->_Parameters['Id'])) {
+if(isset($Parameters['Id'])) {
+	$Attributes .= ' id="'.$Parameters['Id'].'"';
+}
+else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 

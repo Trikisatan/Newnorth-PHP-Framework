@@ -133,8 +133,8 @@ class Layout {
 		$this->_Controls->PostExecute();
 	}
 
-	public function Render($Return = false) {
-		return call_user_func($this->_Renderer.'::Render', $this, null, $Return);
+	public function Render($Return = false, $Parameters = []) {
+		return call_user_func($this->_Renderer.'::Render', $this, null, $Return, $Parameters);
 	}
 
 	/* Instance methods */
@@ -151,8 +151,8 @@ class Layout {
 		return $this->_Controls->Items[$Alias];
 	}
 
-	public function RenderControl($Alias, $Placeholder = null, $Return = false) {
-		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return);
+	public function RenderControl($Alias, $Placeholder = null, $Return = false, $Parameters = []) {
+		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return, $Parameters);
 	}
 
 	/* Validator methods */
