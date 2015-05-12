@@ -133,8 +133,8 @@ class Page {
 		$this->_Controls->PostExecute();
 	}
 
-	public function Render($PlaceHolder = null) {
-		call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder);
+	public function Render($PlaceHolder = null, $Return = false) {
+		return call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder, $Return);
 	}
 
 	/* Instance methods */
@@ -151,8 +151,8 @@ class Page {
 		return $this->_Controls->Items[$Alias];
 	}
 
-	public function RenderControl($Alias) {
-		$this->_Controls->Items[$Alias]->Render();
+	public function RenderControl($Alias, $Placeholder = null, $Return = false) {
+		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return);
 	}
 
 	/* Validator methods */
