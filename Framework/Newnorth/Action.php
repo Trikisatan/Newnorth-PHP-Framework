@@ -150,7 +150,7 @@ class Action {
 					break;
 				}
 
-				$Object = isset($Parameters['Object']) ? $GLOBALS['Application']->GetObject($this->Owner, $Parameters['Object']) : $this->Owner;
+				$Object = isset($Parameters['Object']) ? $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['Object']) : $this->Owner;
 
 				if($Object === null) {
 					throw new RuntimeException(
@@ -185,7 +185,7 @@ class Action {
 					$IsValid = false;
 
 					if(isset($Parameters['ErrorMessage'])) {
-						$SupervisorObject = isset($Parameters['SupervisorObject']) ? $GLOBALS['Application']->GetObject($this->Owner, $Parameters['SupervisorObject']) : $Object;
+						$SupervisorObject = isset($Parameters['SupervisorObject']) ? $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['SupervisorObject']) : $Object;
 
 						$SupervisorObject->_ErrorMessages[] = $Parameters['ErrorMessage'];
 					}

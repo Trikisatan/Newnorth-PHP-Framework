@@ -200,10 +200,21 @@ class Application {
 
 	/* Instance methods */
 
-	public function GetObject($ScopeObject, $Name) {
+	public function GetObject($Scope, $Name) {
 		if($Name[0] !== '/') {
-			if($ScopeObject !== null) {
-				$Name = $ScopeObject.'/'.$Name;
+			while(substr($Name, 0, 3) === '../') {
+				$Name = substr($Name, 3);
+
+				$Slash = strrpos($Scope, '/', -1);
+
+				$Scope = substr($Scope, 0, $Slash + 1);
+			}
+
+			if(!isset($Name[0]) || $Name === './') {
+				$Scope = substr($Scope, 0, -1);
+			}
+			else {
+				$Name = $Scope.'/'.$Name;
 			}
 		}
 
