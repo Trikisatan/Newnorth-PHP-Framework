@@ -150,11 +150,19 @@ abstract class DbConditionGroup extends DbCondition {
 }
 
 class DbAnd extends DbConditionGroup {
+	/* Magic methods */
 
+	public function __construct($Conditions = []) {
+		$this->Conditions = $Conditions;
+	}
 }
 
 class DbOr extends DbConditionGroup {
+	/* Magic methods */
 
+	public function __construct($Conditions = []) {
+		$this->Conditions = $Conditions;
+	}
 }
 
 class DbEqualTo extends DbCondition {
