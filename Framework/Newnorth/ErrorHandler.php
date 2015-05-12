@@ -30,9 +30,6 @@ class ErrorHandler {
 
 			throw new RerouteException($Parameters);
 		}
-		else {
-			die('500 Internal Server Error');
-		}
 	}
 
 	public static function FormatException(\Exception $Exception) {
