@@ -113,11 +113,11 @@ abstract class Control {
 
 		$this->_Parent = $Parent;
 
-		$this->_Directory = $Directory;
+		$this->_Directory = isset($this->_Directory[0]) ? $this->_Directory : $Directory;
 
-		$this->_Namespace = $Namespace;
+		$this->_Namespace = isset($this->_Namespace[0]) ? $this->_Namespace : $Namespace;
 
-		$this->_Name = $Name;
+		$this->_Name = isset($this->_Name[0]) ? $this->_Name : $Name;
 
 		$this->_Alias = $Alias;
 

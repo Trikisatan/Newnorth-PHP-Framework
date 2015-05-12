@@ -76,11 +76,11 @@ class Layout {
 	public function __construct($Directory, $Namespace, $Name) {
 		$this->_Id = str_replace('\\', '/', $Namespace).$Name;
 
-		$this->_Directory = $Directory;
+		$this->_Directory = isset($this->_Directory[0]) ? $this->_Directory : $Directory;
 
-		$this->_Namespace = $Namespace;
+		$this->_Namespace = isset($this->_Namespace[0]) ? $this->_Namespace : $Namespace;
 
-		$this->_Name = $Name;
+		$this->_Name = isset($this->_Name[0]) ? $this->_Name : $Name;
 
 		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
 

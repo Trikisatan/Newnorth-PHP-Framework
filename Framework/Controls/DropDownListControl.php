@@ -5,6 +5,12 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
+		$this->_Directory = FRAMEWORK_DIRECTORY.'Controls/';
+
+		$this->_Namespace = '\\Framework\\Controls\\';
+
+		$this->_Name = 'DropDownListControl';
+
 		parent::__construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters);
 
 		$this->_Parameters['Value'] = isset($this->_Parameters['Value']) ? (string)$this->_Parameters['Value'] : null;
