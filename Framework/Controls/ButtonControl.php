@@ -1,7 +1,7 @@
 <?
 namespace Framework\Controls;
 
-class ButtonControl extends InputControl {
+class ButtonControl extends \Framework\Newnorth\Control {
 
 }
 ?>

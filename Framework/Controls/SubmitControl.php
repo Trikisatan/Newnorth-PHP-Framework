@@ -1,7 +1,7 @@
 <?
 namespace Framework\Controls;
 
-class SubmitControl extends InputControl {
+class SubmitControl extends \Framework\Newnorth\Control {
 
 }
 ?>

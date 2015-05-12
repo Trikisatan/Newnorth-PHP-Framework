@@ -61,12 +61,18 @@ class Connection extends DbConnection {
 	/* Instance methods */
 
 	// TODO: Add support for using a select query as an input.
-	public function Insert(DbInsertQuery $Query) {
-		return $this->Query(
+	public function Insert(DbInsertQuery $Query, $Execute = true) {
+		$Query =
 			'INSERT INTO `'.$Query->Source.'`'.
 			$this->Insert_ProcessColumns($Query->Columns).
-			$this->Insert_ProcessValues($Query->Values)
-		);
+			$this->Insert_ProcessValues($Query->Values);
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
 	}
 
 	private function Insert_ProcessColumns($Columns) {
@@ -102,12 +108,18 @@ class Connection extends DbConnection {
 		return ' VALUES ('.$Sql.')';
 	}
 
-	public function Update(DbUpdateQuery $Query) {
-		return $this->Query(
+	public function Update(DbUpdateQuery $Query, $Execute = true) {
+		$Query =
 			'UPDATE '.$this->Update_ProcessSources($Query->Sources).
 			' SET '.$this->Update_ProcessChanges($Query->Changes).
-			$this->Update_ProcessConditions($Query->Conditions)
-		);
+			$this->Update_ProcessConditions($Query->Conditions);
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
 	}
 
 	// TODO: Add support for join method.
@@ -116,31 +128,28 @@ class Connection extends DbConnection {
 		$Count = count($Sources);
 
 		if($Count === 0) {
-			throw new RuntimeException('No source specified.');
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
+		else {
+			$Sql = '`'.$Sources[0]->Expression.'`';
 
-		$Sql = '`'.$Sources[0]->Reference.'`';
-
-		if($Sources[0]->Alias !== null) {
-			$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-		}
-
-		for($I = 1; $I < $Count; ++$I) {
-			$Sql = ', `'.$Sources[$I]->Reference.'`';
-
-			if($Sources[$I]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
+			if($Sources[0]->Alias !== null) {
+				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
 			}
-		}
 
-		return $Sql;
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function Update_ProcessChanges($Changes) {
 		$Count = count($Changes);
 
 		if($Count === 0) {
-			throw new RuntimeException('No changes specified.');
+			throw new \Framework\Newnorth\RuntimeException('No changes specified.');
 		}
 
 		$Sql = $this->ProcessExpression_DbColumn($Changes[0]->Column).'='.$this->ProcessExpression($Changes[0]->Value);
@@ -161,12 +170,18 @@ class Connection extends DbConnection {
 		}
 	}
 
-	public function Delete(DbDeleteQuery $Query) {
-		return $this->Query(
+	public function Delete(DbDeleteQuery $Query, $Execute = true) {
+		$Query =
 			'DELETE'.$this->Delete_ProcessTargets($Query->Targets).
 			' FROM '.$this->Delete_ProcessSources($Query->Sources).
-			$this->Delete_ProcessConditions($Query->Conditions)
-		);
+			$this->Delete_ProcessConditions($Query->Conditions);
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
 	}
 
 	private function Delete_ProcessTargets($Targets) {
@@ -191,24 +206,21 @@ class Connection extends DbConnection {
 		$Count = count($Sources);
 
 		if($Count === 0) {
-			throw new RuntimeException('No source specified.');
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
+		else {
+			$Sql = '`'.$Sources[0]->Expression.'`';
 
-		$Sql = '`'.$Sources[0]->Reference.'`';
-
-		if($Sources[0]->Alias !== null) {
-			$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-		}
-
-		for($I = 1; $I < $Count; ++$I) {
-			$Sql = ', `'.$Sources[$I]->Reference.'`';
-
-			if($Sources[$I]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
+			if($Sources[0]->Alias !== null) {
+				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
 			}
-		}
 
-		return $Sql;
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function Delete_ProcessConditions(DbCondition $Condition = null) {
@@ -220,15 +232,21 @@ class Connection extends DbConnection {
 		}
 	}
 
-	public function Find(DbSelectQuery $Query) {
-		return $this->Query(
+	public function Find(DbSelectQuery $Query, $Execute = true) {
+		$Query =
 			'SELECT '.$this->Find_ProcessColumns($Query->Columns).
 			' FROM '.$this->Find_ProcessSources($Query->Sources).
 			$this->Find_ProcessConditions($Query->Conditions).
 			$this->Find_ProcessGroups($Query->Groups).
 			$this->Find_ProcessSorts($Query->Sorts).
-			' LIMIT 1'
-		);
+			' LIMIT 1';
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
 	}
 
 	private function Find_ProcessColumns($Columns) {
@@ -259,24 +277,21 @@ class Connection extends DbConnection {
 		$Count = count($Sources);
 
 		if($Count === 0) {
-			throw new RuntimeException('No source specified.');
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
+		else {
+			$Sql = '`'.$Sources[0]->Expression.'`';
 
-		$Sql = '`'.$Sources[0]->Reference.'`';
-
-		if($Sources[0]->Alias !== null) {
-			$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-		}
-
-		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', `'.$Sources[$I]->Reference.'`';
-
-			if($Sources[$I]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
+			if($Sources[0]->Alias !== null) {
+				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
 			}
-		}
 
-		return $Sql;
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function Find_ProcessConditions(DbCondition $Conditions = null) {
@@ -322,15 +337,21 @@ class Connection extends DbConnection {
 		}
 	}
 
-	public function FindAll(DbSelectQuery $Query) {
-		return $this->Query(
+	public function FindAll(DbSelectQuery $Query, $Execute = true) {
+		$Query =
 			'SELECT '.$this->FindAll_ProcessColumns($Query->Columns).
 			' FROM '.$this->FindAll_ProcessSources($Query->Sources).
 			$this->FindAll_ProcessConditions($Query->Conditions).
 			$this->FindAll_ProcessGroups($Query->Groups).
 			$this->FindAll_ProcessSorts($Query->Sorts).
-			$this->FindAll_ProcessLimit($Query->MaxRows, $Query->FirstRow)
-		);
+			$this->FindAll_ProcessLimit($Query->MaxRows, $Query->FirstRow);
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
 	}
 
 	private function FindAll_ProcessColumns($Columns) {
@@ -361,24 +382,21 @@ class Connection extends DbConnection {
 		$Count = count($Sources);
 
 		if($Count === 0) {
-			throw new RuntimeException('No source specified.');
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
+		else {
+			$Sql = '`'.$Sources[0]->Expression.'`';
 
-		$Sql = '`'.$Sources[0]->Reference.'`';
-
-		if($Sources[0]->Alias !== null) {
-			$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-		}
-
-		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', `'.$Sources[$I]->Reference.'`';
-
-			if($Sources[$I]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
+			if($Sources[0]->Alias !== null) {
+				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
 			}
-		}
 
-		return $Sql;
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function FindAll_ProcessConditions(DbCondition $Conditions = null) {
@@ -438,18 +456,24 @@ class Connection extends DbConnection {
 		}
 	}
 
-	public function Count(DbSelectQuery $Query) {
-		$Result = $this->Query(
+	public function Count(DbSelectQuery $Query, $Execute = true) {
+		$Query =
 			'SELECT COUNT(*)'.
 			' FROM '.$this->Count_ProcessSources($Query->Sources).
-			$this->Count_ProcessConditions($Query->Conditions)
-		);
+			$this->Count_ProcessConditions($Query->Conditions);
 
-		if($Result instanceof Result) {
-			return $Result->Fetch() ? $Result->GetInt(0) : 0;
+		if($Execute) {
+			$Result = $this->Query($Query);
+
+			if($Result instanceof Result) {
+				return $Result->Fetch() ? $Result->GetInt(0) : 0;
+			}
+			else {
+				return $Result;
+			}
 		}
 		else {
-			return $Result;
+			return $Query;
 		}
 	}
 
@@ -459,24 +483,21 @@ class Connection extends DbConnection {
 		$Count = count($Sources);
 
 		if($Count === 0) {
-			throw new RuntimeException('No source specified.');
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
+		else {
+			$Sql = '`'.$Sources[0]->Expression.'`';
 
-		$Sql = '`'.$Sources[0]->Reference.'`';
-
-		if($Sources[0]->Alias !== null) {
-			$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-		}
-
-		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', `'.$Sources[$I]->Reference.'`';
-
-			if($Sources[$I]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[$I]->Alias.'`';
+			if($Sources[0]->Alias !== null) {
+				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
 			}
-		}
 
-		return $Sql;
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function Count_ProcessConditions(DbCondition $Conditions = null) {
@@ -540,6 +561,53 @@ class Connection extends DbConnection {
 		return $Result->Fetch() ? $Result->GetInt(0) : 0;
 	}
 
+	private function ProcessSource(\Framework\Newnorth\DbSource $Source) {
+		switch($Source->Method) {
+			case null: {
+				$Sql = ', ';
+
+				if($Source->Conditions !== null) {
+					throw new \Framework\Newnorth\RuntimeException('Conditions not available when not using a join method.');
+				}
+
+				break;
+			}
+			case DB_INNERJOIN: {
+				$Sql = 'INNER JOIN';
+
+				if($Source->Conditions === null) {
+					throw new \Framework\Newnorth\RuntimeException('Conditions required when using a join method.');
+				}
+
+				break;
+			}
+			case DB_LEFTJOIN: {
+				$Sql = 'LEFT JOIN';
+
+				if($Source->Conditions === null) {
+					throw new \Framework\Newnorth\RuntimeException('Conditions required when using a join method.');
+				}
+
+				break;
+			}
+			default: {
+				throw new \Framework\Newnorth\RuntimeException('Join method not recognized.');
+			}
+		}
+
+		$Sql .= ' `'.$Source->Expression.'`';
+
+		if($Source->Alias !== null) {
+			$Sql .= ' AS `'.$Source->Alias.'`';
+		}
+
+		if($Source->Conditions !== null) {
+			$Sql .= ' ON '.$this->ProcessCondition($Source->Conditions);
+		}
+
+		return $Sql;
+	}
+
 	private function ProcessCondition(DbCondition $Condition) {
 		if($Condition instanceof DbAnd) {
 			return $this->ProcessCondition_DbAnd($Condition);
@@ -567,6 +635,9 @@ class Connection extends DbConnection {
 		}
 		else if($Condition instanceof DbLessThan) {
 			return $this->ProcessCondition_DbLessThan($Condition);
+		}
+		else if($Condition instanceof \Framework\Newnorth\DbIn) {
+			return $this->ProcessCondition_DbIn($Condition);
 		}
 	}
 
@@ -630,6 +701,23 @@ class Connection extends DbConnection {
 
 	private function ProcessCondition_DbLessThan(DbLessThan $Condition) {
 		return $this->ProcessExpression($Condition->A).' < '.$this->ProcessExpression($Condition->B);
+	}
+
+	private function ProcessCondition_DbIn(\Framework\Newnorth\DbIn $Condition) {
+		$Count = count($Condition->B);
+
+		if(0 < $Count) {
+			$B = $this->ProcessExpression($Condition->B[0]);
+
+			for($I = 1; $I < $Count; ++$I) {
+				$B .= ', '.$this->ProcessExpression($Condition->B[$I]);
+			}
+
+			return $this->ProcessExpression($Condition->A).' IN ('.$B.')';
+		}
+		else {
+			throw new \exception('Empty in-condition.');
+		}
 	}
 
 	private function ProcessExpression(DbExpression $Expression) {

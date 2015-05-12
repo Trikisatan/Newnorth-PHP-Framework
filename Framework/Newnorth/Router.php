@@ -4,41 +4,83 @@ namespace Framework\Newnorth;
 class Router {
 	/* Static methods */
 
-	static private function Reroute($Parameters) {
-		if(count(array_diff($GLOBALS['Parameters'], $Parameters)) === 0) {
-			throw new RuntimeException(
-				'Rerouting loop encountered.',
-				[
-					'Route parameters' => $Parameters,
-				]
-			);
+	private static function Reroute(array $Parameters) {
+		if(!isset($Parameters['Locale'])) {
+			if(isset($GLOBALS['Parameters']['Locale'])) {
+				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+			}
+			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			}
 		}
-		else {
-			throw new RerouteException($Parameters);
-		}
+
+		throw new RerouteException($Parameters);
 	}
 
-	static public function ErrorPage() {
+	public static function RerouteErrorPage() {
 		header('HTTP/1.0 500 Internal Server Error');
 
 		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['Error']);
 	}
 
-	static public function NotFoundPage() {
+	public static function RerouteForbiddenPage() {
+		header('HTTP/1.0 403 Forbidden');
+
+		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['Forbidden']);
+	}
+
+	public static function RerouteNotFoundPage() {
 		header('HTTP/1.0 404 Not Found');
 
 		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['NotFound']);
 	}
 
-	static public function Redirect($Location) {
-		if(is_array($Location)) {
-			header('Location: '.$GLOBALS['Routing']->GetUrl($Location));
-		}
-		else {
-			header('Location: '.$Location);
+	public static function Redirect($Path = '', array $Parameters = [], $QueryString = '') {
+		throw new RedirectException(self::GetUrl($Path, $Parameters, $QueryString));
+	}
+
+	public static function ParseUrl($Url, Route &$Route = null, array &$Parameters = null) {
+		return $GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $Parameters = []);
+	}
+
+	public static function GetUrl($Path = '', array $Parameters = [], $QueryString = '') {
+		// Add current parameters.
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
+			}
 		}
 
-		exit();
+		if(isset($Path[0])) {
+			if($Path[0] === '/') {
+				if(isset($Path[1])) {
+					return $GLOBALS['Routing']->Route->GetUrl(explode('/', substr($Path, 1)), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+				}
+				else {
+					return $GLOBALS['Routing']->Route->GetUrl([], false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+				}
+			}
+			else if($GLOBALS['Route'] === null) {
+				throw new RuntimeException(
+					'Unable to get URL to a relative route from a non-existing route.',
+					[
+						'Current Parameters' => $GLOBALS['Parameters'],
+						'Requested path' => $Path,
+						'Requested parameters' => $Parameters,
+						'Requested query string' => $QueryString,
+					]
+				);
+			}
+			else {
+				return $GLOBALS['Route']->GetUrl(explode('/', $Path), true, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+			}
+		}
+		else if($GLOBALS['Parameters']['Page'] === $GLOBALS['Routing']->Route->FullName) {
+			return $GLOBALS['Routing']->Route->GetUrl([], false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+		}
+		else {
+			return $GLOBALS['Routing']->Route->GetUrl(explode('/', $GLOBALS['Parameters']['Page']), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+		}
 	}
 }
 ?>

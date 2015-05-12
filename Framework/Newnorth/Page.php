@@ -1,8 +1,61 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class Page {
+class Page {
+	/* Static methods */
+
+	public static function Instantiate($Path, &$Page) {
+		Page::ParsePath(
+			$Path,
+			$FilePath,
+			$Directory,
+			$ClassName,
+			$Namespace,
+			$Name
+		);
+
+		if(!class_exists($ClassName, false)) {
+			if(file_exists($FilePath)) {
+				include($FilePath);
+			}
+
+			if(!class_exists($ClassName, false)) {
+				throw new RuntimeException(
+					'Unable to load page.',
+					[
+						'Path' => $Path,
+						'File path' => $FilePath,
+						'Directory' => $Directory,
+						'Class name' => $ClassName,
+						'Namespace' => $Namespace,
+						'Name' => $Name,
+					]
+				);
+			}
+		}
+
+		$Page = new $ClassName($Directory, $Namespace, $Name);
+	}
+
+	private static function ParsePath($Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
+		$FilePath = $GLOBALS['Config']->Files['Pages'].$Path.'Page.php';
+
+		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
+
+		$ClassName = '\\'.str_replace('/', '\\', $Path).'Page';
+
+		$Namespace = strrpos($ClassName, '\\');
+
+		$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
+
+		$Name = strrpos($Path, '/');
+
+		$Name = (($Name === false) ? $Path : substr($Path, $Name + 1)).'Page';
+	}
+
 	/* Instance variables */
+
+	public $_Id;
 
 	public $_Directory;
 
@@ -10,32 +63,34 @@ abstract class Page {
 
 	public $_Name;
 
-	public $_Translations;
-
 	public $_Controls;
 
 	public $_Actions;
+
+	public $_ErrorMessages = [];
 
 	public $_Renderer = '\Framework\Newnorth\HtmlRenderer';
 
 	/* Magic methods */
 
 	public function __construct($Directory, $Namespace, $Name) {
-		$this->_Directory = $GLOBALS['Config']->Files['Pages'].$Directory;
+		$this->_Id = str_replace('\\', '/', $Namespace).$Name;
+
+		$this->_Directory = $Directory;
 
 		$this->_Namespace = $Namespace;
 
 		$this->_Name = $Name;
 
-		$this->_Translations = new Translations($this, $Directory.$Name.'/');
+		$this->_Controls = new Controls($this);
 
-		$this->_Controls = new Controls($this, $GLOBALS['Config']->Files['Pages'].$Directory.$Name.'/', $Namespace.$Name.'\\');
+		$this->_Actions = new Actions($this, $Directory.$Name.'/');
 
-		$this->_Actions = new Actions($this, $GLOBALS['Config']->Files['Pages'].$Directory.$Name.'/');
+		$GLOBALS['Application']->RegisterObject($this);
 	}
 
 	public function __toString() {
-		return $this->_Directory.$this->_Name;
+		return $this->_Id;
 	}
 
 	/* Life cycle methods */
@@ -93,45 +148,45 @@ abstract class Page {
 	}
 
 	public function GetControl($Alias) {
-		return $this->_Controls[$Alias];
+		return $this->_Controls->Items[$Alias];
 	}
 
 	public function RenderControl($Alias) {
-		$this->_Controls[$Alias]->Render();
+		$this->_Controls->Items[$Alias]->Render();
 	}
 
-	public function GetValidatorMethod($ActionName, &$MethodName, &$MethodObject) {
-		$PossibleMethodName = $ActionName.'Action_'.$MethodName;
+	/* Validator methods */
 
-		if(method_exists($this, $PossibleMethodName)) {
-			$MethodObject = $this;
-			$MethodName = $PossibleMethodName;
-			return true;
-		}
-
-		if(method_exists($this, $MethodName)) {
-			$MethodObject = $this;
-			return true;
-		}
-
-		if($GLOBALS['Layout'] !== null) {
-			return $GLOBALS['Layout']->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
-		}
-
-		return $GLOBALS['Application']->GetValidatorMethod($ActionName, $MethodName, $MethodObject);
+	public function IsBetweenExclusiveValidator($Parameters) {
+		return eval('return $Parameters[\'Min\'] < '.$Parameters['Variable'].' && '.$Parameters['Variable'].' < $Parameters[\'Max\'];');
 	}
 
-	public function GetValidatorRenderMethod($MethodName, &$MethodObject) {
-		if(method_exists($this, $MethodName)) {
-			$MethodObject = $this;
-			return true;
-		}
+	public function IsBetweenInclusiveValidator($Parameters) {
+		return eval('return $Parameters[\'Min\'] <= '.$Parameters['Variable'].' && '.$Parameters['Variable'].' <= $Parameters[\'Max\'];');
+	}
 
-		if($GLOBALS['Layout'] !== null) {
-			return $GLOBALS['Layout']->GetValidatorRenderMethod($MethodName, $MethodObject);
-		}
+	public function IsEMailAddressValidator($Parameters) {
+		return eval('return 0 < preg_match(\'/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+)?$/\', '.$Parameters['Variable'].');');
+	}
 
-		return $GLOBALS['Application']->GetValidatorRenderMethod($MethodName, $MethodObject);
+	public function IsFloatValidator($Parameters) {
+		return eval('return is_numeric('.$Parameters['Variable'].');');
+	}
+
+	public function IsIntValidator($Parameters) {
+		return eval('return ctype_digit('.$Parameters['Variable'].');');
+	}
+
+	public function MaxLengthValidator($Parameters) {
+		return eval('return isset('.$Parameters['Variable'].'[$Parameters[\'Max\']]);');
+	}
+
+	public function MinLengthValidator($Parameters) {
+		return eval('return isset('.$Parameters['Variable'].'[$Parameters[\'Min\']]);');
+	}
+
+	public function NotEmptyValidator($Parameters) {
+		return eval('return isset('.$Parameters['Variable'].'[0]);');
 	}
 }
 ?>

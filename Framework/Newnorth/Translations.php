@@ -4,70 +4,21 @@ namespace Framework\Newnorth;
 class Translations {
 	/* Instance variables */
 
-	private $Owner;
+	public $FilePath;
 
-	private $Directory;
-
-	private $Items = [];
+	public $Items = [];
 
 	/* Magic methods */
 
-	public function __construct($Owner, $Directory) {
-		$this->Owner = $Owner;
-
-		$this->Directory = $Directory;
-
-		$this->TryLoadIniFile();
+	public function __construct($FilePath = 'Translations.ini') {
+		$this->FilePath = $FilePath;
 	}
 
 	/* Instance methods */
 
-	private function TryLoadIniFile() {
-		if(isset($GLOBALS['Parameters']['Locale'][0])) {
-			if(isset($GLOBALS['Config']->Files['Translations'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Translations'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
-			}
-			else if($this->Owner instanceof Layout && isset($GLOBALS['Config']->Files['Layouts'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Layouts'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
-			}
-			else if($this->Owner instanceof Page && isset($GLOBALS['Config']->Files['Pages'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Pages'].$this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
-			}
-			else
-			{
-				$FilePath = $this->Directory.'Translations.'.$GLOBALS['Parameters']['Locale'].'.ini';
-			}
-		}
-		else {
-			if(isset($GLOBALS['Config']->Files['Translations'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Translations'].$this->Directory.'Translations.ini';
-			}
-			else if($this->Owner instanceof Layout && isset($GLOBALS['Config']->Files['Layouts'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Layouts'].$this->Directory.'Translations.ini';
-			}
-			else if($this->Owner instanceof Page && isset($GLOBALS['Config']->Files['Pages'][0]))
-			{
-				$FilePath = $GLOBALS['Config']->Files['Pages'].$this->Directory.'Translations.ini';
-			}
-			else
-			{
-				$FilePath = $this->Directory.'Translations.ini';
-			}
-		}
-
-		if(!file_exists($FilePath)) {
-			return;
-		}
-
-		$Translations = ParseIniFile($FilePath);
-
-		foreach($Translations as $Key => $Value) {
-			$this->Items[$Key] = $Value;
+	public function Initialize() {
+		if(file_exists($this->FilePath)) {
+			$this->Items = ParseIniFile($this->FilePath, false, true);
 		}
 	}
 
@@ -75,7 +26,7 @@ class Translations {
 		$Offset = 0;
 
 		while(0 < preg_match('/(?<!%)%([a-zA-Z0-9_\\/\\\\]+?)%(?!%)/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
-			$Key = $Match[1][0];
+			$Key = str_replace('\/', '/', $Match[1][0]);
 
 			if(isset($this->Items[$Key])) {
 				$Translation = $this->Items[$Key];
@@ -92,7 +43,7 @@ class Translations {
 		$Offset = 0;
 
 		while(0 < preg_match('/(?<!%)%([a-zA-Z0-9_\\/\\\\]+?)\("(.*?)"\)%(?!%)/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
-			$Key = $Match[1][0];
+			$Key = str_replace('\/', '/', $Match[1][0]);
 
 			if(isset($this->Items[$Key])) {
 				$Translation = $this->Items[$Key];

@@ -1,29 +1,41 @@
 <?
 namespace Framework\Controls;
 
-class TextAreaBoxControl extends InputControl {
+class TextAreaBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
-	public function ParseParameters() {
-		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] === true : false;
+	public function PostExecute() {
+		parent::PostExecute();
 
-		$this->_Parameters['IsReadOnly'] = isset($this->_Parameters['IsReadOnly']) ? $this->_Parameters['IsReadOnly'] === true : false;
-
-		if(isset($this->_Parameters['Validators'])) {
-			$this->ParseParameters_Validators($this->_Parameters['Validators']);
+		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 	}
 
-	public function SetValue() {
-		if(method_exists($this->_Parent, $this->_Alias.'_SetValue')) {
-			$this->_Parent->{$this->_Alias.'_SetValue'}($this);
-		}
+	/* Validator methods */
+
+	public function GetMaxLengthValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][$Parameters['Max']]);
 	}
 
-	/* Instance methods */
+	public function GetMinLengthValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][$Parameters['Min']]);
+	}
 
-	public function AutoFill($Value) {
-		$this->_Parameters['Value'] = $Value;
+	public function GetNotEmptyValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][0]);
+	}
+
+	public function PostMaxLengthValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][$Parameters['Max']]);
+	}
+
+	public function PostMinLengthValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][$Parameters['Min']]);
+	}
+
+	public function PostNotEmptyValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][0]);
 	}
 }
 ?>

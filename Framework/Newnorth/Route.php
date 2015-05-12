@@ -4,165 +4,290 @@ namespace Framework\Newnorth;
 class Route {
 	/* Instance variables */
 
+	public $Parent;
+
 	public $Name;
+
+	public $FullName;
 
 	public $Pattern;
 
+	public $TranslatedPatterns = [];
+
 	public $ReversablePattern;
 
-	public $Defaults;
+	public $TranslatedReversablePatterns = [];
 
-	public $Translations;
+	public $Parameters = [];
+
+	public $Routes = [];
 
 	/* Magic methods */
 
-	public function __construct($Name, $Pattern, $Requirements, $Translations, $Defaults) {
-		$this->Name = $Name;
+	public function __construct($Parent, $Name, $Data) {
+		$this->Parent = $Parent;
 
-		$this->Pattern = preg_replace('/(\/)\+\@?([^\/]+)(?=\/|$)/', '(?:\1(?<\2>.+))', $Pattern);
-		$this->Pattern = preg_replace('/(\/)\*\@?([^\/]+)(?=\/|$)/', '(?:\1(?<\2>.*))?', $this->Pattern);
-		foreach($Requirements as $Key => $Value) {
-			$this->Pattern = preg_replace('/(\<'.$Key.'\>)\.\+/', '\1'.$Value, $this->Pattern);
-			$this->Pattern = preg_replace('/(\<'.$Key.'\>)\.\*/', '\1'.$Value, $this->Pattern);
+		if($this->Parent === null) {
+			$this->Name = 'Index';
 		}
-		$this->Pattern = preg_replace('/(\/)\*(\/|$)/', '\1(.*?)\2', $this->Pattern);
-		$this->Pattern = preg_replace('/(\/)\+(\/|$)/', '\1(.+?)\2', $this->Pattern);
-		$this->Pattern = '/^'.str_replace('/', '\/', $this->Pattern).'$/';
+		else {
+			$this->Name = $Name;
+		}
 
-		// Turn "/+@Var/" into "/+Var/"
-		$this->ReversablePattern = preg_replace('/(\/\+)\@?([^\/]+)/', '\1\2', $Pattern);
-		// Turn "/*@Var/" into "/*Var/"
-		$this->ReversablePattern = preg_replace('/(\/\*)\@?([^\/]+)/', '\1\2', $this->ReversablePattern);
+		if($this->Parent === null || $this->Parent->Parent === null) {
+			$this->FullName = $this->Name;
+		}
+		else {
+			$this->FullName = $this->Parent->FullName.'/'.$this->Name;
+		}
 
-		$this->Defaults = $Defaults;
-		$this->Translations = $Translations;
+		if($this->Parent === null) {
+			if(isset($Data['Pattern'][0])) {
+				$this->Pattern = '/^\/'.str_replace('/', '\/', $Data['Pattern']).'\/(.*?)$/';
+			}
+			else {
+				$this->Pattern = '/^\/(.*?)$/';
+			}
+		}
+		else {
+			$this->Pattern = '/^'.str_replace('/', '\/', $Data['Pattern']).'\/(.*?)$/';
+		}
+
+		$this->Pattern = preg_replace('/(\^|\\\\\/)\*(.*?)(?:\((.*?)\))?\\\\\//', '$1(?:(?<$2>$3)\/)?', $this->Pattern);
+
+		$this->Pattern = preg_replace('/(\^|\\\\\/)\+(.*?)(?:\((.*?)\))?\\\\\//', '$1(?<$2>$3)\/', $this->Pattern);
+
+		if(isset($Data['Translations'])) {
+			foreach($Data['Translations'] as $Locale => $Translation) {
+				$this->TranslatedPatterns[$Locale] = str_replace('@', str_replace('/', '\/', $Translation), $this->Pattern);
+			}
+		}
+
+		if($this->Parent === null) {
+			if(isset($Data['Pattern'][0])) {
+				$this->ReversablePattern = '/'.$Data['Pattern'].'/';
+			}
+			else {
+				$this->ReversablePattern = '/';
+			}
+		}
+		else {
+			$this->ReversablePattern = $Data['Pattern'].'/';
+		}
+
+		if(isset($Data['Translations'])) {
+			foreach($Data['Translations'] as $Locale => $Translation) {
+				$this->TranslatedReversablePatterns[$Locale] = str_replace('@', str_replace('/', '\/', $Translation), $this->ReversablePattern);
+			}
+		}
+
+		$this->Parameters = isset($Data['Parameters']) ? $Data['Parameters'] : [];
+
+		if(!isset($this->Parameters['Application'][0])) {
+			$this->Parameters['Application'] = 'Default';
+		}
+
+		if(!isset($this->Parameters['Layout'][0])) {
+			$this->Parameters['Layout'] = 'Default';
+		}
+
+		$this->Parameters['Page'] = $this->FullName;
+
+		if(isset($Data['Routes'])) {
+			foreach($Data['Routes'] as $Name => $Data) {
+				$this->Routes[$Name] = new Route($this, $Name, $Data);
+			}
+		}
 	}
 
 	public function __toString() {
-		return $this->Name;
+		return $this->FullName;
 	}
 
 	/* Instance methods */
 
-	public function GetName() {
-		return $this->Name;
-	}
-
-	public function Match($Url, &$Parameters) {
-		return 0 < preg_match($this->Pattern, $Url, $Parameters);
-	}
-
-	public function SetDefaults(&$Parameters) {
-		foreach($this->Defaults as $ParameterName => $ParameterValue) {
-			if(!isset($Parameters[$ParameterName])) {
-				$Parameters[$ParameterName] = $ParameterValue;
-			}
-		}
-	}
-
-	public function Translate(&$Parameters, $Locale) {
-		if(isset($this->Translations[$Locale])) {
-			foreach($this->Translations[$Locale] as $ParameterName => $Translations) {
-				$ParameterValue = isset($Parameters[$ParameterName]) ? $Parameters[$ParameterName] : '';
-
-				$IsRequired = isset($Parameters[$ParameterName]);
-
-				$IsUpdated = false;
-
-				foreach($Translations as $UpdatedValue => $OriginalValue) {
-					if($ParameterValue === $OriginalValue) {
-						$ParameterValue = $UpdatedValue;
-
-						$IsUpdated = true;
-
-						break;
-					}
+	public function ParseUrl($Url, Route &$Route = null, array &$Parameters) {
+		if(0 < count($this->TranslatedPatterns)) {
+			foreach($this->TranslatedPatterns as $Locale => $Pattern) {
+				if(isset($Locale[0], $Parameters["Locale"]) && $Locale !== $Parameters["Locale"]) {
+					continue;
 				}
 
-				if($IsUpdated) {
-					$Parameters[$ParameterName] = $ParameterValue;
-				}
-				else if($IsRequired) {
-					return false;
-				}
-			}
-		}
+				if(preg_match($Pattern, $Url, $Matches) === 1) {
+					end($Matches);
 
-		return true;
-	}
+					$Url = preg_replace($Pattern, '$'.key($Matches), $Url);
 
-	public function ReversedTranslate(&$Data, $Locale) {
-		if(!isset($this->Translations[$Locale])) {
-			return;
-		}
+					$NewParameters = $Parameters;
 
-		foreach($Data as $Key => $Value) {
-			if(substr($Key, -1) === '?') {
-				$Key = substr($Key, 0, -1);
-			}
+					// If a locale is used for this route, add it to its parameters.
+					$NewParameters["Locale"] = $Locale;
 
-			if(isset($this->Translations[$Locale][$Key][$Value])) {
-				$Data[$Key] = $this->Translations[$Locale][$Key][$Value];
-			}
-		}
-	}
-
-	public function ReversedMatch($Parameters, $Locale, &$Url) {
-		$Url = $this->ReversablePattern;
-
-		foreach($Parameters as $ParameterName => $ParameterValue) {
-			if(substr($ParameterName, -1) === '?') {
-				$ParameterName = substr($ParameterName, 0, -1);
-			}
-
-			if(isset($this->Translations[$Locale][$ParameterName][$ParameterValue])) {
-				$ParameterValue = $this->Translations[$Locale][$ParameterName][$ParameterValue];
-			}
-
-			if(isset($ParameterValue[0])) {
-				$Url = preg_replace('/\/(?:\+|\*)'.$ParameterName.'\//', '/'.$ParameterValue.'/', $Url);
-			}
-			else {
-				$Url = preg_replace('/\/\*'.$ParameterName.'\//', '/', $Url);
-			}
-		}
-
-		$Url = preg_replace('/\/(?:\+|\*)Locale\//', '/'.$Locale.'/', $Url);
-		$Url = preg_replace('/\/(?:\*)(?:[^\/]+)(?:\/|$)/', '/', $Url);
-		$Url = preg_replace('/\/(?:\*)(?:\/|$)/', '/', $Url);
-
-		if($this->Match($Url, $Match)) {
-			if($this->Translate($Match, $Locale)) {
-				$this->SetDefaults($Match);
-
-				foreach($Parameters as $Key => $Value) {
-					$IsRequired = true;
-
-					if(substr($Key, -1) === '?') {
-						$Key = substr($Key, 0, -1);
-
-						$IsRequired = false;
-					}
-
-					if(isset($Match[$Key])) {
-						if($Match[$Key] !== $Value) {
-							return false;
+					// Add new parameters obtained via the pattern.
+					foreach($Matches as $Key => $Value) {
+						if(isset($Value[0]) && !is_int($Key)) {
+							$NewParameters[$Key] = $Value;
 						}
 					}
-					else if($IsRequired) {
-						return false;
+
+					if(isset($Url[0])) {
+						foreach($this->Routes as $PossibleRoute) {
+							if($PossibleRoute->ParseUrl($Url, $Route, $NewParameters)) {
+								$Parameters = $NewParameters;
+
+								return true;
+							}
+						}
 					}
+					else {
+						$Route = $this;
+
+						$Parameters = $NewParameters;
+
+						foreach($this->Parameters as $ParameterName => $ParameterValue) {
+							if(!isset($Parameters[$ParameterName])) {
+								$Parameters[$ParameterName] = $ParameterValue;
+							}
+						}
+
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+		else if(preg_match($this->Pattern, $Url, $Matches) === 1) {
+			end($Matches);
+
+			$Url = preg_replace($this->Pattern, '$'.key($Matches), $Url);
+
+			// Create and use a copy of the parameters in case this route
+			// doesn't prove to be correct in the end, so we easily can switch back.
+			$NewParameters = $Parameters;
+
+			// Add new parameters obtained via the pattern.
+			foreach($Matches as $Key => $Value) {
+				if(isset($Value[0]) && !is_int($Key)) {
+					$NewParameters[$Key] = $Value;
+				}
+			}
+
+			if(isset($Url[0])) {
+				foreach($this->Routes as $PossibleRoute) {
+					if($PossibleRoute->ParseUrl($Url, $Route, $NewParameters)) {
+						$Parameters = $NewParameters;
+
+						return true;
+					}
+				}
+
+				return false;
+			}
+			else {
+				$Route = $this;
+
+				$Parameters = $NewParameters;
+
+				foreach($this->Parameters as $ParameterName => $ParameterValue) {
+					if(!isset($Parameters[$ParameterName])) {
+						$Parameters[$ParameterName] = $ParameterValue;
+					}
+				}
+
+				if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+					$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 				}
 
 				return true;
-			}
-			else {
-				return false;
 			}
 		}
 		else {
 			return false;
 		}
+	}
+
+	public function GetUrl(array $Path, $IsRelative, array $Parameters) {
+		if(0 < count($Path)) {
+			$Node = array_shift($Path);
+
+			if($Node === '..') {
+				return '../'.$this->Parent->GetUrl($Path, true, $Parameters);
+			}
+			else if($Node === '...') {
+				return $this->Parent->GetUrl($Path, true, $Parameters);
+			}
+			else if(!isset($this->Routes[$Node])) {
+				throw new RuntimeException(
+					'Subroute not found.',
+					[
+						'Route' => $this->__toString(),
+						'Subroute' => $Node,
+					]
+				);
+			}
+			else if($IsRelative) {
+				return $this->Routes[$Node]->GetUrl($Path, false, $Parameters);
+			}
+			else {
+				return $this->GetUrl_GetReversablePattern($Parameters).$this->Routes[$Node]->GetUrl($Path, false, $Parameters);
+			}
+		}
+		else if($IsRelative) {
+			return '';
+		}
+		else {
+			return $this->GetUrl_GetReversablePattern($Parameters);
+		}
+	}
+
+	private function GetUrl_GetReversablePattern($Parameters) {
+		if(0 < count($this->TranslatedReversablePatterns)) {
+			if(!isset($Parameters['Locale'])) {
+				if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+					$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+				}
+				else {
+					throw new RuntimeException('Locale not set.');
+				}
+			}
+
+			if(!isset($this->TranslatedReversablePatterns[$Parameters['Locale']])) {
+				throw new RuntimeException('Route not available for current locale.');
+			}
+			else {
+				return $this->GetUrl_GetReversablePattern_ApplyParameters($this->TranslatedReversablePatterns[$Parameters['Locale']], $Parameters);
+			}
+		}
+		else {
+			return $this->GetUrl_GetReversablePattern_ApplyParameters($this->ReversablePattern, $Parameters);
+		}
+	}
+
+	private function GetUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
+		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+			foreach($Matches as $Match) {
+				if(isset($Parameters[$Match[2]])) {
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+				}
+				else {
+					throw new RuntimeException('Parameter "'.$Match[2].'" not set.');
+				}
+			}
+		}
+
+		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+			foreach($Matches as $Match) {
+				if(isset($Parameters[$Match[2]])) {
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+				}
+				else {
+					$ReversablePattern = str_replace($Match[0], $Match[1], $ReversablePattern);
+				}
+			}
+		}
+
+		return $ReversablePattern;
 	}
 }
 ?>

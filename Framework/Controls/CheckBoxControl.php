@@ -1,29 +1,37 @@
 <?
 namespace Framework\Controls;
 
-class CheckBoxControl extends InputControl {
+class CheckBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
-	public function ParseParameters() {
-		$this->_Parameters['IsChecked'] = isset($this->_Parameters['IsChecked']) ? $this->_Parameters['IsChecked'] === true || $this->_Parameters['IsChecked'] === '1' : false;
+	public function PostExecute() {
+		parent::PostExecute();
 
-		$this->_Parameters['IsDisabled'] = isset($this->_Parameters['IsDisabled']) ? $this->_Parameters['IsDisabled'] === true : false;
+		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+		}
 
-		if(isset($this->_Parameters['Validators'])) {
-			$this->ParseParameters_Validators($this->_Parameters['Validators']);
+		if(method_exists($this->_Parent, 'SetControlIsChecked_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlIsChecked_'.$this->_Alias}($this);
 		}
 	}
 
-	public function SetValue() {
-		if(method_exists($this->_Parent, $this->_Alias.'_SetValue')) {
-			$this->_Parent->{$this->_Alias.'_SetValue'}($this);
-		}
+	/* Validator methods */
+
+	public function GetIsCheckedValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']]);
 	}
 
-	/* Instance methods */
+	public function GetIsNotCheckedValidator($Parameters) {
+		return !isset($_POST[$this->_Parameters['Name']]);
+	}
 
-	public function AutoFill($Value) {
-		$this->_Parameters['IsChecked'] = ($Value === '1');
+	public function PostIsCheckedValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']]);
+	}
+
+	public function PostIsNotCheckedValidator($Parameters) {
+		return !isset($_POST[$this->_Parameters['Name']]);
 	}
 }
 ?>

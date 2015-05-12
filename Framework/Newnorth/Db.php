@@ -2,22 +2,27 @@
 namespace Framework\Newnorth;
 
 define('DB_ASC', 1);
+
 define('DB_DESC', 2);
+
+define('DB_INNERJOIN', 1);
+
+define('DB_LEFTJOIN', 2);
 
 abstract class DbConnection {
 	/* Instance methods */
 
-	public abstract function Insert(DbInsertQuery $Query);
+	public abstract function Insert(DbInsertQuery $Query, $Execute);
 
-	public abstract function Update(DbUpdateQuery $Query);
+	public abstract function Update(DbUpdateQuery $Query, $Execute);
 
-	public abstract function Delete(DbDeleteQuery $Query);
+	public abstract function Delete(DbDeleteQuery $Query, $Execute);
 
-	public abstract function Find(DbSelectQuery $Query);
+	public abstract function Find(DbSelectQuery $Query, $Execute);
 
-	public abstract function FindAll(DbSelectQuery $Query);
+	public abstract function FindAll(DbSelectQuery $Query, $Execute);
 
-	public abstract function Count(DbSelectQuery $Query);
+	public abstract function Count(DbSelectQuery $Query, $Execute);
 
 	public abstract function Lock($Sources);
 
@@ -54,6 +59,30 @@ abstract class DbResult {
 	public abstract function IsNull($Column);
 }
 
+class DbSource {
+	/* Instance variables */
+
+	public $Expression;
+
+	public $Alias;
+
+	public $Method;
+
+	public $Conditions;
+
+	/* Magic methods */
+
+	public function __construct($Expression, $Alias = null, $Method = null, $Conditions = null) {
+		$this->Expression = $Expression;
+
+		$this->Alias = $Alias;
+
+		$this->Method = $Method;
+
+		$this->Conditions = $Conditions;
+	}
+}
+
 abstract class DbCondition {
 
 }
@@ -67,41 +96,55 @@ abstract class DbConditionGroup extends DbCondition {
 
 	public function Add(DbCondition $Condition) {
 		$this->Conditions[] = $Condition;
+
 		return $this;
 	}
 
 	public function EqualTo($A, $B) {
 		$this->Conditions[] = new DbEqualTo($A, $B);
+
 		return $this;
 	}
 
 	public function Like($A, $B) {
 		$this->Conditions[] = new DbLike($A, $B);
+
 		return $this;
 	}
 
 	public function Contains($A, $B) {
 		$this->Conditions[] = new DbContains($A, $B);
+
 		return $this;
 	}
 
 	public function StartsWith($A, $B) {
 		$this->Conditions[] = new DbStartsWith($A, $B);
+
 		return $this;
 	}
 
 	public function EndsWith($A, $B) {
 		$this->Conditions[] = new DbEndsWith($A, $B);
+
 		return $this;
 	}
 
 	public function GreaterThan($A, $B) {
 		$this->Conditions[] = new DbGreaterThan($A, $B);
+
 		return $this;
 	}
 
 	public function LessThan($A, $B) {
 		$this->Conditions[] = new DbLessThan($A, $B);
+
+		return $this;
+	}
+
+	public function In($A, array $B) {
+		$this->Conditions[] = new DbIn($A, $B);
+
 		return $this;
 	}
 }
@@ -226,10 +269,28 @@ class DbLessThan extends DbCondition {
 	}
 }
 
+class DbIn extends DbCondition {
+	/* Instance variables */
+
+	public $A;
+
+	public $B = [];
+
+	/* Magic methods */
+
+	public function __construct($A, array $B) {
+		$this->A = DbExpression::Parse($A);
+
+		for($I = 0; $I < count($B); ++$I) {
+			$this->B[] = DbExpression::Parse($B[$I]);
+		}
+	}
+}
+
 class DbExpression {
 	/* Static methods */
 
-	static public function Parse($Expression) {
+	public static function Parse($Expression) {
 		if($Expression instanceof DbExpression) {
 			return $Expression;
 		}
@@ -284,7 +345,7 @@ class DbExpression {
 		}
 	}
 
-	static public function ParseDbColumn($Expression) {
+	public static function ParseDbColumn($Expression) {
 		$Length = strlen($Expression);
 
 		if(2 < $Length && $Expression[0] === '`' && $Expression[$Length - 1] === '`') {
@@ -416,12 +477,12 @@ class DbUpdateQuery {
 
 	/* Instance methods */
 
-	public function AddSource($Expression, $Alias = null) {
-		if($Expression instanceof DbUpdateSource) {
+	public function AddSource($Expression, $Alias = null, $Method = null, $Conditions = null) {
+		if($Expression instanceof DbSource) {
 			return $this->Sources[] = $Source;
 		}
 		else {
-			return $this->Sources[] = new DbUpdateSource($Expression, $Alias);
+			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
 	}
 
@@ -435,22 +496,6 @@ class DbUpdateQuery {
 		}
 
 		return $this->Changes[] = new DbUpdateChange($Column, $Value);
-	}
-}
-
-class DbUpdateSource {
-	/* Instance variables */
-
-	public $Reference;
-
-	public $Alias = null;
-
-	/* Magic methods */
-
-	public function __construct($Reference, $Alias = null) {
-		$this->Reference = $Reference;
-
-		$this->Alias = $Alias;
 	}
 }
 
@@ -485,29 +530,13 @@ class DbDeleteQuery {
 		return $this->Targets[] = $Target;
 	}
 
-	public function AddSource($Expression, $Alias = null) {
-		if($Expression instanceof DbDeleteSource) {
+	public function AddSource($Expression, $Alias = null, $Method = null, $Conditions = null) {
+		if($Expression instanceof DbSource) {
 			return $this->Sources[] = $Source;
 		}
 		else {
-			return $this->Sources[] = new DbDeleteSource($Expression, $Alias);
+			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
-	}
-}
-
-class DbDeleteSource {
-	/* Instance variables */
-
-	public $Reference;
-
-	public $Alias = null;
-
-	/* Magic methods */
-
-	public function __construct($Reference, $Alias = null) {
-		$this->Reference = $Reference;
-
-		$this->Alias = $Alias;
 	}
 }
 
@@ -539,12 +568,12 @@ class DbSelectQuery {
 		}
 	}
 
-	public function AddSource($Expression, $Alias = null) {
-		if($Expression instanceof DbSelectSource) {
+	public function AddSource($Expression, $Alias = null, $Method = null, $Conditions = null) {
+		if($Expression instanceof DbSource) {
 			return $this->Sources[] = $Source;
 		}
 		else {
-			return $this->Sources[] = new DbSelectSource($Expression, $Alias);
+			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
 	}
 
@@ -583,22 +612,6 @@ class DbSelectColumn {
 
 	public function __construct($Expression, $Alias = null) {
 		$this->Expression = DbExpression::Parse($Expression);
-
-		$this->Alias = $Alias;
-	}
-}
-
-class DbSelectSource {
-	/* Instance variables */
-
-	public $Reference;
-
-	public $Alias = null;
-
-	/* Magic methods */
-
-	public function __construct($Reference, $Alias = null) {
-		$this->Reference = $Reference;
 
 		$this->Alias = $Alias;
 	}

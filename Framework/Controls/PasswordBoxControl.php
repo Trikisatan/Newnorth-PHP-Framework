@@ -1,21 +1,41 @@
 <?
 namespace Framework\Controls;
 
-class PasswordBoxControl extends InputControl {
+class PasswordBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
-	public function ParseParameters() {
-		$this->_Parameters['UseJavaScript'] = isset($this->_Parameters['UseJavaScript']) ? $this->_Parameters['UseJavaScript'] == true : false;
+	public function PostExecute() {
+		parent::PostExecute();
 
-		if(isset($this->_Parameters['Validators'])) {
-			$this->ParseParameters_Validators($this->_Parameters['Validators']);
+		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 	}
 
-	/* Instance methods */
+	/* Validator methods */
 
-	public function AutoFill($Value) {
-		$this->_Parameters['Value'] = $Value;
+	public function GetMaxLengthValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][$Parameters['Max']]);
+	}
+
+	public function GetMinLengthValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][$Parameters['Min']]);
+	}
+
+	public function GetNotEmptyValidator($Parameters) {
+		return isset($_GET[$this->_Parameters['Name']][0]);
+	}
+
+	public function PostMaxLengthValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][$Parameters['Max']]);
+	}
+
+	public function PostMinLengthValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][$Parameters['Min']]);
+	}
+
+	public function PostNotEmptyValidator($Parameters) {
+		return isset($_POST[$this->_Parameters['Name']][0]);
 	}
 }
 ?>

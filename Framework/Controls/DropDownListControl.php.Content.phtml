@@ -1,0 +1,52 @@
+<?
+if(isset($Control->_Parameters['Label'])) {
+	$Attributes = '';
+
+	if(isset($Control->_Parameters['Id'])) {
+		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
+	}
+
+	$Attributes .= ' class="DropDownListLabel"';
+
+	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
+}
+
+$Attributes = '';
+
+if(isset($Control->_Parameters['Id'])) {
+	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
+}
+
+if(isset($Control->_Parameters['Name'])) {
+	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
+}
+
+if(isset($Control->_Parameters['Form'])) {
+	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
+}
+
+$Attributes .= ' class="DropDownList"';
+
+if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
+	$Attributes .= ' disabled="disabled"';
+}
+
+?><select<?=$Attributes?>><?
+	foreach($Control->_Parameters['Options'] as $Value => $Text) {
+		if($Value === $Control->_Parameters['Value']) {
+			?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+		}
+		else {
+			?><option value="<?=$Value?>"><?=$Text?></option><?
+		}
+	}
+?></select><?
+
+if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
+	?><div class="ErrorMessages"><?
+		foreach($Control->_ErrorMessages as $ErrorMessage) {
+			?><p><?=$ErrorMessage?></p><?
+		}
+	?></div><?
+}
+?>

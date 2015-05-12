@@ -8,61 +8,88 @@ class Config {
 
 	public $Data;
 
-	public $Files = [
-		'DataManagers' => '',
-		'DataTypes' => '',
-		'EMailTemplates' => '',
-		'Layouts' => '',
-		'Pages' => '',
-		'Controls' => '',
-		'Translations' => '',
-		'ErrorLog' => 'errors.log',
-	];
+	public $Defaults;
 
-	public $ErrorHandling = [
-		'Log' => true,
-		'LogMethods' => [
-			'\Framework\Newnorth\Logger::ErrorLog',
-		],
-		'Report' => false,
-		'ReportMethods' => [
-			'\Framework\Newnorth\EMailer::ErrorReport',
-		],
-		'DisplayErrorMessages' => true,
-		'DisplayErrorMessageDetails' => true,
-		'RouteNotFound' => [
-			'Log' => true,
-			'Report' => false,
-		],
-		'Pages' => [
-			'Error' => [],
-			'NotFound' => [],
-		],
-	];
+	public $Files;
 
-	public $Translation = [
-		'ThrowException' => true,
-		'Log' => true,
-		'Report' => true,
-	];
+	public $ErrorHandling;
 
-	public $EMailer = [
-		'ErrorReport' => [
-			'From' => '',
-			'To' => '',
-		],
-	];
+	public $Translation;
+
+	public $EMailer;
 
 	/* Magic methods */
 
-	public function __construct($FilePath = 'Config.ini') {
+	public function __construct($FilePath = null) {
 		$this->FilePath = $FilePath;
+
+		$this->Defaults = [
+			'Locale' => '',
+		];
+
+		$this->Files = [
+			'Applications' => '',
+			'Layouts' => '',
+			'Pages' => '',
+			'Controls' => '',
+			'DataManagers' => '',
+			'DataTypes' => '',
+			'ErrorLog' => 'errors.log',
+			'EMailTemplates' => '',
+		];
+
+		$this->ErrorHandling = [
+			'Log' => true,
+			'LogMethods' => [
+				'\Framework\Newnorth\Logger::ErrorLog',
+			],
+			'Report' => false,
+			'ReportMethods' => [
+				'\Framework\Newnorth\EMailer::ErrorReport',
+			],
+			'DisplayErrorMessages' => true,
+			'DisplayErrorMessageDetails' => true,
+			'Pages' => [
+				'Error' => [
+					'Application' => 'Default',
+					'Layout' => 'Default',
+					'Page' => 'Error',
+				],
+				'Forbidden' => [
+					'Application' => 'Default',
+					'Layout' => 'Default',
+					'Page' => 'Forbidden',
+				],
+				'NotFound' => [
+					'Application' => 'Default',
+					'Layout' => 'Default',
+					'Page' => 'NotFound',
+				],
+			],
+		];
+
+		$this->Translation = [
+			'ThrowException' => true,
+			'Log' => true,
+			'Report' => true,
+		];
+
+		$this->EMailer = [
+			'ErrorReport' => [
+				'From' => '',
+				'To' => '',
+			],
+		];
 	}
 
 	/* Instance methods */
 
 	public function Initialize() {
 		$this->Data = ParseIniFile($this->FilePath);
+
+		if(isset($this->Data['Defaults'])) {
+			$this->Initialize_Defaults($this->Data['Defaults']);
+		}
 
 		if(isset($this->Data['Files'])) {
 			$this->Initialize_Files($this->Data['Files']);
@@ -81,12 +108,12 @@ class Config {
 		}
 	}
 
+	private function Initialize_Defaults($Section) {
+		$this->Defaults['Locale'] = isset($Section['Locale']) ? $Section['Locale'] : $this->Defaults['Locale'];
+	}
+
 	private function Initialize_Files($Section) {
-		$this->Files['DataManagers'] = isset($Section['DataManagers']) ? $Section['DataManagers'] : $this->Files['DataManagers'];
-
-		$this->Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : $this->Files['DataTypes'];
-
-		$this->Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : $this->Files['EMailTemplates'];
+		$this->Files['Applications'] = isset($Section['Applications']) ? $Section['Applications'] : $this->Files['Applications'];
 
 		$this->Files['Layouts'] = isset($Section['Layouts']) ? $Section['Layouts'] : $this->Files['Layouts'];
 
@@ -94,9 +121,13 @@ class Config {
 
 		$this->Files['Controls'] = isset($Section['Controls']) ? $Section['Controls'] : $this->Files['Controls'];
 
-		$this->Files['Translations'] = isset($Section['Translations']) ? $Section['Translations'] : $this->Files['Translations'];
+		$this->Files['DataManagers'] = isset($Section['DataManagers']) ? $Section['DataManagers'] : $this->Files['DataManagers'];
+
+		$this->Files['DataTypes'] = isset($Section['DataTypes']) ? $Section['DataTypes'] : $this->Files['DataTypes'];
 
 		$this->Files['ErrorLog'] = isset($Section['ErrorLog']) ? $Section['ErrorLog'] : $this->Files['ErrorLog'];
+
+		$this->Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : $this->Files['EMailTemplates'];
 	}
 
 	private function Initialize_ErrorHandling($Section) {
@@ -112,23 +143,15 @@ class Config {
 
 		$this->ErrorHandling['DisplayErrorMessageDetails'] = isset($Section['DisplayErrorMessageDetails']) ? $Section['DisplayErrorMessageDetails'] : $this->ErrorHandling['DisplayErrorMessageDetails'];
 
-		if(isset($Section['RouteNotFound'])) {
-			$this->Initialize_ErrorHandling_RouteNotFound($Section['RouteNotFound']);
-		}
-
 		if(isset($Section['Pages'])) {
 			$this->Initialize_ErrorHandling_Pages($Section['Pages']);
 		}
 	}
 
-	private function Initialize_ErrorHandling_RouteNotFound($Section) {
-		$this->ErrorHandling['RouteNotFound']['Log'] = isset($Section['Log']) ? $Section['Log'] : $this->ErrorHandling['RouteNotFound']['Log'];
-
-		$this->ErrorHandling['RouteNotFound']['Report'] = isset($Section['Report']) ? $Section['Report'] : $this->ErrorHandling['RouteNotFound']['Report'];
-	}
-
 	private function Initialize_ErrorHandling_Pages($Section) {
 		$this->ErrorHandling['Pages']['Error'] = isset($Section['Error']) ? $Section['Error'] : $this->ErrorHandling['Pages']['Error'];
+
+		$this->ErrorHandling['Pages']['Forbidden'] = isset($Section['Forbidden']) ? $Section['Forbidden'] : $this->ErrorHandling['Pages']['Forbidden'];
 
 		$this->ErrorHandling['Pages']['NotFound'] = isset($Section['NotFound']) ? $Section['NotFound'] : $this->ErrorHandling['Pages']['NotFound'];
 	}

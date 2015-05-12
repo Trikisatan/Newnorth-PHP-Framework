@@ -1,19 +1,15 @@
 <?
 namespace Framework\Controls;
 
-class HiddenControl extends InputControl {
+class HiddenControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
-	public function SetValue() {
-		if(method_exists($this->_Parent, $this->_Alias.'_SetValue')) {
-			$this->_Parent->{$this->_Alias.'_SetValue'}($this);
+	public function PostExecute() {
+		parent::PostExecute();
+
+		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
-	}
-
-	/* Instance methods */
-
-	public function AutoFill($Value) {
-		$this->_Parameters['Value'] = $Value;
 	}
 }
 ?>

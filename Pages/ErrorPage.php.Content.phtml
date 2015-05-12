@@ -1,0 +1,18 @@
+<?
+if($GLOBALS['Config']->ErrorHandling['DisplayErrorMessages']) {
+	?>
+	<b><?=$GLOBALS['Parameters']['Error']['Type']?></b><br />
+	<?=htmlspecialchars($GLOBALS['Parameters']['Error']['Message'])?><br />
+	<br />
+	<?
+	if($GLOBALS['Config']->ErrorHandling['DisplayErrorMessageDetails']) {
+		?>
+		<b>Details</b><br />
+		<?=str_replace(["\n", '    '], ['<br />', '&nbsp;&nbsp;&nbsp;&nbsp;'], print_r($GLOBALS['Parameters']['Error'], true))?>
+		<?
+	}
+}
+else {
+	?>500 Internal Server Error<?
+}
+?>

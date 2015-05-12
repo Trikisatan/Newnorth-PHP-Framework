@@ -1,0 +1,22 @@
+<?
+$Attributes = '';
+
+if(isset($Control->_Parameters['Id'])) {
+	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
+}
+
+if(isset($Control->_Parameters['Name'])) {
+	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
+}
+
+if(isset($Control->_Parameters['Form'])) {
+	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
+}
+
+$Attributes .= ' type="hidden"';
+
+if(isset($Control->_Parameters['Value'])) {
+	$Attributes .= ' value="'.$Control->_Parameters['Value'].'"';
+}
+
+?><input<?=$Attributes?> />

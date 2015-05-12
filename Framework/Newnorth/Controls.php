@@ -1,74 +1,50 @@
 <?
 namespace Framework\Newnorth;
 
-class Controls implements \ArrayAccess {
+class Controls {
 	/* Instance variables */
 
 	private $Owner;
 
-	private $Namespace;
+	private $FilePath;
 
-	private $Directory;
-
-	private $Items = [];
+	public $Items = [];
 
 	/* Magic methods */
 
-	public function __construct($Owner, $Directory, $Namespace) {
+	public function __construct($Owner) {
 		$this->Owner = $Owner;
 
-		$this->Directory = $Directory;
-
-		$this->Namespace = $Namespace;
+		$this->FilePath = $this->Owner->_Directory.$this->Owner->_Name.'.php.Controls.ini';
 
 		$this->TryLoadIniFile();
 	}
 
 	public function __toString() {
-		return $this->Directory.'Controls.ini';
-	}
-
-	/* Array access methods */
-
-	public function offsetSet($Key, $Value) {
-		throw new Exception('Not allowed.');
-	}
-
-	public function offsetExists($Key) {
-		return isset($this->Items[$Key]);
-	}
-
-	public function offsetUnset($Key) {
-		throw new Exception('Not allowed.');
-	}
-
-	public function offsetGet($Key) {
-		return $this->Items[$Key];
+		return $this->FilePath;
 	}
 
 	/* Instance methods */
 
 	private function TryLoadIniFile() {
-		$FilePath = $this->Directory.'Controls.ini';
+		if(file_exists($this->FilePath)) {
+			$Controls = ParseIniFile($this->FilePath);
 
-		if(!file_exists($FilePath)) {
-			return;
-		}
-
-		$Controls = ParseIniFile($FilePath);
-
-		foreach($Controls as $Name => $Data) {
-			if(!isset($Data['Class'])) {
-				throw new ConfigException(
-					'Class not set.',
-					[
-						'File' => $FilePath,
-						'Control' => $Name,
-					]
-				);
+			foreach($Controls as $Alias => $Parameters) {
+				if(!isset($Parameters['Class'])) {
+					throw new RuntimeException(
+						'Control class not set.',
+						[
+							'File path' => $this->FilePath,
+							'Alias' => $Alias,
+							'Parameters' => $Parameters,
+						]
+					);
+				}
+				else {
+					$this->Items[$Alias] = Control::Instantiate($this->Owner, $Parameters['Class'], $Alias, $Parameters);
+				}
 			}
-
-			$this->Add($Name, $Data['Class'], $Data);
 		}
 	}
 
@@ -88,9 +64,9 @@ class Controls implements \ArrayAccess {
 			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
 		}
 		else {
-			$ClassName = $this->Namespace.$Name.'Control';
+			$ClassName = $this->Owner->_Namespace.$this->Owner->_Name.'\\'.$Name.'Control';
 
-			$Directory = './'.$this->Directory;
+			$Directory = './'.$this->Owner->_Directory.$this->Owner->_Name.'/';
 
 			$Name = $Name.'Control';
 		}
@@ -115,46 +91,55 @@ class Controls implements \ArrayAccess {
 
 		return $this->Items[$Alias] = $Control;
 	}
+
 	public function PreInitialize() {
 		foreach($this->Items as $Control) {
 			$Control->PreInitialize();
 		}
 	}
+
 	public function Initialize() {
 		foreach($this->Items as $Control) {
 			$Control->Initialize();
 		}
 	}
+
 	public function PostInitialize() {
 		foreach($this->Items as $Control) {
 			$Control->PostInitialize();
 		}
 	}
+
 	public function PreLoad() {
 		foreach($this->Items as $Control) {
 			$Control->PreLoad();
 		}
 	}
+
 	public function Load() {
 		foreach($this->Items as $Control) {
 			$Control->Load();
 		}
 	}
+
 	public function PostLoad() {
 		foreach($this->Items as $Control) {
 			$Control->PostLoad();
 		}
 	}
+
 	public function PreExecute() {
 		foreach($this->Items as $Control) {
 			$Control->PreExecute();
 		}
 	}
+
 	public function Execute() {
 		foreach($this->Items as $Control) {
 			$Control->Execute();
 		}
 	}
+
 	public function PostExecute() {
 		foreach($this->Items as $Control) {
 			$Control->PostExecute();

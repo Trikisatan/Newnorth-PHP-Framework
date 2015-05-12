@@ -1,13 +1,11 @@
 <?
 namespace Framework\Controls;
 
-class FileUploadControl extends InputControl {
-	/* Life cycle methods */
+class FileUploadControl extends \Framework\Newnorth\Control {
+	/* Validator methods */
 
-	public function ParseParameters() {
-		if(isset($this->_Parameters['Validators'])) {
-			$this->ParseParameters_Validators($this->_Parameters['Validators']);
-		}
+	public function FileUploadedValidator($Parameters) {
+		return 0 < $_FILES[$this->_Parameters['Name']]['size'];
 	}
 }
 ?>

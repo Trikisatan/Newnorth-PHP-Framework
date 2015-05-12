@@ -1,91 +1,45 @@
 <?
 namespace Framework\Newnorth;
 
-class Actions implements \ArrayAccess {
+class Actions {
 	/* Instance variables */
 
 	private $Owner;
 
-	private $Directory;
+	private $FilePath;
 
 	public $Items = [];
 
 	/* Magic methods */
 
-	public function __construct($Owner, $Directory) {
+	public function __construct($Owner) {
 		$this->Owner = $Owner;
-		$this->Directory = $Directory;
+
+		$this->FilePath = $this->Owner->_Directory.$this->Owner->_Name.'.php.Actions.ini';
 
 		$this->TryLoadIniFile();
 	}
 
-	public function __toString() {
-		return $this->Directory.'Actions.ini';
-	}
+	/* Life cycle methods */
 
-	/* Array access methods */
-
-	public function offsetSet($Key, $Value) {
-		throw new Exception('Not allowed.');
-	}
-
-	public function offsetExists($Key) {
-		return isset($this->Items[$Key]);
-	}
-
-	public function offsetUnset($Key) {
-		throw new Exception('Not allowed.');
-	}
-
-	public function offsetGet($Key) {
-		return $this->Items[$Key];
+	public function Execute() {
+		foreach($this->Items as $Action) {
+			$Action->Execute();
+		}
 	}
 
 	/* Instance methods */
 
 	private function TryLoadIniFile() {
-		$FilePath = $this->Directory.'Actions.ini';
+		if(file_exists($this->FilePath)) {
+			$Items = ParseIniFile($this->FilePath);
 
-		if(!file_exists($FilePath)) {
-			return;
-		}
-
-		$Items = ParseIniFile($FilePath);
-
-		foreach($Items as $Name => $Data) {
-			$this->Items[$Name] = new Action(
-				$this->Owner,
-				$this->Directory,
-				$Name,
-				$Data
-			);
-		}
-	}
-
-	public function Execute() {
-		foreach($this->Items as $Action) {
-			if(!$Action->ValidateRequiredVariables()) {
-				continue;
-			}
-
-			if(!$Action->ValidateRequiredValues()) {
-				continue;
-			}
-
-			$Action->AutoFill();
-
-			$Action->Load();
-
-			$Action->LockDbConnections();
-
-			if($Action->Validate()) {
-				$Redirect = $Action->Execute();
-			}
-
-			$Action->UnlockDbConnections();
-
-			if(isset($Redirect)) {
-				\Framework\Newnorth\Router::Redirect($Redirect);
+			foreach($Items as $Name => $Parameters) {
+				$this->Items[$Name] = new Action(
+					$this->Owner,
+					$Name,
+					$Parameters
+				);
 			}
 		}
 	}

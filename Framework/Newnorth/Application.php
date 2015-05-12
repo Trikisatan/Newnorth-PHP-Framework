@@ -2,291 +2,156 @@
 namespace Framework\Newnorth;
 
 class Application {
+	/* Static methods */
+
+	public static function Instantiate($Path, &$Application) {
+		Application::ParsePath(
+			$Path,
+			$FilePath,
+			$Directory,
+			$ClassName,
+			$Namespace,
+			$Name
+		);
+
+		if(!class_exists($ClassName, false)) {
+			if(file_exists($FilePath)) {
+				include($FilePath);
+			}
+
+			if(!class_exists($ClassName, false)) {
+				throw new RuntimeException(
+					'Unable to load application.',
+					[
+						'Path' => $Path,
+						'File path' => $FilePath,
+						'Directory' => $Directory,
+						'Class name' => $ClassName,
+						'Namespace' => $Namespace,
+						'Name' => $Name,
+					]
+				);
+			}
+		}
+
+		$Application = new $ClassName($Directory, $Namespace, $Name);
+	}
+
+	private static function ParsePath($Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
+		$FilePath = $GLOBALS['Config']->Files['Applications'].$Path.'Application.php';
+
+		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
+
+		$ClassName = '\\'.str_replace('/', '\\', $Path).'Application';
+
+		$Namespace = strrpos($ClassName, '\\');
+
+		$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
+
+		$Name = strrpos($Path, '/');
+
+		$Name = (($Name === false) ? $Path : substr($Path, $Name + 1)).'Application';
+	}
+
 	/* Instance variables */
 
-	public $Url;
+	public $Objects = [];
 
 	private $DbConnections = [];
 
 	private $DataManagers = [];
 
-	public $Translations;
-
-	public $IsExecuting = false;
-
 	/* Magic methods */
 
 	public function __construct() {
-		$this->Url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
+
 	}
 
-	/* Instance methods */
+	/* Life cycle methods */
+
+	public function PreInitialize() {
+
+	}
 
 	public function Initialize() {
-		if(!$this->ParseUrl()) {
-			if($GLOBALS['Config']->ErrorHandling['RouteNotFound']['Log']) {
-				foreach($GLOBALS['Config']->ErrorHandling['LogMethods'] as $LogMethod) {
-					call_user_func(
-						$LogMethod,
-						[
-							'Type' => 'Route not found',
-							'Message' => 'Unable to parse URL.',
-							'Url' => $this->Url,
-						]
-					);
-				}
-			}
 
-			if($GLOBALS['Config']->ErrorHandling['RouteNotFound']['Report']) {
-				foreach($GLOBALS['Config']->ErrorHandling['ReportMethods'] as $ReportMethod) {
-					call_user_func(
-						$ReportMethod,
-						[
-							'Type' => 'Route not found',
-							'Message' => 'Unable to parse URL.',
-							'Url' => $this->Url,
-						]
-					);
-				}
-			}
-
-			if(0 < count($GLOBALS['Config']->ErrorHandling['Pages']['NotFound'])) {
-				header('HTTP/1.0 404 Not Found');
-
-				$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
-			}
-		}
-
-		$this->Translations = new Translations($this, '');
 	}
 
-	private function ParseUrl() {
-		foreach($GLOBALS['Routing']->Routes as $RouteName => $Route) {
-			if($Route->Match($this->Url, $Parameters)) {
-				if(isset($Parameters['Locale'][0])) {
-					$Locale = $Parameters['Locale'];
-				}
-				else if(isset($Route->Defaults['Locale'][0])) {
-					$Locale = $Route->Defaults['Locale'];
-				}
-				else if(isset($_SESSION['Locale'][0])) {
-					$Locale = $_SESSION['Locale'];
-				}
-				else {
-					$Locale = '';
-				}
+	public function PostInitialize() {
 
-				if($Route->Translate($Parameters, $Locale)) {
-					$Route->SetDefaults($Parameters);
+	}
 
-					$GLOBALS['Parameters'] = $Parameters;
+	public function PreLoad() {
 
-					if(!isset($GLOBALS['Parameters']['Locale'])) {
-						$GLOBALS['Parameters']['Locale'] = $Locale;
-					}
+	}
 
-					return true;
-				}
-			}
-		}
+	public function Load() {
 
-		return false;
+	}
+
+	public function PostLoad() {
+
+	}
+
+	public function PreExecute() {
+
 	}
 
 	public function Execute() {
-		$this->IsExecuting = true;
+		if(!isset($GLOBALS['Parameters']['Layout'][0])) {
+			$GLOBALS['Page']->PreInitialize();
+			$GLOBALS['Page']->Initialize();
+			$GLOBALS['Page']->PostInitialize();
 
-		try {
-			try {
-				if(!isset($GLOBALS['Parameters']['Page'][0])) {
-					throw new ConfigException(
-						'Page not set.',
-						[]
-					);
-				}
-				else if(!isset($GLOBALS['Parameters']['Layout'][0])) {
-					$this->Execute_LoadPage();
+			$GLOBALS['Page']->PreLoad();
+			$GLOBALS['Page']->Load();
+			$GLOBALS['Page']->PostLoad();
 
-					$start = microtime(true);
-					$GLOBALS['Page']->PreInitialize();
-					$GLOBALS['Page']->Initialize();
-					$GLOBALS['Page']->PostInitialize();
-					$InitializationTime = microtime(true) - $start;
-
-					$start = microtime(true);
-					$GLOBALS['Page']->PreLoad();
-					$GLOBALS['Page']->Load();
-					$GLOBALS['Page']->PostLoad();
-					$LoadTime = microtime(true) - $start;
-
-					$start = microtime(true);
-					$GLOBALS['Page']->PreExecute();
-					$GLOBALS['Page']->Execute();
-					$GLOBALS['Page']->PostExecute();
-					$ExecutionTime = microtime(true) - $start;
-
-					$GLOBALS['Page']->Render();
-
-					$this->Execute_Translate();
-				}
-				else {
-					$this->Execute_LoadLayout();
-
-					$this->Execute_LoadPage();
-
-					$start = microtime(true);
-					$GLOBALS['Layout']->PreInitialize();
-					$GLOBALS['Page']->PreInitialize();
-					$GLOBALS['Layout']->Initialize();
-					$GLOBALS['Page']->Initialize();
-					$GLOBALS['Layout']->PostInitialize();
-					$GLOBALS['Page']->PostInitialize();
-					$InitializationTime = microtime(true) - $start;
-
-					$start = microtime(true);
-					$GLOBALS['Layout']->PreLoad();
-					$GLOBALS['Page']->PreLoad();
-					$GLOBALS['Layout']->Load();
-					$GLOBALS['Page']->Load();
-					$GLOBALS['Layout']->PostLoad();
-					$GLOBALS['Page']->PostLoad();
-					$LoadTime = microtime(true) - $start;
-
-					$start = microtime(true);
-					$GLOBALS['Layout']->PreExecute();
-					$GLOBALS['Page']->PreExecute();
-					$GLOBALS['Layout']->Execute();
-					$GLOBALS['Page']->Execute();
-					$GLOBALS['Layout']->PostExecute();
-					$GLOBALS['Page']->PostExecute();
-					$ExecutionTime = microtime(true) - $start;
-
-					$GLOBALS['Layout']->Render();
-
-					$this->Execute_Translate();
-				}
-			}
-			catch(RerouteException $Exception) {
-				throw $Exception;
-			}
-			catch(Exception $Exception) {
-				ErrorHandler::HandleError(
-					$Exception->Type,
-					$Exception->getMessage(),
-					$Exception->getFile(),
-					$Exception->getLine(),
-					$Exception->Data,
-					$Exception->getTrace()
-				);
-			}
-			catch(\ErrorException $Exception) {
-				ErrorHandler::HandleError(
-					'Error',
-					$Exception->getMessage(),
-					$Exception->getFile(),
-					$Exception->getLine(),
-					[],
-					$Exception->getTrace()
-				);
-			}
-			catch(\Exception $Exception) {
-				ErrorHandler::HandleError(
-					'Unhandled exception',
-					$Exception->getMessage(),
-					$Exception->getFile(),
-					$Exception->getLine(),
-					[],
-					$Exception->getTrace()
-				);
-			}
+			$GLOBALS['Page']->PreExecute();
+			$GLOBALS['Page']->Execute();
+			$GLOBALS['Page']->PostExecute();
 		}
-		catch(RerouteException $Exception) {
-			$GLOBALS['Parameters'] = $Exception->Parameters;
+		else {
+			$GLOBALS['Layout']->PreInitialize();
+			$GLOBALS['Page']->PreInitialize();
+			$GLOBALS['Layout']->Initialize();
+			$GLOBALS['Page']->Initialize();
+			$GLOBALS['Layout']->PostInitialize();
+			$GLOBALS['Page']->PostInitialize();
 
-			$this->Execute();
+			$GLOBALS['Layout']->PreLoad();
+			$GLOBALS['Page']->PreLoad();
+			$GLOBALS['Layout']->Load();
+			$GLOBALS['Page']->Load();
+			$GLOBALS['Layout']->PostLoad();
+			$GLOBALS['Page']->PostLoad();
+
+			$GLOBALS['Layout']->PreExecute();
+			$GLOBALS['Page']->PreExecute();
+			$GLOBALS['Layout']->Execute();
+			$GLOBALS['Page']->Execute();
+			$GLOBALS['Layout']->PostExecute();
+			$GLOBALS['Page']->PostExecute();
 		}
-
-		$this->IsExecuting = false;
 	}
 
-	private function Execute_LoadLayout() {
-		$FullName = $GLOBALS['Parameters']['Layout'].'Layout';
+	public function PostExecute() {
 
-		$ClassName = str_replace('/', '\\', $FullName);
-
-		if(!class_exists($ClassName, false)) {
-			$FilePath = $GLOBALS['Config']->Files['Layouts'].$FullName.'.php';
-
-			@include($FilePath);
-
-			if(!class_exists($ClassName, false)) {
-				throw new RuntimeException(
-					'Unable to load layout.',
-					[
-						'File' => $FilePath,
-						'Class' => $ClassName,
-					]
-				);
-			}
-		}
-
-		$Name = strrpos($FullName, '/');
-
-		$Name = $Name === false ? $FullName : substr($FullName, $Name + 1);
-
-		$Directory = strrpos($FullName, '/');
-
-		$Directory = $Directory === false ? '' : substr($FullName, 0, $Directory + 1);
-
-		$Namespace = strrpos($ClassName, '\\');
-
-		$Namespace = $Namespace === false ? '\\' : substr($ClassName, 0, $Namespace + 1);
-
-		$GLOBALS['Layout'] = new $ClassName($Directory, $Namespace, $Name);
 	}
 
-	private function Execute_LoadPage() {
-		$FullName = $GLOBALS['Parameters']['Page'].'Page';
-
-		$ClassName = str_replace('/', '\\', $FullName);
-
-		if(!class_exists($ClassName, false)) {
-			$FilePath = $GLOBALS['Config']->Files['Pages'].$FullName.'.php';
-
-			@include($FilePath);
-
-			if(!class_exists($ClassName, false)) {
-				throw new RuntimeException(
-					'Unable to load page.',
-					[
-						'File' => $FilePath,
-						'Class' => $ClassName,
-					]
-				);
-			}
+	public function Render() {
+		if($GLOBALS['Layout'] === null) {
+			$GLOBALS['Page']->Render();
+		}
+		else {
+			$GLOBALS['Layout']->Render();
 		}
 
-		$Name = strrpos($FullName, '/');
-
-		$Name = $Name === false ? $FullName : substr($FullName, $Name + 1);
-
-		$Directory = strrpos($FullName, '/');
-
-		$Directory = $Directory === false ? '' : substr($FullName, 0, $Directory + 1);
-
-		$Namespace = strrpos($ClassName, '\\');
-
-		$Namespace = $Namespace === false ? '\\' : substr($ClassName, 0, $Namespace + 1);
-
-		$GLOBALS['Page'] = new $ClassName($Directory, $Namespace, $Name);
-	}
-
-	private function Execute_Translate() {
 		$Output = ob_get_contents();
 
 		ob_clean();
 
-		$this->Translations->Translate($Output);
+		$GLOBALS['Translations']->Translate($Output);
 
 		$MissingTranslations = Translator::GetMissingTranslations($Output);
 
@@ -307,7 +172,7 @@ class Application {
 							[
 								'Type' => 'Translation(s) not found',
 								'Message' => 'Unable to translate content.',
-								'Url' => $this->Url,
+								'Url' => $GLOBALS['Url'],
 								'Missing translations' => $MissingTranslations,
 							]
 						);
@@ -321,7 +186,7 @@ class Application {
 							[
 								'Type' => 'Translation(s) not found',
 								'Message' => 'Unable to translate content.',
-								'Url' => $this->Url,
+								'Url' => $GLOBALS['Url'],
 								'Missing translations' => $MissingTranslations,
 							]
 						);
@@ -331,6 +196,26 @@ class Application {
 		}
 
 		echo $Output;
+	}
+
+	/* Instance methods */
+
+	public function GetObject($ScopeObject, $Name) {
+		if($Name[0] !== '/') {
+			if($ScopeObject !== null) {
+				$Name = $ScopeObject.'/'.$Name;
+			}
+		}
+
+		return isset($this->Objects[$Name]) ? $this->Objects[$Name] : null;
+	}
+
+	public function RegisterObject($Object) {
+		$this->Objects[$Object->__toString()] = $Object;
+	}
+
+	public function UnregisterObject($Object) {
+		unset($this->Objects[$Object->__toString()]);
 	}
 
 	public function GetDbConnection($Alias) {
@@ -420,174 +305,6 @@ class Application {
 
 	public function SetTranslation($Key, $Value) {
 		$this->Translations[$Key] = $Value;
-	}
-
-	public function GetValidatorMethod($ActionName, $MethodName, &$MethodObject) {
-		if(method_exists($this, $MethodName)) {
-			$MethodObject = $this;
-			return true;
-		}
-
-		return false;
-	}
-
-	public function GetValidatorRenderMethod($MethodName, &$MethodObject) {
-		if(method_exists($this, $MethodName)) {
-			$MethodObject = $this;
-			return true;
-		}
-
-		return false;
-	}
-
-	/* Validator methods */
-
-	public function TokenValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'Validator requires a control.',
-				[
-					'Validator' => 'TokenValidator',
-				]
-			);
-		}
-
-		return $_POST[$Control->_Parameters['Name']] === $_SESSION['Token'];
-	}
-
-	public function DropDownListValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'Validator requires a control.',
-				[
-					'Validator' => 'DropDownListValidator',
-				]
-			);
-		}
-
-		$Value = $_POST[$Control->_Parameters['Name']];
-
-		return isset($Control->_Parameters['Options'][$Value]);
-	}
-
-	public function EMailAddressFormatValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'Validator requires a control.',
-				[
-					'Validator' => 'EMailAddressFormatValidator',
-				]
-			);
-		}
-
-		return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/', $_POST[$Control->_Parameters['Name']]);
-	}
-
-	public function FileUploadedValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'Validator requires a control.',
-				[
-					'Validator' => 'FileUploadedValidator',
-				]
-			);
-		}
-
-		return 0 < $_FILES[$Control->_Parameters['Name']]['size'];
-	}
-
-	public function IsBetweenValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'IsBetweenValidator',
-				]
-			);
-		}
-
-		$Value = (int)$_POST[$Control->_Parameters['Name']];
-
-		return $Control->_Parameters['MinValue'] <= $Value && $Value <= $Control->_Parameters['MaxValue'];
-	}
-
-	public function IsDigitsValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'IsDigitsValidator',
-				]
-			);
-		}
-
-		return ctype_digit($_POST[$Control->_Parameters['Name']]);
-	}
-
-	public function IsNumericValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'IsNumericValidator',
-				]
-			);
-		}
-
-		return is_numeric($_POST[$Control->_Parameters['Name']]);
-	}
-
-	public function MaxLengthValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'MaxLengthValidator',
-				]
-			);
-		}
-
-		return !isset($_POST[$Control->_Parameters['Name']][$Control->_Parameters['MaxLength']]);
-	}
-
-	public function MinLengthValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'MinLengthValidator',
-				]
-			);
-		}
-
-		return isset($_POST[$Control->_Parameters['Name']][$Control->_Parameters['MinLength']]);
-	}
-
-	public function ValueNotEmptyValidator($Control) {
-		if($Control === null) {
-			throw new ConfigException(
-				'This validator requires a control.',
-				[
-					'Validator' => 'ValueNotEmptyValidator',
-				]
-			);
-		}
-
-		return isset($_POST[$Control->_Parameters['Name']][0]);
-	}
-
-	/* Validator render methods */
-
-	public function RenderValueNotEmptyValidator($Control, $Parameters) {
-		return 'return 0<this.value.length';
-	}
-
-	public function RenderValueRegExpValidator($Control, $Parameters) {
-		return 'return -1<this.value.search('.$Parameters['RegExp'].')';
-	}
-
-	public function RenderEmailAddressFormatValidator($Control, $Parameters) {
-		return 'return -1<this.value.search(/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]+)?$/)';
 	}
 }
 ?>

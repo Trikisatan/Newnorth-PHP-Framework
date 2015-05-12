@@ -6,285 +6,201 @@ class Action {
 
 	private $Owner;
 
-	private $Directory;
-
 	private $Name;
 
-	private $RequiredVariables;
+	private $PreValidators = null;
 
-	private $RequiredValues;
+	private $DbLocks = null;
 
-	private $AutoFill;
-
-	private $DbConnections = [];
-
-	private $Validators = [];
-
-	public $ErrorMessages = [];
+	private $Validators = null;
 
 	/* Magic methods */
 
-	public function __construct($Owner, $Directory, $Name, $Data) {
+	public function __construct($Owner, $Name, $Parameters) {
 		$this->Owner = $Owner;
-
-		$this->Directory = $Directory;
 
 		$this->Name = $Name;
 
-		$this->RequiredVariables = isset($Data['RequiredVariables']) ? $Data['RequiredVariables'] : [];
+		$this->PreValidators = isset($Parameters['PreValidators']) ? $Parameters['PreValidators'] : $this->PreValidators;
 
-		$this->RequiredValues = isset($Data['RequiredValues']) ? $Data['RequiredValues'] : [];
+		$this->DbLocks = isset($Parameters['DbLocks']) ? $Parameters['DbLocks'] : $this->DbLocks;
 
-		$this->AutoFill = isset($Data['AutoFill']) ? $Data['AutoFill'] : [];
+		$this->Validators = isset($Parameters['Validators']) ? $Parameters['Validators'] : $this->Validators;
 	}
 
-	public function __toString() {
-		return $this->Directory.$this->Name;
+	/* Life cycle methods */
+
+	public function Execute() {
+		if($this->PreValidate()) {
+			try {
+				$this->LockDbConnections();
+
+				if($this->Validate()) {
+					$this->Owner->{$this->Name.'Action'}();
+				}
+			}
+			catch(\Exception $Exception) {
+				throw $Exception;
+			}
+			finally {
+				$this->UnlockDbConnections();
+			}
+		}
 	}
 
 	/* Instance methods */
 
-	public function Load() {
-		$FilePath = $this->Directory.$this->Name.'Action.ini';
-
-		$Data = ParseIniFile($FilePath, false);
-
-		if(isset($Data['DbConnections'])) {
-			$this->Load_DbConnections($Data['DbConnections']);
-		}
-
-		if(isset($Data['Validators'])) {
-			$this->Load_Validators($Data['Validators']);
-		}
-	}
-
-	private function Load_DbConnections($DbConnections) {
-		foreach($DbConnections as $DbConnection => $Sources) {
-			$this->DbConnections[] = [
-				'DbConnection' => GetDbConnection($DbConnection),
-				'Sources' => $Sources,
-			];
-		}
-	}
-
-	private function Load_Validators($Validators) {
-		foreach($Validators as $Name => $Validator) {
-			$this->Validators[] = [
-				'Control' => isset($Validator['Control']) ? $Validator['Control'] : null,
-				'Method' => (isset($Validator['Method']) ? $Validator['Method'] : $Name).'Validator',
-				'ErrorMessage' => isset($Validator['ErrorMessage']) ? $Validator['ErrorMessage'] : null,
-				'AbortOnPreviousFailures' => isset($Validator['AbortOnPreviousFailures']) ? $Validator['AbortOnPreviousFailures'] : false,
-				'AbortOnFailure' => isset($Validator['AbortOnFailure']) ? $Validator['AbortOnFailure'] : false,
-			];
-		}
-	}
-
-	public function ValidateRequiredVariables() {
-		foreach($this->RequiredVariables as $Variable => $ShouldExist) {
-			$VariableParts = explode('/', $Variable);
-
-			$ShouldExist = ($ShouldExist === '1');
-
-			if($VariableParts[0] === '_FILES') {
-				if(isset($_FILES[$VariableParts[1]]) !== $ShouldExist) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_GET') {
-				if(isset($_GET[$VariableParts[1]]) !== $ShouldExist) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_POST') {
-				if(isset($_POST[$VariableParts[1]]) !== $ShouldExist) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_SESSION') {
-				if(isset($_SESSION[$VariableParts[1]]) !== $ShouldExist) {
-					return false;
-				}
-
-				continue;
-			}
-
-			throw new ConfigException(
-				'Unknown variable provided in validation of required variables.',
-				[
-					'Action' => $this->__toString(),
-					'Variable' => $Variable,
-				]
-			);
-		}
-
-		return true;
-	}
-
-	public function ValidateRequiredValues() {
-		foreach($this->RequiredValues as $Variable => $Value) {
-			$VariableParts = explode('/', $Variable);
-
-			if($VariableParts[0] === '_FILES') {
-				if($_FILES[$VariableParts[1]] !== $Value) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_GET') {
-				if($_GET[$VariableParts[1]] !== $Value) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_POST') {
-				if($_POST[$VariableParts[1]] !== $Value) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_SESSION') {
-				if($_SESSION[$VariableParts[1]] !== $Value) {
-					return false;
-				}
-
-				continue;
-			}
-
-			throw new ConfigException(
-				'Unknown variable provided in validation of required values.',
-				[
-					'Action' => $this->__toString(),
-					'Variable' => $Variable,
-				]
-			);
-		}
-
-		return true;
-	}
-
-	public function AutoFill() {
-		foreach($this->AutoFill as $Control => $Variable) {
-			$Control = $this->Owner->GetControl($Control);
-
-			$VariableParts = explode('/', $Variable);
-
-			if($VariableParts[0] === '_GET') {
-				if(isset($_GET[$VariableParts[1]])) {
-					$Control->AutoFill($_GET[$VariableParts[1]]);
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_POST') {
-				if(isset($_POST[$VariableParts[1]])) {
-					$Control->AutoFill($_POST[$VariableParts[1]]);
-				}
-
-				continue;
-			}
-
-			if($VariableParts[0] === '_SESSION') {
-				if(isset($_SESSION[$VariableParts[1]])) {
-					$Control->AutoFill($_SESSION[$VariableParts[1]]);
-				}
-
-				continue;
-			}
-
-			throw new ConfigException(
-				'Unknown variable provided in auto fill.',
-				[
-					'Action' => $this->__toString(),
-					'Variable' => $Variable,
-				]
-			);
-		}
-	}
-
-	public function LockDbConnections() {
-		for($I = 0, $IC = count($this->DbConnections); $I < $IC; ++$I) {
-			$this->DbConnections[$I]['DbConnection']->Lock($this->DbConnections[$I]['Sources']);
-		}
-	}
-
-	public function UnlockDbConnections() {
-		for($I = 0, $IC = count($this->DbConnections); $I < $IC; ++$I) {
-			$this->DbConnections[$I]['DbConnection']->Unlock($this->DbConnections[$I]['Sources']);
-		}
-	}
-
-	public function Validate() {
-		$isValid = true;
-
-		foreach($this->Validators as $Validator) {
-			if($Validator['AbortOnPreviousFailures'] && !$isValid) {
+	private function PreValidate() {
+		if(is_array($this->PreValidators)) {
+			if(isset($this->PreValidators['IsSet']) && is_array($this->PreValidators['IsSet']) && !$this->PreValidate_IsSet()) {
 				return false;
 			}
-
-			if(!$this->Owner->GetValidatorMethod($this->Name, $Validator['Method'], $MethodObject)) {
-				throw new ConfigException(
-					'Unable to find validator method.',
-					[
-						'Object' => $this->Owner->__toString(),
-						'Method' => $Validator['Method'],
-					]
-				);
+			else if(isset($this->PreValidators['IsNotSet']) && is_array($this->PreValidators['IsNotSet']) && !$this->PreValidate_IsNotSet()) {
+				return false;
 			}
-
-			if($Validator['Control'] === null) {
-				if($MethodObject->$Validator['Method'](null)) {
-					continue;
-				}
-
-				if($Validator['ErrorMessage'] !== null) {
-					$this->ErrorMessages[] = $Validator['ErrorMessage'];
-				}
+			else if(isset($this->PreValidators['IsTrue']) && is_array($this->PreValidators['IsTrue']) && !$this->PreValidate_IsTrue()) {
+				return false;
+			}
+			else if(isset($this->PreValidators['IsFalse']) && is_array($this->PreValidators['IsFalse']) && !$this->PreValidate_IsFalse()) {
+				return false;
 			}
 			else {
-				$Control = $this->Owner->GetControl($Validator['Control']);
-
-				if($MethodObject->$Validator['Method']($Control)) {
-					continue;
-				}
-
-				if($Validator['ErrorMessage'] !== null) {
-					if(!isset($Control->_Parameters['ErrorMessages'])) {
-						$Control->_Parameters['ErrorMessages'] = [$Validator['ErrorMessage']];
-					}
-					else {
-						$Control->_Parameters['ErrorMessages'][] = $Validator['ErrorMessage'];
-					}
-				}
+				return true;
 			}
-
-			if($Validator['AbortOnFailure']) {
-				return false;
-			}
-
-			$isValid = false;
 		}
-
-		return $isValid;
+		else {
+			return true;
+		}
 	}
 
-	public function Execute() {
-		return $this->Owner->{$this->Name.'Action'}();
+	private function PreValidate_IsSet() {
+		foreach($this->PreValidators['IsSet'] as $IsSet) {
+			if(!eval('return isset('.$IsSet.');')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function PreValidate_IsNotSet() {
+		foreach($this->PreValidators['IsNotSet'] as $IsNotSet) {
+			if(eval('return isset('.$IsNotSet.');')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function PreValidate_IsTrue() {
+		foreach($this->PreValidators['IsTrue'] as $IsTrue) {
+			if(!eval('return '.$IsTrue.';')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function PreValidate_IsFalse() {
+		foreach($this->PreValidators['IsFalse'] as $IsFalse) {
+			if(eval('return '.$IsFalse.';')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function LockDbConnections() {
+		if(is_array($this->DbLocks)) {
+			foreach($this->DbLocks as $DbConnection => $Sources) {
+				$GLOBALS['Application']->GetDbConnection($DbConnection)->Lock($Sources);
+			}
+		}
+	}
+
+	private function UnlockDbConnections() {
+		if(is_array($this->DbLocks)) {
+			foreach($this->DbLocks as $DbConnection => $Sources) {
+				$GLOBALS['Application']->GetDbConnection($DbConnection)->Unlock($Sources);
+			}
+		}
+	}
+
+	private function Validate() {
+		if(is_array($this->Validators)) {
+			$IsValid = true;
+
+			foreach($this->Validators as $Name => $Parameters) {
+				if(!isset($Parameters['Method'])) {
+					throw new RuntimeException(
+						'Validator method is not set.',
+						[
+							'Owner' => $this->Owner->__toString(),
+							'Action' => $this->Name,
+							'Validator' => $Name,
+							'Parameters' => $Parameters,
+						]
+					);
+				}
+
+				if(!$IsValid && (!isset($Parameters['AllowFailures']) || !$Parameters['AllowFailures'])) {
+					break;
+				}
+
+				$Object = isset($Parameters['Object']) ? $GLOBALS['Application']->GetObject($this->Owner, $Parameters['Object']) : $this->Owner;
+
+				if($Object === null) {
+					throw new RuntimeException(
+						'Unable to find validator object.',
+						[
+							'Owner' => $this->Owner->__toString(),
+							'Action' => $this->Name,
+							'Validator' => $Name,
+							'Object' => $Parameters['Object'],
+							'Parameters' => $Parameters,
+						]
+					);
+				}
+
+				$Method = $Parameters['Method'].'Validator';
+
+				if(!method_exists($Object, $Method)) {
+					throw new RuntimeException(
+						'Unable to find validator method.',
+						[
+							'Owner' => $this->Owner->__toString(),
+							'Action' => $this->Name,
+							'Validator' => $Name,
+							'Object' => $Object->__toString(),
+							'Method' => $Method,
+							'Parameters' => $Parameters,
+						]
+					);
+				}
+
+				if(!$Object->$Method(isset($Parameters['Parameters']) ? $Parameters['Parameters'] : null)) {
+					$IsValid = false;
+
+					if(isset($Parameters['ErrorMessage'])) {
+						$SupervisorObject = isset($Parameters['SupervisorObject']) ? $GLOBALS['Application']->GetObject($this->Owner, $Parameters['SupervisorObject']) : $Object;
+
+						$SupervisorObject->_ErrorMessages[] = $Parameters['ErrorMessage'];
+					}
+
+					if(!isset($Parameters['AbortOnFailure']) || $Parameters['AbortOnFailure']) {
+						break;
+					}
+				}
+			}
+
+			return $IsValid;
+		}
+		else {
+			return true;
+		}
 	}
 }
 ?>
