@@ -1,21 +1,4 @@
 <?
-if(isset($Control->_Parameters['Label'])) {
-	$Attributes = '';
-
-	if(isset($Parameters['Id'])) {
-		$Attributes .= ' for="'.$Parameters['Id'].'"';
-	}
-	else if(isset($Control->_Parameters['Id'])) {
-		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
-	}
-
-	if(isset($Control->_Parameters['LabelCssClass'])) {
-		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
-	}
-
-	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
-}
-
 $Attributes = '';
 
 if(isset($Parameters['Id'])) {
@@ -37,7 +20,7 @@ if(isset($Control->_Parameters['CssClass'])) {
 	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
 }
 
-$Attributes .= ' type="password"';
+$Attributes .= ' type="radio"';
 
 if(isset($Parameters['Value'])) {
 	$Attributes .= ' value="'.$Parameters['Value'].'"';
@@ -46,27 +29,38 @@ else if(isset($Control->_Parameters['Value'])) {
 	$Attributes .= ' value="'.$Control->_Parameters['Value'].'"';
 }
 
-if(isset($Control->_Parameters['Placeholder'])) {
-	$Attributes .= ' placeholder="'.$Control->_Parameters['Placeholder'].'"';
+if(isset($Parameters['IsChecked']) && $Parameters['IsChecked']) {
+	$Attributes .= ' checked="checked"';
+}
+else if(isset($Control->_Parameters['IsChecked']) && $Control->_Parameters['IsChecked']) {
+	$Attributes .= ' checked="checked"';
 }
 
-if(isset($Control->_Parameters['MaxLength'])) {
-	$Attributes .= ' maxlength="'.$Control->_Parameters['MaxLength'].'"';
+if(isset($Parameters['IsDisabled']) && $Parameters['IsDisabled']) {
+	$Attributes .= ' disabled="disabled"';
 }
-
-if(isset($Control->_Parameters['AutoComplete'])) {
-	$Attributes .= ' autocomplete="'.$Control->_Parameters['AutoComplete'].'"';
-}
-
-if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
+else if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
 	$Attributes .= ' disabled="disabled"';
 }
 
-if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOnly']) {
-	$Attributes .= ' readonly="readonly"';
-}
-
 ?><input<?=$Attributes?> /><?
+
+if(isset($Control->_Parameters['Label'])) {
+	$Attributes = '';
+
+	if(isset($Parameters['Id'])) {
+		$Attributes .= ' for="'.$Parameters['Id'].'"';
+	}
+	else if(isset($Control->_Parameters['Id'])) {
+		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
+	}
+
+	if(isset($Control->_Parameters['LabelCssClass'])) {
+		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
+	}
+
+	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
+}
 
 if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
 	?><div class="ErrorMessages"><?

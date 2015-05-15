@@ -1,4 +1,8 @@
 <?
+/* Definitions */
+
+define('FRAMEWORK_DIRECTORY', 'Framework/');
+
 /* Dependencies */
 
 require('Framework/Newnorth/Newnorth.php');

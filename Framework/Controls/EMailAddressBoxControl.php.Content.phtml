@@ -37,7 +37,7 @@ if(isset($Control->_Parameters['CssClass'])) {
 	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
 }
 
-$Attributes .= ' type="text"';
+$Attributes .= ' type="email"';
 
 if(isset($Parameters['Value'])) {
 	$Attributes .= ' value="'.htmlspecialchars($Parameters['Value'], ENT_QUOTES).'"';

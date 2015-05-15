@@ -31,65 +31,25 @@ class Controls {
 			$Controls = ParseIniFile($this->FilePath);
 
 			foreach($Controls as $Alias => $Parameters) {
-				if(!isset($Parameters['Class'])) {
-					throw new RuntimeException(
-						'Control class not set.',
-						[
-							'File path' => $this->FilePath,
-							'Alias' => $Alias,
-							'Parameters' => $Parameters,
-						]
-					);
-				}
-				else {
-					$this->Items[$Alias] = Control::Instantiate($this->Owner, $Parameters['Class'], $Alias, $Parameters);
-				}
+				$this->Add($Alias, $Parameters);
 			}
 		}
 	}
 
-	public function Add($Alias, $Name, $Data = []) {
-		if($Name[0] === '.') {
-			$ClassName = str_replace('/', '\\', trim($Name, "./")).'Control';
-
-			$Directory = substr($Name, 0, strrpos($Name, '/') + 1);
-
-			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
-		}
-		else if($Name[0] === '/') {
-			$ClassName = str_replace('/', '\\', $Name).'Control';
-
-			$Directory = '/'.$GLOBALS['Config']->Files['Controls'].substr($Name, 1, strrpos($Name, '/'));
-
-			$Name = substr($Name, strrpos($Name, '/') + 1).'Control';
+	public function Add($Alias, $Parameters = []) {
+		if(!isset($Parameters['Class'])) {
+			throw new RuntimeException(
+				'Control class not set.',
+				[
+					'File path' => $this->FilePath,
+					'Alias' => $Alias,
+					'Parameters' => $Parameters,
+				]
+			);
 		}
 		else {
-			$ClassName = $this->Owner->_Namespace.$this->Owner->_Name.'\\'.$Name.'Control';
-
-			$Directory = './'.$this->Owner->_Directory.$this->Owner->_Name.'/';
-
-			$Name = $Name.'Control';
+			$this->Items[$Alias] = Control::Instantiate($this->Owner, $Parameters['Class'], $Alias, $Parameters);
 		}
-
-		if(!class_exists($ClassName, false)) {
-			$FilePath = $Directory.$Name.'.php';
-
-			include($FilePath);
-
-			if(!class_exists($ClassName, false)) {
-				throw new ConfigException(
-					'Control not found.',
-					[
-						'File' => $FilePath,
-						'Class' => $ClassName,
-					]
-				);
-			}
-		}
-
-		$Control = new $ClassName($this->Owner, $Directory, $this->Namespace, $Name, $Alias, $Data);
-
-		return $this->Items[$Alias] = $Control;
 	}
 
 	public function PreInitialize() {

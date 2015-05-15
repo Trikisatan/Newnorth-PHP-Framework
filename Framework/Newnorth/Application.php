@@ -201,7 +201,10 @@ class Application {
 	/* Instance methods */
 
 	public function GetObject($Scope, $Name) {
-		if($Name[0] !== '/') {
+		if(!isset($Name[0])) {
+			$Name = $Scope;
+		}
+		else if($Name[0] !== '/') {
 			while(substr($Name, 0, 3) === '../') {
 				$Name = substr($Name, 3);
 
@@ -211,7 +214,7 @@ class Application {
 			}
 
 			if(!isset($Name[0]) || $Name === './') {
-				$Scope = substr($Scope, 0, -1);
+				$Name = $Scope;
 			}
 			else {
 				$Name = $Scope.'/'.$Name;
@@ -275,7 +278,7 @@ class Application {
 			$DataManager = '\\'.str_replace('/', '\\', $Alias).'DataManager';
 
 			if(!class_exists($DataManager, false)) {
-				include($GLOBALS['Config']->Files['DataManagers'].$Alias.'DataManager.php');
+				include($GLOBALS['Config']->Files['DataManagers'].str_replace('\\', '/', $Alias).'DataManager.php');
 
 				if(!class_exists($DataManager, false)) {
 					throw new RuntimeException(
@@ -293,7 +296,7 @@ class Application {
 			$DataManager->DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
 
 			if(!class_exists($DataManager->DataType, false)) {
-				include($GLOBALS['Config']->Files['DataTypes'].$Alias.'DataType.php');
+				include($GLOBALS['Config']->Files['DataTypes'].str_replace('\\', '/', $Alias).'DataType.php');
 
 				if(!class_exists($DataManager->DataType, false)) {
 					throw new RuntimeException(

@@ -16,7 +16,9 @@ if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
-$Attributes .= ' class="Submit"';
+if(isset($Control->_Parameters['CssClass'])) {
+	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
+}
 
 $Attributes .= ' type="submit"';
 

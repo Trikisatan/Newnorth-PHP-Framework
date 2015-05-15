@@ -9,7 +9,9 @@ if(isset($Control->_Parameters['Label'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 
-	$Attributes .= ' class="DropDownListLabel"';
+	if(isset($Control->_Parameters['LabelCssClass'])) {
+		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
+	}
 
 	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
 }
@@ -31,7 +33,9 @@ if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
-$Attributes .= ' class="DropDownList"';
+if(isset($Control->_Parameters['CssClass'])) {
+	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
+}
 
 if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
 	$Attributes .= ' disabled="disabled"';
@@ -40,7 +44,9 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 ?><select<?=$Attributes?>><?
 	if(isset($Parameters['Value'])) {
 		foreach($Control->_Parameters['Options'] as $Value => $Text) {
-			if($Value === $Parameters['Value']) {
+			$Value = (string)$Value;
+
+			if((string)$Value === $Parameters['Value']) {
 				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
 			}
 			else {
@@ -50,6 +56,8 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 	}
 	else if(isset($Control->_Parameters['Value'])) {
 		foreach($Control->_Parameters['Options'] as $Value => $Text) {
+			$Value = (string)$Value;
+
 			if($Value === $Control->_Parameters['Value']) {
 				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
 			}
@@ -60,6 +68,8 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 	}
 	else {
 		foreach($Control->_Parameters['Options'] as $Value => $Text) {
+			$Value = (string)$Value;
+
 			?><option value="<?=$Value?>"><?=$Text?></option><?
 		}
 	}

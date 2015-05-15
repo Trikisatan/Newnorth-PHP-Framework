@@ -187,6 +187,19 @@ class Action {
 					if(isset($Parameters['ErrorMessage'])) {
 						$SupervisorObject = isset($Parameters['SupervisorObject']) ? $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['SupervisorObject']) : $Object;
 
+						if($SupervisorObject === null) {
+							throw new RuntimeException(
+								'Unable to find validator supervisor object.',
+								[
+									'Owner' => $this->Owner->__toString(),
+									'Action' => $this->Name,
+									'Validator' => $Name,
+									'SupervisorObject' => $Parameters['SupervisorObject'],
+									'Parameters' => $Parameters,
+								]
+							);
+						}
+
 						$SupervisorObject->_ErrorMessages[] = $Parameters['ErrorMessage'];
 					}
 

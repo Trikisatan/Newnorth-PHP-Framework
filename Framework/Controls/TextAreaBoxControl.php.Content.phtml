@@ -9,7 +9,9 @@ if(isset($Control->_Parameters['Label'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 
-	$Attributes .= ' class="TextAreaBoxLabel"';
+	if(isset($Control->_Parameters['LabelCssClass'])) {
+		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
+	}
 
 	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
 }
@@ -31,7 +33,13 @@ if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
-$Attributes .= ' class="TextAreaBox"';
+if(isset($Control->_Parameters['CssClass'])) {
+	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
+}
+
+if(isset($Control->_Parameters['Rows'])) {
+	$Attributes .= ' rows="'.$Control->_Parameters['Rows'].'"';
+}
 
 if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
 	$Attributes .= ' disabled="disabled"';
@@ -43,10 +51,10 @@ if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOn
 
 ?><textarea<?=$Attributes?> /><?
 	if(isset($Parameters['Value'])) {
-		echo $Parameters['Value'];
+		echo htmlspecialchars($Parameters['Value']);
 	}
 	else if(isset($Control->_Parameters['Value'])) {
-		echo $Control->_Parameters['Value'];
+		echo htmlspecialchars($Control->_Parameters['Value']);
 	}
 ?></textarea><?
 

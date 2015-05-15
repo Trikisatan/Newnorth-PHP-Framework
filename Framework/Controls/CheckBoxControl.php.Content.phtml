@@ -16,7 +16,9 @@ if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
-$Attributes .= ' class="CheckBox"';
+if(isset($Control->_Parameters['CssClass'])) {
+	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
+}
 
 $Attributes .= ' type="checkbox"';
 
@@ -53,7 +55,9 @@ if(isset($Control->_Parameters['Label'])) {
 		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
 	}
 
-	$Attributes .= ' class="CheckBoxLabel"';
+	if(isset($Control->_Parameters['LabelCssClass'])) {
+		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
+	}
 
 	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
 }
