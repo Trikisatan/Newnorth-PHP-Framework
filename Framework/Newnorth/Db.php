@@ -181,6 +181,22 @@ class DbEqualTo extends DbCondition {
 	}
 }
 
+class DbNotEqualTo extends DbCondition {
+	/* Instance variables */
+
+	public $A;
+
+	public $B;
+
+	/* Magic methods */
+
+	public function __construct($A, $B) {
+		$this->A = DbExpression::Parse($A);
+
+		$this->B = DbExpression::Parse($B);
+	}
+}
+
 class DbLike extends DbCondition {
 	/* Instance variables */
 

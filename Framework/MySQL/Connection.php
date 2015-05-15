@@ -618,6 +618,9 @@ class Connection extends DbConnection {
 		else if($Condition instanceof DbEqualTo) {
 			return $this->ProcessCondition_DbEqualTo($Condition);
 		}
+		else if($Condition instanceof \Framework\Newnorth\DbNotEqualTo) {
+			return $this->ProcessCondition_DbNotEqualTo($Condition);
+		}
 		else if($Condition instanceof DbLike) {
 			return $this->ProcessCondition_DbLike($Condition);
 		}
@@ -677,6 +680,10 @@ class Connection extends DbConnection {
 
 	private function ProcessCondition_DbEqualTo(DbEqualTo $Condition) {
 		return $this->ProcessExpression($Condition->A).' = '.$this->ProcessExpression($Condition->B);
+	}
+
+	private function ProcessCondition_DbNotEqualTo(\Framework\Newnorth\DbNotEqualTo $Condition) {
+		return $this->ProcessExpression($Condition->A).' != '.$this->ProcessExpression($Condition->B);
 	}
 
 	private function ProcessCondition_DbLike(DbLike $Condition) {
