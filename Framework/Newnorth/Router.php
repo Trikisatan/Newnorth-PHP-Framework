@@ -4,7 +4,12 @@ namespace Framework\Newnorth;
 class Router {
 	/* Static methods */
 
-	private static function Reroute(array $Parameters) {
+	public static function RerouteErrorPage() {
+		header('HTTP/1.0 500 Internal Server Error');
+
+		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+
+		// Try to add locale if not already set.
 		if(!isset($Parameters['Locale'])) {
 			if(isset($GLOBALS['Parameters']['Locale'])) {
 				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
@@ -17,22 +22,48 @@ class Router {
 		throw new RerouteException($Parameters);
 	}
 
-	public static function RerouteErrorPage() {
-		header('HTTP/1.0 500 Internal Server Error');
-
-		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['Error']);
-	}
-
 	public static function RerouteForbiddenPage() {
 		header('HTTP/1.0 403 Forbidden');
 
-		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['Forbidden']);
+		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Forbidden'];
+
+		// Try to add locale if not already set.
+		if(!isset($Parameters['Locale'])) {
+			if(isset($GLOBALS['Parameters']['Locale'])) {
+				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+			}
+			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			}
+		}
+
+		throw new RerouteException($Parameters);
 	}
 
 	public static function RerouteNotFoundPage() {
 		header('HTTP/1.0 404 Not Found');
 
-		Router::Reroute($GLOBALS['Config']->ErrorHandling['Pages']['NotFound']);
+		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
+
+		// Try to add locale if not already set.
+		if(!isset($Parameters['Locale'])) {
+			if(isset($GLOBALS['Parameters']['Locale'])) {
+				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+			}
+			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			}
+		}
+
+		throw new RerouteException($Parameters);
+	}
+
+	public static function Reroute($Path = '', array $Parameters = []) {
+		$Url = Router::GetUrl($Path, $Parameters);
+
+		Router::ParseUrl($Url, $Route, $Parameters);
+
+		throw new RerouteException($Parameters);
 	}
 
 	public static function Redirect($Path = '', array $Parameters = [], $QueryString = '') {
@@ -44,7 +75,7 @@ class Router {
 	}
 
 	public static function GetUrl($Path = '', array $Parameters = [], $QueryString = '') {
-		// Add current parameters.
+		// Add current parameters that is not already set.
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
 				$Parameters[$Key] = $Value;
