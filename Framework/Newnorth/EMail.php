@@ -14,6 +14,8 @@ class EMail {
 
 	private $Html = null;
 
+	private $Attachments = [];
+
 	/* Instance methods */
 
 	public function SetFrom($From) {
@@ -87,6 +89,10 @@ class EMail {
 		}
 	}
 
+	public function AddAttachment($Name, $Type, $Contents) {
+		$this->Attachments[] = ['Name' => $Name, 'Type' => $Type, 'Contents' => $Contents];
+	}
+
 	public function Send($To) {
 		$Rel = 'PHP-rel-'.md5(rand());
 		$Alt = 'PHP-alt-'.md5(rand());
@@ -104,40 +110,46 @@ class EMail {
 			$Headers .= "\r\n".'Reply-To: '.$this->ReplyTo;
 		}
 
-		$Message = '';
+		$Message =
+			'--'.$Rel.$Newline.
+			'Content-Type: multipart/alternative; boundary="'.$Alt.'"'.$Newline
+		;
 
-		if($this->Text !== null && $this->Html !== null) {
+		if($this->Text !== null) {
 			$Message .=
-				'--'.$Rel.$Newline.
-				'Content-Type: multipart/alternative; boundary="'.$Alt.'"'.$Newline.
 				'--'.$Alt.$Newline.
 				'Content-Type: text/plain; charset=UTF-8'.$Newline.
 				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Text).$Newline.$Newline.
+				quoted_printable_encode($this->Text).$Newline.$Newline
+			;
+		}
+
+		if($this->Html !== null) {
+			$Message .=
 				'--'.$Alt.$Newline.
 				'Content-Type: text/html; charset=UTF-8'.$Newline.
 				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Html).$Newline.$Newline.
-				'--'.$Alt.'--'.$Newline;
-		}
-		else if($this->Text !== null) {
-			$Message .=
-				'--'.$Rel.$Newline.
-				'Content-Type: text/plain; charset=UTF-8'.$Newline.
-				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Text).$Newline.$Newline;
-		}
-		else if($this->Html !== null) {
-			$Message .=
-				'--'.$Rel.$Newline.
-				'Content-Type: text/html; charset=UTF-8'.$Newline.
-				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Html).$Newline.$Newline;
+				quoted_printable_encode($this->Html).$Newline.$Newline
+			;
 		}
 
-		if(isset($Message[0])) {
-			$Message .= '--'.$Rel.'--';
+		$Message .=
+			'--'.$Alt.'--'.$Newline
+		;
+
+		foreach($this->Attachments as $Attachment) {
+			$Message .=
+				'--'.$Rel.$Newline.
+				'Content-Type: '.$Attachment['Type'].'; name="'.$Attachment['Name'].'"'.$Newline.
+				'Content-Transfer-Encoding: base64'.$Newline.
+				'Content-Disposition: attachment'.$Newline.$Newline.
+				chunk_split(base64_encode($Attachment['Contents'])).$Newline.$Newline
+			;
 		}
+
+		$Message .=
+			'--'.$Rel.'--'
+		;
 
 		return mail($To, $this->Subject, $Message, $Headers);
 	}
