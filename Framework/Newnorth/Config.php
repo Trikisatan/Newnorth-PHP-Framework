@@ -71,7 +71,7 @@ class Config {
 		$this->Translation = [
 			'ThrowException' => true,
 			'Log' => true,
-			'Report' => true,
+			'Report' => false,
 		];
 
 		$this->EMailer = [
