@@ -63,7 +63,7 @@ class Connection extends DbConnection {
 	// TODO: Add support for using a select query as an input.
 	public function Insert(DbInsertQuery $Query, $Execute = true) {
 		$Query =
-			'INSERT INTO `'.$Query->Source.'`'.
+			'INSERT INTO '.$Query->Source.
 			$this->Insert_ProcessColumns($Query->Columns).
 			$this->Insert_ProcessValues($Query->Values);
 
@@ -131,7 +131,7 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
 		else {
-			$Sql = '`'.$Sources[0]->Expression.'`';
+			$Sql = $Sources[0]->Expression;
 
 			if($Sources[0]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
@@ -209,7 +209,7 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
 		else {
-			$Sql = '`'.$Sources[0]->Expression.'`';
+			$Sql = $Sources[0]->Expression;
 
 			if($Sources[0]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
@@ -280,7 +280,7 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
 		else {
-			$Sql = '`'.$Sources[0]->Expression.'`';
+			$Sql = $Sources[0]->Expression;
 
 			if($Sources[0]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
@@ -385,7 +385,7 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
 		else {
-			$Sql = '`'.$Sources[0]->Expression.'`';
+			$Sql = $Sources[0]->Expression;
 
 			if($Sources[0]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
@@ -486,7 +486,7 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No source specified.');
 		}
 		else {
-			$Sql = '`'.$Sources[0]->Expression.'`';
+			$Sql = $Sources[0]->Expression;
 
 			if($Sources[0]->Alias !== null) {
 				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
@@ -595,7 +595,7 @@ class Connection extends DbConnection {
 			}
 		}
 
-		$Sql .= ' `'.$Source->Expression.'`';
+		$Sql .= ' '.$Source->Expression;
 
 		if($Source->Alias !== null) {
 			$Sql .= ' AS `'.$Source->Alias.'`';
