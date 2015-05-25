@@ -1,6 +1,4 @@
 <?
-namespace Framework\Controls;
-
 class PasswordBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 

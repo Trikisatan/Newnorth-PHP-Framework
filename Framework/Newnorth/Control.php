@@ -39,47 +39,19 @@ abstract class Control {
 	}
 
 	private static function ParsePath($Parent, $Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
-		if($Path[0] === '.') {
-			$FilePath = $Path.'.php';
+		$FilePath = $GLOBALS['Config']->Files['Controls'].$Path.'Control.php';
 
-			$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
+		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
 
-			$ClassName = '\\'.str_replace('/', '\\', trim($Path, "./"));
+		$ClassName = '\\'.str_replace('/', '\\', $Path).'Control';
 
-			$Namespace = strrpos($ClassName, '\\');
+		$Namespace = strrpos($ClassName, '\\');
 
-			$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
+		$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
 
-			$Name = substr($Path, strrpos($Path, '/') + 1);
-		}
-		else if($Path[0] === '/') {
-			$FilePath = $GLOBALS['Config']->Files['Controls'].substr($Path, 1).'.php';
+		$Name = strrpos($Path, '/');
 
-			$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
-
-			$ClassName = str_replace('/', '\\', $Path);
-
-			$Namespace = strrpos($ClassName, '\\');
-
-			$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
-
-			$Name = substr($Path, strrpos($Path, '/') + 1);
-		}
-		else {
-			$FilePath = $Parent->_Directory.$Parent->_Name.'/'.$Path.'.php';
-
-			$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
-
-			$ClassName = $Parent->_Namespace.$Parent->_Name.'\\'.str_replace('/', '\\', $Path);
-
-			$Namespace = strrpos($ClassName, '\\');
-
-			$Namespace = ($Namespace === false) ? '\\' : substr($ClassName, 0, $Namespace + 1);
-
-			$Name = strrpos($Path, '/');
-
-			$Name = ($Name === false) ? $Path : substr($Path, $Name + 1);
-		}
+		$Name = (($Name === false) ? $Path : substr($Path, $Name + 1)).'Control';
 	}
 
 	/* Instance variables */
@@ -186,6 +158,10 @@ abstract class Control {
 
 	public function SetTranslation($Key, $Value) {
 		$this->_Translations[$Key] = $Value;
+	}
+
+	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
+		$this->_Controls->Items[$Alias] = $Control;
 	}
 
 	public function GetControl($Alias) {

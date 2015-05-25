@@ -147,6 +147,10 @@ class Layout {
 		$this->_Translations[$Key] = $Value;
 	}
 
+	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
+		$this->_Controls->Items[$Alias] = $Control;
+	}
+
 	public function GetControl($Alias) {
 		return $this->_Controls->Items[$Alias];
 	}

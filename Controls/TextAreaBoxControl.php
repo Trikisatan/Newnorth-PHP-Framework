@@ -1,6 +1,4 @@
 <?
-namespace Framework\Controls;
-
 class TextAreaBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 

@@ -1,13 +1,9 @@
 <?
-namespace Framework\Controls;
-
 class DropDownListControl extends \Framework\Newnorth\Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
-		$this->_Directory = FRAMEWORK_DIRECTORY.'Controls/';
-
-		$this->_Namespace = '\\Framework\\Controls\\';
+		$this->_Namespace = '\\';
 
 		$this->_Name = 'DropDownListControl';
 
@@ -32,8 +28,8 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	public function PostExecute() {
 		parent::PostExecute();
 
-		if(method_exists($this->_Parent, 'Set'.$this->_Alias.'ControlOptions')) {
-			$this->_Parent->{'Set'.$this->_Alias.'ControlOptions'}($this);
+		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
+			$this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
 		}
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {

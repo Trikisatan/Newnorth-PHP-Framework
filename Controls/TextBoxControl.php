@@ -1,7 +1,5 @@
 <?
-namespace Framework\Controls;
-
-class EMailAddressBoxControl extends \Framework\Newnorth\Control {
+class TextBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
 	public function PostExecute() {
