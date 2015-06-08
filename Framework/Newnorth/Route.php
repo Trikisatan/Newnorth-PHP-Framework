@@ -53,9 +53,9 @@ class Route {
 			$this->Pattern = '/^'.str_replace('/', '\/', $Data['Pattern']).'\/(.*?)$/';
 		}
 
-		$this->Pattern = preg_replace('/(\^|\\\\\/)\*(.*?)(?:\((.*?)\))?\\\\\//', '$1(?:(?<$2>$3)\/)?', $this->Pattern);
+		$this->Pattern = preg_replace('/(\^|\\\\\/)\*(.*?)(?:\((.*?)\))?(?=\\\\\/)/', '$1(?:(?<$2>$3))?', $this->Pattern);
 
-		$this->Pattern = preg_replace('/(\^|\\\\\/)\+(.*?)(?:\((.*?)\))?\\\\\//', '$1(?<$2>$3)\/', $this->Pattern);
+		$this->Pattern = preg_replace('/(\^|\\\\\/)\+(.*?)(?:\((.*?)\))?(?=\\\\\/)/', '$1(?<$2>$3)', $this->Pattern);
 
 		if(isset($Data['Translations'])) {
 			foreach($Data['Translations'] as $Locale => $Translation) {
@@ -77,7 +77,7 @@ class Route {
 
 		if(isset($Data['Translations'])) {
 			foreach($Data['Translations'] as $Locale => $Translation) {
-				$this->TranslatedReversablePatterns[$Locale] = str_replace('@', str_replace('/', '\/', $Translation), $this->ReversablePattern);
+				$this->TranslatedReversablePatterns[$Locale] = str_replace('@', $Translation, $this->ReversablePattern);
 			}
 		}
 
@@ -265,10 +265,10 @@ class Route {
 	}
 
 	private function GetUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
-		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
 			foreach($Matches as $Match) {
 				if(isset($Parameters[$Match[2]])) {
-					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
 				}
 				else {
 					throw new RuntimeException('Parameter "'.$Match[2].'" not set.');
