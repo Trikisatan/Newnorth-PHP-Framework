@@ -679,11 +679,41 @@ class Connection extends DbConnection {
 	}
 
 	private function ProcessCondition_DbEqualTo(DbEqualTo $Condition) {
-		return $this->ProcessExpression($Condition->A).' = '.$this->ProcessExpression($Condition->B);
+		if($Condition->A instanceof DbNull) {
+			if($Condition->B instanceof DbNull) {
+				return 'NULL IS NULL';
+			}
+			else {
+				return $this->ProcessExpression($Condition->B).' IS NULL';
+			}
+		}
+		else {
+			if($Condition->B instanceof DbNull) {
+				return $this->ProcessExpression($Condition->A).' IS NULL';
+			}
+			else {
+				return $this->ProcessExpression($Condition->A).' = '.$this->ProcessExpression($Condition->B);
+			}
+		}
 	}
 
 	private function ProcessCondition_DbNotEqualTo(\Framework\Newnorth\DbNotEqualTo $Condition) {
-		return $this->ProcessExpression($Condition->A).' != '.$this->ProcessExpression($Condition->B);
+		if($Condition->A instanceof DbNull) {
+			if($Condition->B instanceof DbNull) {
+				return 'NULL IS NOT NULL';
+			}
+			else {
+				return $this->ProcessExpression($Condition->B).' IS NOT NULL';
+			}
+		}
+		else {
+			if($Condition->B instanceof DbNull) {
+				return $this->ProcessExpression($Condition->A).' IS NOT NULL';
+			}
+			else {
+				return $this->ProcessExpression($Condition->A).' != '.$this->ProcessExpression($Condition->B);
+			}
+		}
 	}
 
 	private function ProcessCondition_DbLike(DbLike $Condition) {
