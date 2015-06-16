@@ -21,16 +21,12 @@ class ErrorHandler {
 
 		ob_clean();
 
-		header('HTTP/1.0 500 Internal Server Error');
-
 		if($GLOBALS['Parameters']['Page'] !== $GLOBALS['Config']->ErrorHandling['Pages']['Error']['Page']) {
-			$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
-
-			$Parameters['Error'] = $Exception;
-
-			throw new RerouteException($Parameters);
+			Router::RerouteErrorPage($Exception);
 		}
 		else {
+			header('HTTP/1.0 500 Internal Server Error');
+
 			die('500 Internal Server Error');
 		}
 	}
