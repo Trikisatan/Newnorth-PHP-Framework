@@ -8,24 +8,32 @@ class Action {
 
 	private $Name;
 
-	private $PreValidators = null;
+	private $PreValidators = [];
 
 	private $DbLocks = null;
 
 	private $Validators = null;
+
+	public $IsExecuted = false;
 
 	/* Magic methods */
 
 	public function __construct($Owner, $Name, $Parameters) {
 		$this->Owner = $Owner;
 
-		$this->Name = $Name;
+		$this->Name = $Name.'Action';
 
 		$this->PreValidators = isset($Parameters['PreValidators']) ? $Parameters['PreValidators'] : $this->PreValidators;
 
 		$this->DbLocks = isset($Parameters['DbLocks']) ? $Parameters['DbLocks'] : $this->DbLocks;
 
 		$this->Validators = isset($Parameters['Validators']) ? $Parameters['Validators'] : $this->Validators;
+
+		$GLOBALS['Application']->RegisterObject($this);
+	}
+
+	public function __toString() {
+		return $this->Owner.'/'.$this->Name;
 	}
 
 	/* Life cycle methods */
@@ -36,7 +44,7 @@ class Action {
 				$this->LockDbConnections();
 
 				if($this->Validate()) {
-					$this->Owner->{$this->Name.'Action'}();
+					$this->Owner->{$this->Name}();
 				}
 			}
 			catch(\Exception $Exception) {
@@ -44,6 +52,8 @@ class Action {
 			}
 			finally {
 				$this->UnlockDbConnections();
+
+				$this->IsExecuted = true;
 			}
 		}
 	}
@@ -51,30 +61,32 @@ class Action {
 	/* Instance methods */
 
 	private function PreValidate() {
-		if(is_array($this->PreValidators)) {
-			if(isset($this->PreValidators['IsSet']) && is_array($this->PreValidators['IsSet']) && !$this->PreValidate_IsSet()) {
+		foreach($this->PreValidators as $Type => $PreValidators) {
+			if(!$this->{'PreValidate_'.$Type}($PreValidators)) {
 				return false;
-			}
-			else if(isset($this->PreValidators['IsNotSet']) && is_array($this->PreValidators['IsNotSet']) && !$this->PreValidate_IsNotSet()) {
-				return false;
-			}
-			else if(isset($this->PreValidators['IsTrue']) && is_array($this->PreValidators['IsTrue']) && !$this->PreValidate_IsTrue()) {
-				return false;
-			}
-			else if(isset($this->PreValidators['IsFalse']) && is_array($this->PreValidators['IsFalse']) && !$this->PreValidate_IsFalse()) {
-				return false;
-			}
-			else {
-				return true;
 			}
 		}
-		else {
-			return true;
-		}
+
+		return true;
 	}
 
-	private function PreValidate_IsSet() {
-		foreach($this->PreValidators['IsSet'] as $IsSet) {
+	private function PreValidate_ActionIsExecuted($PreValidators) {
+		foreach($PreValidators as $Action) {
+			$Action = $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Action);
+
+			/*if($Action === null) {
+				return false;
+			}
+			else */if(!$Action->IsExecuted) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function PreValidate_IsSet($PreValidators) {
+		foreach($PreValidators as $IsSet) {
 			if(!eval('return isset('.$IsSet.');')) {
 				return false;
 			}
@@ -83,8 +95,8 @@ class Action {
 		return true;
 	}
 
-	private function PreValidate_IsNotSet() {
-		foreach($this->PreValidators['IsNotSet'] as $IsNotSet) {
+	private function PreValidate_IsNotSet($PreValidators) {
+		foreach($PreValidators as $IsNotSet) {
 			if(eval('return isset('.$IsNotSet.');')) {
 				return false;
 			}
@@ -93,8 +105,8 @@ class Action {
 		return true;
 	}
 
-	private function PreValidate_IsTrue() {
-		foreach($this->PreValidators['IsTrue'] as $IsTrue) {
+	private function PreValidate_IsTrue($PreValidators) {
+		foreach($PreValidators as $IsTrue) {
 			if(!eval('return '.$IsTrue.';')) {
 				return false;
 			}
@@ -103,8 +115,8 @@ class Action {
 		return true;
 	}
 
-	private function PreValidate_IsFalse() {
-		foreach($this->PreValidators['IsFalse'] as $IsFalse) {
+	private function PreValidate_IsFalse($PreValidators) {
+		foreach($PreValidators as $IsFalse) {
 			if(eval('return '.$IsFalse.';')) {
 				return false;
 			}
