@@ -48,27 +48,43 @@ function Initialize() {
 
 			$GLOBALS['Routing']->Initialize();
 
-			if(!\Framework\Newnorth\Router::ParseUrl($GLOBALS['Url'], $GLOBALS['Route'], $GLOBALS['Parameters'])) {
+			if(!\Framework\Newnorth\Router::ParseUrl($GLOBALS['Url'], $GLOBALS['Route'], $GLOBALS['RealRoute'], $GLOBALS['Parameters'])) {
 				header('HTTP/1.0 404 Not Found');
 
 				$GLOBALS['Route'] = null;
 
+				$GLOBALS['RealRoute'] = null;
+
 				$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
+
+				$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+
+				$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 			}
 		}
-		catch(\Framework\Newnorth\ConfigException $Exception) {
+		catch(\Framework\Newnorth\Exception $Exception) {
 			$GLOBALS['Routing'] = new \Framework\Newnorth\Routing();
 
 			header('HTTP/1.0 500 Internal Server Error');
 
 			$GLOBALS['Route'] = null;
 
+			$GLOBALS['RealRoute'] = null;
+
 			$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+
+			$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+
+			$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+
+			if(!isset($GLOBALS['Parameters']['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+				$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			}
 
 			$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
 		}
 	}
-	catch(\Framework\Newnorth\ConfigException $Exception) {
+	catch(\Framework\Newnorth\Exception $Exception) {
 		$GLOBALS['Config'] = new \Framework\Newnorth\Config();
 
 		$GLOBALS['Routing'] = new \Framework\Newnorth\Routing();
@@ -77,7 +93,13 @@ function Initialize() {
 
 		$GLOBALS['Route'] = null;
 
+		$GLOBALS['RealRoute'] = null;
+
 		$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+
+		$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+
+		$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 
 		$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
 	}
@@ -139,6 +161,10 @@ function Run() {
 		header('Location: '.$Exception->Url);
 	}
 	catch(\Framework\Newnorth\RerouteException $Exception) {
+		$Exception->Parameters['Route'] = $GLOBALS['Parameters']['Route'];
+
+		$Exception->Parameters['RealRoute'] = $GLOBALS['Parameters']['RealRoute'];
+
 		$GLOBALS['Parameters'] = $Exception->Parameters;
 
 		Run();

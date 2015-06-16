@@ -4,19 +4,21 @@ namespace Framework\Newnorth;
 class Router {
 	/* Static methods */
 
-	public static function RerouteErrorPage() {
+	public static function RerouteErrorPage($Exception) {
 		header('HTTP/1.0 500 Internal Server Error');
 
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
 
-		// Try to add locale if not already set.
-		if(!isset($Parameters['Locale'])) {
-			if(isset($GLOBALS['Parameters']['Locale'])) {
-				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+		$Parameters['Error'] = $Exception;
+
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
 			}
-			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-			}
+		}
+
+		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 		}
 
 		throw new RerouteException($Parameters);
@@ -27,14 +29,14 @@ class Router {
 
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Forbidden'];
 
-		// Try to add locale if not already set.
-		if(!isset($Parameters['Locale'])) {
-			if(isset($GLOBALS['Parameters']['Locale'])) {
-				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
 			}
-			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-			}
+		}
+
+		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 		}
 
 		throw new RerouteException($Parameters);
@@ -45,14 +47,14 @@ class Router {
 
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
 
-		// Try to add locale if not already set.
-		if(!isset($Parameters['Locale'])) {
-			if(isset($GLOBALS['Parameters']['Locale'])) {
-				$Parameters['Locale'] = $GLOBALS['Parameters']['Locale'];
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
 			}
-			else if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-			}
+		}
+
+		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 		}
 
 		throw new RerouteException($Parameters);
@@ -61,17 +63,52 @@ class Router {
 	public static function Reroute($Path = '', array $Parameters = []) {
 		$Url = Router::GetUrl($Path, $Parameters);
 
-		Router::ParseUrl($Url, $Route, $Parameters);
+		Router::ParseUrl($Url, $Route, $RealRoute, $Parameters);
 
 		throw new RerouteException($Parameters);
 	}
 
 	public static function Redirect($Path = '', array $Parameters = [], $QueryString = '') {
-		throw new RedirectException(self::GetUrl($Path, $Parameters, $QueryString));
+		throw new RedirectException(Router::GetUrl($Path, $Parameters, $QueryString));
 	}
 
-	public static function ParseUrl($Url, Route &$Route = null, array &$Parameters = null) {
-		return $GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $Parameters = []);
+	public static function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters = null) {
+		return $GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $RealRoute, $Parameters = []);
+	}
+
+	public static function GetRoute(Route $CurrentRoute = null, $Path = '', Route &$Route = null) {
+		if(isset($Path[0])) {
+			if($Path[0] === '/') {
+				if(isset($Path[1])) {
+					return $GLOBALS['Routing']->Route->GetRoute(explode('/', substr($Path, 1)), $Route);
+				}
+				else {
+					return $GLOBALS['Routing']->Route->GetRoute([], $Route);
+				}
+			}
+			else if($CurrentRoute === null) {
+				throw new RuntimeException(
+					'Unable to get relative route from a non-current route.',
+					[
+						'Requested path' => $Path
+					]
+				);
+			}
+			else {
+				return $CurrentRoute->GetRoute(explode('/', $Path), $Route);
+			}
+		}
+		else if($CurrentRoute === null) {
+			throw new RuntimeException(
+				'Unable to get relative route from a non-current route.',
+				[
+					'Requested path' => $Path
+				]
+			);
+		}
+		else {
+			return $CurrentRoute;
+		}
 	}
 
 	public static function GetUrl($Path = '', array $Parameters = [], $QueryString = '') {
@@ -110,7 +147,7 @@ class Router {
 			return $GLOBALS['Routing']->Route->GetUrl([], false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
 		}
 		else {
-			return $GLOBALS['Routing']->Route->GetUrl(explode('/', $GLOBALS['Parameters']['Page']), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+			return $GLOBALS['Routing']->Route->GetUrl(explode('/', $GLOBALS['Parameters']['Route']), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
 		}
 	}
 }
