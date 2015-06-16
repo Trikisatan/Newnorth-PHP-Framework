@@ -26,4 +26,10 @@ if(isset($Control->_Parameters['Text'])) {
 	$Attributes .= ' value="'.$Control->_Parameters['Text'].'"';
 }
 
+if(isset($Control->_Parameters['Attributes'])) {
+	foreach($Control->_Parameters['Attributes'] as $Name => $Value) {
+		$Attributes .= ' '.$Name.'="'.$Value.'"';
+	}
+}
+
 ?><input<?=$Attributes?> />
