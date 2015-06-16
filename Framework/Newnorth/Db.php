@@ -106,6 +106,12 @@ abstract class DbConditionGroup extends DbCondition {
 		return $this;
 	}
 
+	public function NotEqualTo($A, $B) {
+		$this->Conditions[] = new DbNotEqualTo($A, $B);
+
+		return $this;
+	}
+
 	public function Like($A, $B) {
 		$this->Conditions[] = new DbLike($A, $B);
 
