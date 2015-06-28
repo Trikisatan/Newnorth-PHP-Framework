@@ -63,9 +63,9 @@ class Layout {
 
 	public $_Name;
 
-	public $_Controls;
-
 	public $_Actions;
+
+	public $_Controls;
 
 	public $_ErrorMessages = [];
 
@@ -82,9 +82,9 @@ class Layout {
 
 		$this->_Name = isset($this->_Name[0]) ? $this->_Name : $Name;
 
-		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
-
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');
+
+		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
 
 		$GLOBALS['Application']->RegisterObject($this);
 	}
@@ -147,8 +147,24 @@ class Layout {
 		$this->_Translations[$Key] = $Value;
 	}
 
+	public function _RemoveAction($Action) {
+		for($I = 0; $I < count($this->_Actions->Items); ++$I) {
+			if($this->_Actions->Items[$I] === $Alias) {
+				$this->_Actions->Items[$I]->Destroy();
+
+				array_splice($this->_Actions->Items, $I);
+			}
+		}
+	}
+
 	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
 		$this->_Controls->Items[$Alias] = $Control;
+	}
+
+	public function RemoveControl($Alias) {
+		$this->_Controls->Items[$Alias]->Destroy();
+
+		unset($this->_Controls->Items[$Alias]);
 	}
 
 	public function GetControl($Alias) {

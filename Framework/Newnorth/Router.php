@@ -69,7 +69,12 @@ class Router {
 	}
 
 	public static function Redirect($Path = '', array $Parameters = [], $QueryString = '') {
-		throw new RedirectException(Router::GetUrl($Path, $Parameters, $QueryString));
+		if($QueryString === '') {
+			throw new RedirectException(Router::GetFullUrl($Path, $Parameters));
+		}
+		else {
+			throw new RedirectException(Router::GetFullUrl($Path, $Parameters).'?'.$QueryString);
+		}
 	}
 
 	public static function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters = null) {
@@ -148,6 +153,40 @@ class Router {
 		}
 		else {
 			return $GLOBALS['Routing']->Route->GetUrl(explode('/', $GLOBALS['Parameters']['Route']), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+		}
+	}
+
+	public static function GetFullUrl($Path = '', array $Parameters = []) {
+		// Add current parameters that is not already set.
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
+			}
+		}
+
+		if($Path === '') {
+			return $GLOBALS['Route']->GetFullUrl([], $Parameters);
+		}
+		else if($Path[0] === '/') {
+			$Path = explode('/', $Path);
+
+			return $GLOBALS['Routing']->Route->GetFullUrl($Path, $Parameters);
+		}
+		else if($GLOBALS['Route'] === null) {
+			throw new RuntimeException(
+				'Unable to get URL to a relative route from a non-existing route.',
+				[
+					'Current Parameters' => $GLOBALS['Parameters'],
+					'Requested path' => $Path,
+					'Requested parameters' => $Parameters,
+					'Requested query string' => $QueryString,
+				]
+			);
+		}
+		else {
+			$Path = explode('/', $Path);
+
+			return $GLOBALS['Route']->GetFullUrl($Path, $Parameters);
 		}
 	}
 }

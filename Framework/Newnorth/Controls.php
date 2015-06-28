@@ -36,6 +36,12 @@ class Controls {
 		}
 	}
 
+	public function Destroy() {
+		foreach($this->Items as $Item) {
+			$Item->Destroy();
+		}
+	}
+
 	public function Add($Alias, $Parameters = []) {
 		if(!isset($Parameters['Class'])) {
 			throw new RuntimeException(

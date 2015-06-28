@@ -70,9 +70,9 @@ abstract class Control {
 
 	public $_Parameters;
 
-	public $_Controls;
-
 	public $_Actions;
+
+	public $_Controls;
 
 	public $_ErrorMessages = [];
 
@@ -81,7 +81,7 @@ abstract class Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
-		$this->_Id = str_replace('\\', '/', $Parent->_Namespace.$Parent->_Name).'/'.$Alias;
+		$this->_Id = $Parent->_Id.'/'.$Alias;
 
 		$this->_Parent = $Parent;
 
@@ -95,9 +95,9 @@ abstract class Control {
 
 		$this->_Parameters = $Parameters;
 
-		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
-
 		$this->_Actions = new Actions($this, $Directory.$Name.'/');
+
+		$this->_Controls = new Controls($this, $Directory.$Name.'/', $Namespace.$Name.'\\');
 
 		$GLOBALS['Application']->RegisterObject($this);
 	}
@@ -152,6 +152,18 @@ abstract class Control {
 
 	/* Instance methods */
 
+	public function Destroy() {
+		$this->_Actions->Destroy();
+
+		$this->_Actions = null;
+
+		$this->_Controls->Destroy();
+
+		$this->_Controls = null;
+
+		$GLOBALS['Application']->UnregisterObject($this);
+	}
+
 	public function GetTranslation($Key, $DefaultValue = null) {
 		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;
 	}
@@ -160,8 +172,24 @@ abstract class Control {
 		$this->_Translations[$Key] = $Value;
 	}
 
+	public function _RemoveAction($Action) {
+		for($I = 0; $I < count($this->_Actions->Items); ++$I) {
+			if($this->_Actions->Items[$I] === $Alias) {
+				$this->_Actions->Items[$I]->Destroy();
+
+				array_splice($this->_Actions->Items, $I);
+			}
+		}
+	}
+
 	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
 		$this->_Controls->Items[$Alias] = $Control;
+	}
+
+	public function RemoveControl($Alias) {
+		$this->_Controls->Items[$Alias]->Destroy();
+
+		unset($this->_Controls->Items[$Alias]);
 	}
 
 	public function GetControl($Alias) {

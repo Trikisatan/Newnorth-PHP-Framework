@@ -379,5 +379,96 @@ class Route {
 
 		return $ReversablePattern;
 	}
+
+	public function GetFullUrl(array $Path, array $Parameters) {
+		if(0 < count($Path)) {
+			$Node = array_shift($Path);
+
+			if($Node === '') {
+				return $this->GetFullUrl($Path, $Parameters);
+			}
+			else if($Node === '..') {
+				return $this->Parent->GetFullUrl($Path, $Parameters);
+			}
+			else if(!isset($this->Routes[$Node])) {
+				throw new RuntimeException(
+					'Subroute not found.',
+					[
+						'Route' => $this->__toString(),
+						'Subroute' => $Node,
+					]
+				);
+			}
+			else {
+				return $this->Routes[$Node]->GetFullUrl($Path, $Parameters);
+			}
+		}
+		else if($this->Parent === null) {
+			return $this->GetFullUrl_GetReversablePattern($Parameters);
+		}
+		else {
+			return $this->Parent->GetFullUrl($Path, $Parameters).$this->GetFullUrl_GetReversablePattern($Parameters);
+		}
+	}
+
+	private function GetFullUrl_GetReversablePattern($Parameters) {
+		if($this->Pattern === null) {
+			throw new RuntimeException(
+				'Pattern not set.',
+				[
+					'Route' => $this->__toString(),
+					'Parameters' => $Parameters,
+				]
+			);
+		}
+		else {
+			if(0 < count($this->TranslatedReversablePatterns)) {
+				if(!isset($Parameters['Locale'])) {
+					if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+						$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+					}
+					else {
+						throw new RuntimeException('Locale not set.');
+					}
+				}
+
+				if(!isset($this->TranslatedReversablePatterns[$Parameters['Locale']])) {
+					throw new RuntimeException('Route not available for current locale.');
+				}
+				else {
+					return $this->GetFullUrl_GetReversablePattern_ApplyParameters($this->TranslatedReversablePatterns[$Parameters['Locale']], $Parameters);
+				}
+			}
+			else {
+				return $this->GetFullUrl_GetReversablePattern_ApplyParameters($this->ReversablePattern, $Parameters);
+			}
+		}
+	}
+
+	private function GetFullUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
+		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+			foreach($Matches as $Match) {
+				if(isset($Parameters[$Match[2]])) {
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
+				}
+				else {
+					throw new RuntimeException('Parameter "'.$Match[2].'" not set.');
+				}
+			}
+		}
+
+		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+			foreach($Matches as $Match) {
+				if(isset($Parameters[$Match[2]])) {
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+				}
+				else {
+					$ReversablePattern = str_replace($Match[0], $Match[1], $ReversablePattern);
+				}
+			}
+		}
+
+		return $ReversablePattern;
+	}
 }
 ?>

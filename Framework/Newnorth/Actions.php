@@ -43,5 +43,11 @@ class Actions {
 			}
 		}
 	}
+
+	public function Destroy() {
+		foreach($this->Items as $Item) {
+			$Item->Destroy();
+		}
+	}
 }
 ?>
