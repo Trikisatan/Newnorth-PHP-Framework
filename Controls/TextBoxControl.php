@@ -25,11 +25,35 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function GetIsFloatValidator($Parameters) {
-		return is_numeric($_GET[$this->_Parameters['Name']]);
+		$Value = $_GET[$this->_Parameters['Name']];
+
+		if($this->_Parameters['AllowEmpty']) {
+			if(isset($Value[0])) {
+				return is_numeric($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return is_numeric($_POST[$this->_Parameters['Name']]);
+		}
 	}
 
 	public function GetIsIntValidator($Parameters) {
-		return ctype_digit($_GET[$this->_Parameters['Name']]);
+		$Value = $_GET[$this->_Parameters['Name']];
+
+		if($this->_Parameters['AllowEmpty']) {
+			if(isset($Value[0])) {
+				return ctype_digit($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return is_numeric($Value);
+		}
 	}
 
 	public function GetMaxLengthValidator($Parameters) {
@@ -57,11 +81,36 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function PostIsFloatValidator($Parameters) {
-		return is_numeric($_POST[$this->_Parameters['Name']]);
+		$Value = $_POST[$this->_Parameters['Name']];
+
+		if($this->_Parameters['AllowEmpty']) {
+
+			if(isset($Value[0])) {
+				return is_numeric($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return is_numeric($Value);
+		}
 	}
 
 	public function PostIsIntValidator($Parameters) {
-		return ctype_digit($_POST[$this->_Parameters['Name']]);
+		$Value = $_POST[$this->_Parameters['Name']];
+
+		if($this->_Parameters['AllowEmpty']) {
+			if(isset($Value[0])) {
+				return ctype_digit($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return is_numeric($Value);
+		}
 	}
 
 	public function PostMaxLengthValidator($Parameters) {
