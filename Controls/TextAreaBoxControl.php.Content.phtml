@@ -49,7 +49,7 @@ if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOn
 	$Attributes .= ' readonly="readonly"';
 }
 
-?><textarea<?=$Attributes?> /><?
+?><textarea<?=$Attributes?>><?
 	if(isset($Parameters['Value'])) {
 		echo htmlspecialchars($Parameters['Value']);
 	}
