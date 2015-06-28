@@ -210,7 +210,7 @@ class Application {
 
 				$Slash = strrpos($Scope, '/', -1);
 
-				$Scope = substr($Scope, 0, $Slash + 1);
+				$Scope = substr($Scope, 0, $Slash);
 			}
 
 			if(!isset($Name[0]) || $Name === './') {
