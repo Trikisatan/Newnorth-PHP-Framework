@@ -151,7 +151,18 @@ class EMail {
 			'--'.$Rel.'--'
 		;
 
-		return mail($To, $this->Subject, $Message, $Headers);
+		if(is_array($To)) {
+			$Status = true;
+
+			for($I = 0; $I < count($To); ++$I) {
+				$Status = $Status && mail($To[$I], $this->Subject, $Message, $Headers);
+			}
+
+			return $Status;
+		}
+		else {
+			return mail($To, $this->Subject, $Message, $Headers);
+		}
 	}
 }
 ?>
