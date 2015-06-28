@@ -42,35 +42,40 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 }
 
 ?><select<?=$Attributes?>><?
-	if(isset($Parameters['Value'])) {
-		foreach($Control->_Parameters['Options'] as $Value => $Text) {
-			$Value = (string)$Value;
+	if(isset($Control->_Parameters['Options'])) {
+		foreach($Control->_Parameters['Options'] as $Option) {
+			$Attributes = '';
 
-			if((string)$Value === $Parameters['Value']) {
-				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+			if(isset($Option['Value'])) {
+				$Attributes .= ' value="'.$Option['Value'].'"';
 			}
-			else {
-				?><option value="<?=$Value?>"><?=$Text?></option><?
-			}
-		}
-	}
-	else if(isset($Control->_Parameters['Value'])) {
-		foreach($Control->_Parameters['Options'] as $Value => $Text) {
-			$Value = (string)$Value;
 
-			if($Value === $Control->_Parameters['Value']) {
-				?><option value="<?=$Value?>" selected="selected"><?=$Text?></option><?
+			if(isset($Option['CssClass'])) {
+				$Attributes .= ' class="'.$Option['CssClass'].'"';
 			}
-			else {
-				?><option value="<?=$Value?>"><?=$Text?></option><?
-			}
-		}
-	}
-	else {
-		foreach($Control->_Parameters['Options'] as $Value => $Text) {
-			$Value = (string)$Value;
 
-			?><option value="<?=$Value?>"><?=$Text?></option><?
+			if(isset($Parameters['Value'])) {
+				if(isset($Option['Value'])) {
+					if($Option['Value'] === $Parameters['Value']) {
+						$Attributes .= ' selected="selected"';
+					}
+				}
+				else if($Option['Text'] === $Parameters['Value']) {
+					$Attributes .= ' selected="selected"';
+				}
+			}
+			else if(isset($Control->_Parameters['Value'])) {
+				if(isset($Option['Value'])) {
+					if($Option['Value'] === $Control->_Parameters['Value']) {
+						$Attributes .= ' selected="selected"';
+					}
+				}
+				else if($Option['Text'] === $Control->_Parameters['Value']) {
+					$Attributes .= ' selected="selected"';
+				}
+			}
+
+			?><option<?=$Attributes?>><?=$Option['Text']?></option><?
 		}
 	}
 ?></select><?

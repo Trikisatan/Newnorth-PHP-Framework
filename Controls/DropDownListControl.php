@@ -8,19 +8,6 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		$this->_Name = 'DropDownListControl';
 
 		parent::__construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters);
-
-		if(isset($this->_Parameters['Options'])) {
-			$Options = [];
-
-			foreach($this->_Parameters['Options'] as $Value => $Text) {
-				$Options[(string)$Value] = (string)$Text;
-			}
-
-			$this->_Parameters['Options'] = $Options;
-		}
-		else {
-			$this->_Parameters['Options'] = [];
-		}
 	}
 
 	/* Life cycle methods */
@@ -40,11 +27,37 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	/* Validator methods */
 
 	public function GetValueValidator($Parameters) {
-		return isset($this->_Parameters['Options'][$_GET[$this->_Parameters['Name']]]);
+		if(isset($this->_Parameters['Options'])) {
+			$Value = $_GET[$this->_Parameters['Name']];
+
+			foreach($this->_Parameters['Options'] as $Option) {
+				if($Option['Value'] === $Value) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+		else {
+			return false;
+		}
 	}
 
 	public function PostValueValidator($Parameters) {
-		return isset($this->_Parameters['Options'][$_POST[$this->_Parameters['Name']]]);
+		if(isset($this->_Parameters['Options'])) {
+			$Value = $_POST[$this->_Parameters['Name']];
+
+			foreach($this->_Parameters['Options'] as $Option) {
+				if($Option['Value'] === $Value) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+		else {
+			return false;
+		}
 	}
 }
 ?>
