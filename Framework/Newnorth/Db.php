@@ -496,6 +496,50 @@ class DbInsertQuery {
 	}
 }
 
+class DbInsertUpdateQuery {
+	/* Instance variables */
+
+	public $Source = null;
+
+	public $Columns = [];
+
+	public $Values = [];
+
+	public $Updates = [];
+
+	/* Instance methods */
+
+	public function AddColumn($Expression) {
+		if($Expression instanceof DbColumn) {
+			return $this->Columns[] = $Expression;
+		}
+		else {
+			return $this->Columns[] = DbExpression::ParseDbColumn($Expression);
+		}
+	}
+
+	public function AddValue($Expression) {
+		if($Expression instanceof DbExpression) {
+			return $this->Values[] = $Source;
+		}
+		else {
+			return $this->Values[] = DbExpression::Parse($Expression);
+		}
+	}
+
+	public function Update($Column, $Value) {
+		if(!($Column instanceof DbColumn)) {
+			$Column = DbExpression::ParseDbColumn($Column);
+		}
+
+		if(!($Value instanceof DbExpression)) {
+			$Value = DbExpression::Parse($Value);
+		}
+
+		return $this->Updates[] = new DbUpdate($Column, $Value);
+	}
+}
+
 class DbUpdateQuery {
 	/* Instance variables */
 
@@ -525,11 +569,11 @@ class DbUpdateQuery {
 			$Value = DbExpression::Parse($Value);
 		}
 
-		return $this->Changes[] = new DbUpdateChange($Column, $Value);
+		return $this->Changes[] = new DbUpdate($Column, $Value);
 	}
 }
 
-class DbUpdateChange {
+class DbUpdate {
 	/* Instance variables */
 
 	public $Column;

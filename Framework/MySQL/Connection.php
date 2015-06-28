@@ -61,6 +61,7 @@ class Connection extends DbConnection {
 	/* Instance methods */
 
 	// TODO: Add support for using a select query as an input.
+	// TODO: Add support for IGNORE.
 	public function Insert(DbInsertQuery $Query, $Execute = true) {
 		$Query =
 			'INSERT INTO '.$Query->Source.
@@ -108,6 +109,72 @@ class Connection extends DbConnection {
 		return ' VALUES ('.$Sql.')';
 	}
 
+	// TODO: Add support for using a select query as an input.
+	public function InsertUpdate(\Framework\Newnorth\DbInsertUpdateQuery $Query, $Execute = true) {
+		$Query =
+			'INSERT INTO '.$Query->Source.
+			$this->InsertUpdate_ProcessColumns($Query->Columns).
+			$this->InsertUpdate_ProcessValues($Query->Values).
+			$this->InsertUpdate_ProcessUpdates($Query->Updates);
+
+		if($Execute) {
+			return $this->Query($Query);
+		}
+		else {
+			return $Query;
+		}
+	}
+
+	private function InsertUpdate_ProcessColumns($Columns) {
+		$Count = count($Columns);
+
+		if($Count === 0) {
+			return '';
+		}
+
+		$Sql = $this->ProcessExpression_DbColumn($Columns[0]);
+
+		for($I = 1; $I < $Count; ++$I) {
+			$Sql .= ', '.$this->ProcessExpression_DbColumn($Columns[$I]);
+		}
+
+		return ' ('.$Sql.')';
+	}
+
+	// TODO: Add support for multiple rows per insert.
+	private function InsertUpdate_ProcessValues($Values) {
+		$Count = count($Values);
+
+		if($Count === 0) {
+			return '';
+		}
+
+		$Sql = $this->ProcessExpression($Values[0]);
+
+		for($I = 1; $I < $Count; ++$I) {
+			$Sql .= ', '.$this->ProcessExpression($Values[$I]);
+		}
+
+		return ' VALUES ('.$Sql.')';
+	}
+
+	private function InsertUpdate_ProcessUpdates($Updates) {
+		$Count = count($Updates);
+
+		if($Count === 0) {
+			return '';
+		}
+		else {
+			$Sql = $this->ProcessExpression_DbColumn($Updates[0]->Column).'='.$this->ProcessExpression($Updates[0]->Value);
+
+			for($I = 1; $I < $Count; ++$I) {
+				$Sql .= ', '.$this->ProcessExpression_DbColumn($Updates[$I]->Column).'='.$this->ProcessExpression($Updates[$I]->Value);
+			}
+
+			return ' ON DUPLICATE KEY UPDATE '.$Sql;
+		}
+	}
+
 	public function Update(DbUpdateQuery $Query, $Execute = true) {
 		$Query =
 			'UPDATE '.$this->Update_ProcessSources($Query->Sources).
@@ -122,8 +189,6 @@ class Connection extends DbConnection {
 		}
 	}
 
-	// TODO: Add support for join method.
-	// TODO: Add support for join conditions.
 	private function Update_ProcessSources($Sources) {
 		$Count = count($Sources);
 
@@ -200,8 +265,6 @@ class Connection extends DbConnection {
 		return $Sql;
 	}
 
-	// TODO: Add support for join method.
-	// TODO: Add support for join conditions.
 	private function Delete_ProcessSources($Sources) {
 		$Count = count($Sources);
 
@@ -271,8 +334,6 @@ class Connection extends DbConnection {
 		return $Sql;
 	}
 
-	// TODO: Add support for join method.
-	// TODO: Add support for join conditions.
 	private function Find_ProcessSources(array $Sources) {
 		$Count = count($Sources);
 
@@ -376,8 +437,6 @@ class Connection extends DbConnection {
 		return $Sql;
 	}
 
-	// TODO: Add support for join method.
-	// TODO: Add support for join conditions.
 	private function FindAll_ProcessSources(array $Sources) {
 		$Count = count($Sources);
 
@@ -477,8 +536,6 @@ class Connection extends DbConnection {
 		}
 	}
 
-	// TODO: Add support for join method.
-	// TODO: Add support for join conditions.
 	private function Count_ProcessSources($Sources) {
 		$Count = count($Sources);
 

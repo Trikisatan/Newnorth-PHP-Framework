@@ -13,22 +13,44 @@ abstract class DataManager {
 	public function InsertByQuery(DbInsertQuery $Query) {
 		$Result = $this->Connection->Insert($Query);
 
-		if($Result) {
-			return $this->Connection->LastInsertId();
+		if($Result === false) {
+			return false;
 		}
 		else {
+			return $this->Connection->LastInsertId();
+		}
+	}
+
+	public function InsertUpdateByQuery(DbInsertUpdateQuery $Query) {
+		$Result = $this->Connection->InsertUpdate($Query);
+
+		if($Result === false) {
 			return false;
+		}
+		else {
+			return $this->Connection->LastInsertId();
+		}
+	}
+
+	public function UpdateByQuery(DbUpdateQuery $Query) {
+		$Result = $this->Connection->Update($Query);
+
+		if($Result === false) {
+			return false;
+		}
+		else {
+			return $this->Connection->AffectedRows();
 		}
 	}
 
 	public function DeleteByQuery(DbDeleteQuery $Query) {
 		$Result = $this->Connection->Delete($Query);
 
-		if($Result) {
-			return $this->Connection->AffectedRows();
+		if($Result === false) {
+			return false;
 		}
 		else {
-			return false;
+			return $this->Connection->AffectedRows();
 		}
 	}
 
@@ -38,12 +60,12 @@ abstract class DataManager {
 		if($Result === false) {
 			return null;
 		}
-
-		if($Result->FetchAssoc()) {
+		else if($Result->FetchAssoc()) {
 			return new $this->DataType($Result->GetProcessedRow());
 		}
-
-		return null;
+		else {
+			return null;
+		}
 	}
 
 	public function FindAllByQuery(DbSelectQuery $Query) {
@@ -52,14 +74,15 @@ abstract class DataManager {
 		if($Result === false) {
 			return [];
 		}
+		else {
+			$Items = [];
 
-		$Items = [];
+			while($Result->FetchAssoc()) {
+				$Items[] = new $this->DataType($Result->GetProcessedRow());
+			}
 
-		while($Result->FetchAssoc()) {
-			$Items[] = new $this->DataType($Result->GetProcessedRow());
+			return $Items;
 		}
-
-		return $Items;
 	}
 
 	public function CountByQuery(DbSelectQuery $Query) {
