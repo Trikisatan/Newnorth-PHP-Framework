@@ -163,6 +163,26 @@ class Action {
 		return true;
 	}
 
+	private function PreValidate_IsEmpty($PreValidators) {
+		foreach($PreValidators as $IsEmpty) {
+			if(eval('return isset('.$IsEmpty.'[0]);')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function PreValidate_IsNotEmpty($PreValidators) {
+		foreach($PreValidators as $IsNotEmpty) {
+			if(!eval('return isset('.$IsNotEmpty.'[0]);')) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private function PreValidate_IsTrue($PreValidators) {
 		foreach($PreValidators as $IsTrue) {
 			if(!eval('return '.$IsTrue.';')) {
