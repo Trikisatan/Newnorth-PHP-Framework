@@ -27,8 +27,13 @@ if(isset($Control->_Parameters['Text'])) {
 }
 
 if(isset($Control->_Parameters['Attributes'])) {
-	foreach($Control->_Parameters['Attributes'] as $Name => $Value) {
-		$Attributes .= ' '.$Name.'="'.$Value.'"';
+	foreach($Control->_Parameters['Attributes'] as $Attribute) {
+		if(isset($Attribute['Value'])) {
+			$Attributes .= ' '.$Attribute['Name'].'="'.$Attribute['Value'].'"';
+		}
+		else {
+			$Attributes .= ' '.$Attribute['Name'];
+		}
 	}
 }
 

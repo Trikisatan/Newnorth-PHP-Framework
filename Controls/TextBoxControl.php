@@ -1,5 +1,15 @@
 <?
 class TextBoxControl extends \Framework\Newnorth\Control {
+	/* Magic methods */
+
+	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
+		$this->_Namespace = '\\';
+
+		$this->_Name = 'TextBoxControl';
+
+		parent::__construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters);
+	}
+
 	/* Life cycle methods */
 
 	public function PostExecute() {
@@ -27,7 +37,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public function GetIsFloatValidator($Parameters) {
 		$Value = $_GET[$this->_Parameters['Name']];
 
-		if($this->_Parameters['AllowEmpty']) {
+		if($Parameters['AllowEmpty']) {
 			if(isset($Value[0])) {
 				return is_numeric($Value);
 			}
@@ -43,7 +53,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public function GetIsIntValidator($Parameters) {
 		$Value = $_GET[$this->_Parameters['Name']];
 
-		if($this->_Parameters['AllowEmpty']) {
+		if($Parameters['AllowEmpty']) {
 			if(isset($Value[0])) {
 				return ctype_digit($Value);
 			}
@@ -83,7 +93,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public function PostIsFloatValidator($Parameters) {
 		$Value = $_POST[$this->_Parameters['Name']];
 
-		if($this->_Parameters['AllowEmpty']) {
+		if($Parameters['AllowEmpty']) {
 
 			if(isset($Value[0])) {
 				return is_numeric($Value);
@@ -100,7 +110,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public function PostIsIntValidator($Parameters) {
 		$Value = $_POST[$this->_Parameters['Name']];
 
-		if($this->_Parameters['AllowEmpty']) {
+		if($Parameters['AllowEmpty']) {
 			if(isset($Value[0])) {
 				return ctype_digit($Value);
 			}

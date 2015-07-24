@@ -66,6 +66,17 @@ if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOn
 	$Attributes .= ' readonly="readonly"';
 }
 
+if(isset($Control->_Parameters['Attributes'])) {
+	foreach($Control->_Parameters['Attributes'] as $Attribute) {
+		if(isset($Attribute['Value'])) {
+			$Attributes .= ' '.$Attribute['Name'].'="'.$Attribute['Value'].'"';
+		}
+		else {
+			$Attributes .= ' '.$Attribute['Name'];
+		}
+	}
+}
+
 ?><input<?=$Attributes?> /><?
 
 if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
