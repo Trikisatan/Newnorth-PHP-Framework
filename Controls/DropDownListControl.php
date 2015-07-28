@@ -3,6 +3,8 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
+		$this->_Directory = $GLOBALS['Config']->Files['Controls'];
+
 		$this->_Namespace = '\\';
 
 		$this->_Name = 'DropDownListControl';
