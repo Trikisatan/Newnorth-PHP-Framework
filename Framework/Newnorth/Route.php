@@ -96,16 +96,6 @@ class Route {
 
 		$this->Parameters = isset($Data['Parameters']) ? $Data['Parameters'] : [];
 
-		if(!isset($this->Parameters['Application'][0])) {
-			$this->Parameters['Application'] = 'Default';
-		}
-
-		if(!isset($this->Parameters['Layout'][0])) {
-			$this->Parameters['Layout'] = 'Default';
-		}
-
-		$this->Parameters['Page'] = $this->FullName;
-
 		if(isset($Data['Routes'])) {
 			foreach($Data['Routes'] as $Name => $Data) {
 				$this->Routes[$Name] = new Route($this, $Name, $Data);
@@ -175,11 +165,27 @@ class Route {
 
 							$Parameters['RealRoute'] = $RealRoute->FullName;
 
+							foreach($Route->Parameters as $ParameterName => $ParameterValue) {
+								if(!isset($Parameters[$ParameterName])) {
+									$Parameters[$ParameterName] = $ParameterValue;
+								}
+							}
+
 							foreach($RealRoute->Parameters as $ParameterName => $ParameterValue) {
 								if(!isset($Parameters[$ParameterName])) {
 									$Parameters[$ParameterName] = $ParameterValue;
 								}
 							}
+
+							if(!isset($Parameters['Application'][0])) {
+								$Parameters['Application'] = 'Default';
+							}
+
+							if(!isset($Parameters['Layout'][0])) {
+								$Parameters['Layout'] = 'Default';
+							}
+
+							$Parameters['Page'] = $RealRoute->FullName;
 
 							return true;
 						}
@@ -237,11 +243,27 @@ class Route {
 
 					$Parameters['RealRoute'] = $RealRoute->FullName;
 
+					foreach($Route->Parameters as $ParameterName => $ParameterValue) {
+						if(!isset($Parameters[$ParameterName])) {
+							$Parameters[$ParameterName] = $ParameterValue;
+						}
+					}
+
 					foreach($RealRoute->Parameters as $ParameterName => $ParameterValue) {
 						if(!isset($Parameters[$ParameterName])) {
 							$Parameters[$ParameterName] = $ParameterValue;
 						}
 					}
+
+					if(!isset($Parameters['Application'][0])) {
+						$Parameters['Application'] = 'Default';
+					}
+
+					if(!isset($Parameters['Layout'][0])) {
+						$Parameters['Layout'] = 'Default';
+					}
+
+					$Parameters['Page'] = $RealRoute->FullName;
 
 					if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
 						$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
@@ -366,10 +388,10 @@ class Route {
 			}
 		}
 
-		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
 			foreach($Matches as $Match) {
 				if(isset($Parameters[$Match[2]])) {
-					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
 				}
 				else {
 					$ReversablePattern = str_replace($Match[0], $Match[1], $ReversablePattern);
@@ -457,10 +479,10 @@ class Route {
 			}
 		}
 
-		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?\//', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
+		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
 			foreach($Matches as $Match) {
 				if(isset($Parameters[$Match[2]])) {
-					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]].'/', $ReversablePattern);
+					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
 				}
 				else {
 					$ReversablePattern = str_replace($Match[0], $Match[1], $ReversablePattern);
