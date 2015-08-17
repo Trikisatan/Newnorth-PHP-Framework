@@ -25,7 +25,10 @@ else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
-if(isset($Control->_Parameters['Name'])) {
+if(isset($Parameters['Name'])) {
+	$Attributes .= ' name="'.$Parameters['Name'].'"';
+}
+else if(isset($Control->_Parameters['Name'])) {
 	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
 }
 
