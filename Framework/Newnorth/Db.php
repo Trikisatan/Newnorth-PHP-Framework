@@ -527,7 +527,7 @@ class DbInsertUpdateQuery {
 		}
 	}
 
-	public function Update($Column, $Value) {
+	public function AddUpdate($Column, $Value) {
 		if(!($Column instanceof DbColumn)) {
 			$Column = DbExpression::ParseDbColumn($Column);
 		}
