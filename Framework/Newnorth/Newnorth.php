@@ -25,9 +25,32 @@ require('Route.php');
 require('Translations.php');
 require('Control.php');
 require('Controls.php');
-require('DataManager.php');
-require('DataType.php');
+
 require('Db.php');
+
+require('DataManager.php');
+
+require('TranslationDataManager.php');
+
+require('DataType.php');
+
+require('DataMember.php');
+
+require('BoolDataMember.php');
+
+require('BoolTranslationDataMember.php');
+
+require('FloatDataMember.php');
+
+require('FloatTranslationDataMember.php');
+
+require('IntDataMember.php');
+
+require('IntTranslationDataMember.php');
+
+require('StringDataMember.php');
+
+require('StringTranslationDataMember.php');
 
 function Initialize() {
 	session_start();
