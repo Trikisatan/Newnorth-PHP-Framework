@@ -161,6 +161,16 @@ class Page {
 		$this->_Controls->Items[$Alias] = $Control;
 	}
 
+	public function CloneControl($Alias, $NewAlias, array $Parameters = []) {
+		$this->_Controls->Add(
+			$NewAlias,
+			array_merge(
+				$this->_Controls->Items[$Alias]->_Parameters,
+				$Parameters
+			)
+		);
+	}
+
 	public function RemoveControl($Alias) {
 		$this->_Controls->Items[$Alias]->Destroy();
 
