@@ -15,6 +15,14 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	public function PostExecute() {
 		parent::PostExecute();
 
+		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		}
+
+		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
+		}
+
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
 			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
