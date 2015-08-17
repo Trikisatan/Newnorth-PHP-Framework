@@ -41,7 +41,7 @@ class Action {
 
 		$this->Validators = isset($Parameters['Validators']) ? $Parameters['Validators'] : $this->Validators;
 
-		foreach($this->Validators as $Name => $Parameters) {
+		foreach($this->Validators as $Name => &$Parameters) {
 			if(!isset($Parameters['Method'])) {
 				throw new ConfigException(
 					'Validator method is not set.',
@@ -53,6 +53,10 @@ class Action {
 					]
 				);
 			}
+
+			$Parameters['AllowFailures'] = isset($Parameters['AllowFailures']) ? $Parameters['AllowFailures'] === '1' : true;
+
+			$Parameters['AbortOnFailure'] = isset($Parameters['AbortOnFailure']) ? $Parameters['AbortOnFailure'] === '1' : false;
 		}
 
 		$GLOBALS['Application']->RegisterObject($this);
@@ -107,7 +111,7 @@ class Action {
 	public function RemoveSubAction($SubAction) {
 		for($I = 0; $I < count($this->SubActions); ++$I) {
 			if($this->SubActions[$I] === $SubAction) {
-				array_splice($this->SubActions, $I);
+				array_splice($this->SubActions, $I, 1);
 			}
 		}
 	}
@@ -227,7 +231,7 @@ class Action {
 
 	private function Validate($IsValid = true) {
 		foreach($this->Validators as $Name => $Parameters) {
-			if(!$IsValid && (!isset($Parameters['AllowFailures']) || !$Parameters['AllowFailures'])) {
+			if(!$IsValid && !$Parameters['AllowFailures']) {
 				break;
 			}
 
@@ -284,7 +288,7 @@ class Action {
 					$SupervisorObject->_ErrorMessages[] = $Parameters['ErrorMessage'];
 				}
 
-				if(!isset($Parameters['AbortOnFailure']) || $Parameters['AbortOnFailure']) {
+				if($Parameters['AbortOnFailure']) {
 					break;
 				}
 			}
