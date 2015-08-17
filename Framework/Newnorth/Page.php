@@ -200,11 +200,35 @@ class Page {
 	}
 
 	public function IsFloatValidator($Parameters) {
-		return eval('return is_numeric('.$Parameters['Variable'].');');
+		$Value = eval('return '.$Parameters['Variable'].';');
+
+		if($Parameters['AllowEmpty']) {
+			if(isset($Value[0])) {
+				return is_numeric($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return is_numeric($Value);
+		}
 	}
 
 	public function IsIntValidator($Parameters) {
-		return eval('return ctype_digit('.$Parameters['Variable'].');');
+		$Value = eval('return '.$Parameters['Variable'].';');
+
+		if($Parameters['AllowEmpty']) {
+			if(isset($Value[0])) {
+				return ctype_digit($Value);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return ctype_digit($Value);
+		}
 	}
 
 	public function MaxLengthValidator($Parameters) {

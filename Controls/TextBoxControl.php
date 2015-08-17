@@ -70,7 +70,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 			}
 		}
 		else {
-			return is_numeric($Value);
+			return ctype_digit($Value);
 		}
 	}
 
