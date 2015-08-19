@@ -6,11 +6,11 @@ class CheckBoxControl extends \Framework\Newnorth\Control {
 		parent::PostExecute();
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 
 		if(method_exists($this->_Parent, 'SetControlIsChecked_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlIsChecked_'.$this->_Alias}($this);
+			$this->_Parameters['IsChecked'] = $this->_Parent->{'SetControlIsChecked_'.$this->_Alias}($this);
 		}
 	}
 

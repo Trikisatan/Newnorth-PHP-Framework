@@ -6,7 +6,7 @@ class EMailAddressBoxControl extends \Framework\Newnorth\Control {
 		parent::PostExecute();
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 	}
 

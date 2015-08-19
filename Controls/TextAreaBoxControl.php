@@ -14,7 +14,7 @@ class TextAreaBoxControl extends \Framework\Newnorth\Control {
 		}
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 	}
 
