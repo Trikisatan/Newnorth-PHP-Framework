@@ -187,10 +187,17 @@ abstract class Control {
 	}
 
 	public function CloneControl($Alias, $NewAlias, array $Parameters = []) {
+		if($Alias === null) {
+			$Control = $this;
+		}
+		else {
+			$Control = $this->_Controls->Items[$Alias];
+		}
+
 		$this->_Controls->Add(
 			$NewAlias,
 			array_merge(
-				$this->_Controls->Items[$Alias]->_Parameters,
+				$Control->_Parameters,
 				$Parameters
 			)
 		);
