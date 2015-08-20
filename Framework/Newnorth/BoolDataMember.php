@@ -5,7 +5,10 @@ class BoolDataMember extends DataMember {
 	/* Instance methods */
 
 	public function Parse($Value) {
-		if(is_bool($Value)) {
+		if($Value === null) {
+			return null;
+		}
+		else if(is_bool($Value)) {
 			return $Value;
 		}
 		else if(is_string($Value)) {
@@ -17,7 +20,12 @@ class BoolDataMember extends DataMember {
 	}
 
 	public function ToDbExpression($Value) {
-		return $this->Parse($Value);
+		if($Value === null) {
+			return null;
+		}
+		else {
+			return $this->Parse($Value);
+		}
 	}
 
 	public function Set(DataType $DataType, array $Parameters) {

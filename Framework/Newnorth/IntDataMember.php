@@ -5,11 +5,21 @@ class IntDataMember extends DataMember {
 	/* Instance methods */
 
 	public function Parse($Value) {
-		return (int)$Value;
+		if($Value === null) {
+			return null;
+		}
+		else {
+			return (int)$Value;
+		}
 	}
 
 	public function ToDbExpression($Value) {
-		return $this->Parse($Value);
+		if($Value === null) {
+			return null;
+		}
+		else {
+			return $this->Parse($Value);
+		}
 	}
 
 	public function Set(DataType $DataType, array $Parameters) {

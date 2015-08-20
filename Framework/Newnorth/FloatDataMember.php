@@ -5,11 +5,21 @@ class FloatDataMember extends DataMember {
 	/* Instance methods */
 
 	public function Parse($Value) {
-		return (float)$Value;
+		if($Value === null) {
+			return null;
+		}
+		else {
+			return (float)$Value;
+		}
 	}
 
 	public function ToDbExpression($Value) {
-		return $this->Parse($Value);
+		if($Value === null) {
+			return null;
+		}
+		else {
+			return $this->Parse($Value);
+		}
 	}
 
 	public function Set(DataType $DataType, array $Parameters) {
