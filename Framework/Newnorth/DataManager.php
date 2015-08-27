@@ -8,13 +8,138 @@ abstract class DataManager {
 
 	public $Connection = null;
 
-	protected $Database = null;
+	public $Database = null;
 
-	protected $Table = null;
+	public $Table = null;
 
 	public $PrimaryKey = null;
 
 	public $DataMembers = [];
+
+	/* Magic methods */
+
+	public function __call($Function, $Parameters) {
+		if(strpos($Function, 'FindBy') === 0) {
+			$DataMembers = substr($Function, 6);
+
+			$DataMembers = explode('And', $DataMembers);
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				if(isset($this->DataMembers[$DataMembers[$I]])) {
+					$DataMembers[$I] = $this->DataMembers[$DataMembers[$I]];
+				}
+				else {
+					throw new RuntimeException(
+						'Object method doesn\'t exist.',
+						['Function' => $Function, 'Parameters' => $Parameters]
+					);
+				}
+			}
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				$DataMember = $DataMembers[$I];
+
+				$Column = '`'.$DataMember->Name.'`';
+
+				if($I === 0) {
+					$Value = $DataMember->ToDbExpression($Parameters[0]);
+
+					$Parameters[0] = [];
+				}
+				else {
+					$Value = $DataMember->ToDbExpression($Parameters[1]);
+
+					array_splice($Parameters, 1, 1);
+				}
+
+				$Parameters[0][$Column] = $Value;
+			}
+
+			return call_user_func_array([$this, 'FindByArray'], $Parameters);
+		}
+		else if(strpos($Function, 'FindAllBy') === 0) {
+			$DataMembers = substr($Function, 9);
+
+			$DataMembers = explode('And', $DataMembers);
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				if(isset($this->DataMembers[$DataMembers[$I]])) {
+					$DataMembers[$I] = $this->DataMembers[$DataMembers[$I]];
+				}
+				else {
+					throw new RuntimeException(
+						'Object method doesn\'t exist.',
+						['Function' => $Function, 'Parameters' => $Parameters]
+					);
+				}
+			}
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				$DataMember = $DataMembers[$I];
+
+				$Column = '`'.$DataMember->Name.'`';
+
+				if($I === 0) {
+					$Value = $DataMember->ToDbExpression($Parameters[0]);
+
+					$Parameters[0] = [];
+				}
+				else {
+					$Value = $DataMember->ToDbExpression($Parameters[1]);
+
+					array_splice($Parameters, 1, 1);
+				}
+
+				$Parameters[0][$Column] = $Value;
+			}
+
+			return call_user_func_array([$this, 'FindAllByArray'], $Parameters);
+		}
+		else if(strpos($Function, 'CountBy') === 0) {
+			$DataMembers = substr($Function, 7);
+
+			$DataMembers = explode('And', $DataMembers);
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				if(isset($this->DataMembers[$DataMembers[$I]])) {
+					$DataMembers[$I] = $this->DataMembers[$DataMembers[$I]];
+				}
+				else {
+					throw new RuntimeException(
+						'Object method doesn\'t exist.',
+						['Function' => $Function, 'Parameters' => $Parameters]
+					);
+				}
+			}
+
+			for($I = 0; $I < count($DataMembers); ++$I) {
+				$DataMember = $DataMembers[$I];
+
+				$Column = '`'.$DataMember->Name.'`';
+
+				if($I === 0) {
+					$Value = $DataMember->ToDbExpression($Parameters[0]);
+
+					$Parameters[0] = [];
+				}
+				else {
+					$Value = $DataMember->ToDbExpression($Parameters[1]);
+
+					array_splice($Parameters, 1, 1);
+				}
+
+				$Parameters[0][$Column] = $Value;
+			}
+
+			return call_user_func_array([$this, 'CountByArray'], $Parameters);
+		}
+		else {
+			throw new RuntimeException(
+				'Object method doesn\'t exist.',
+				['Function' => $Function, 'Parameters' => $Parameters]
+			);
+		}
+	}
 
 	/* Instance methods */
 
@@ -111,6 +236,26 @@ abstract class DataManager {
 		return $this->Connection->Update($Query);
 	}
 
+	public function Delete($Item) {
+		$Query = new \Framework\Newnorth\DbDeleteQuery();
+
+		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
+
+		$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
+			'`'.$this->PrimaryKey->Name.'`',
+			$Item->{$this->PrimaryKey->Name}
+		);
+
+		$Result = $this->Connection->Delete($Query);
+
+		if($Result === false) {
+			return false;
+		}
+		else {
+			return $this->Connection->AffectedRows() === 1;
+		}
+	}
+
 	public function DeleteByQuery(DbDeleteQuery $Query) {
 		$Result = $this->Connection->Delete($Query);
 
@@ -120,6 +265,22 @@ abstract class DataManager {
 		else {
 			return $this->Connection->AffectedRows();
 		}
+	}
+
+	public function DeleteByArray(array $Conditions = null) {
+		$Query = new \Framework\Newnorth\DbDeleteQuery();
+
+		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
+
+		if($Conditions !== null) {
+			$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+			foreach($Conditions as $DbExpressionA => $DbExpressionB) {
+				$Query->Conditions->EqualTo($DbExpressionA, $DbExpressionB);
+			}
+		}
+
+		return $this->DeleteByQuery($Query);
 	}
 
 	public function FindByQuery(DbSelectQuery $Query) {
@@ -134,6 +295,26 @@ abstract class DataManager {
 		else {
 			return null;
 		}
+	}
+
+	public function FindByArray(array $Conditions = null, $SortColumn = null, $SortOrder = null) {
+		$Query = new \Framework\Newnorth\DbSelectQuery();
+
+		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
+
+		if($Conditions !== null) {
+			$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+			foreach($Conditions as $DbExpressionA => $DbExpressionB) {
+				$Query->Conditions->EqualTo($DbExpressionA, $DbExpressionB);
+			}
+		}
+
+		if($SortColumn !== null && $SortOrder !== null) {
+			$Query->AddSort($SortColumn, $SortOrder);
+		}
+
+		return $this->FindByQuery($Query);
 	}
 
 	public function FindAllByQuery(DbSelectQuery $Query) {
@@ -153,8 +334,50 @@ abstract class DataManager {
 		}
 	}
 
+	public function FindAllByArray(array $Conditions = null, array $Sorts = null, $MaxRows = null, $FirstRow = 0) {
+		$Query = new \Framework\Newnorth\DbSelectQuery();
+
+		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
+
+		if($Conditions !== null) {
+			$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+			foreach($Conditions as $DbExpressionA => $DbExpressionB) {
+				$Query->Conditions->EqualTo($DbExpressionA, $DbExpressionB);
+			}
+		}
+
+		if($Sorts !== null) {
+			foreach($Sorts as $Sort) {
+				$Query->AddSort($Sort['Column'], $Sort['Order']);
+			}
+		}
+
+		if($MaxRows !== null) {
+			$Query->Limit($MaxRows, $FirstRow);
+		}
+
+		return $this->FindAllByQuery($Query);
+	}
+
 	public function CountByQuery(DbSelectQuery $Query) {
 		return $this->Connection->Count($Query);
+	}
+
+	public function CountByArray(array $Conditions = null) {
+		$Query = new \Framework\Newnorth\DbSelectQuery();
+
+		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
+
+		if($Conditions !== null) {
+			$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+			foreach($Conditions as $DbExpressionA => $DbExpressionB) {
+				$Query->Conditions->EqualTo($DbExpressionA, $DbExpressionB);
+			}
+		}
+
+		return $this->CountByQuery($Query);
 	}
 }
 ?>
