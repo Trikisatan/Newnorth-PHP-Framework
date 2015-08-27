@@ -83,6 +83,10 @@ function Initialize() {
 				$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
 
 				$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+
+				if(!isset($GLOBALS['Parameters']['Locale'])) {
+					$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+				}
 			}
 		}
 		catch(\Framework\Newnorth\Exception $Exception) {
@@ -100,7 +104,7 @@ function Initialize() {
 
 			$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 
-			if(!isset($GLOBALS['Parameters']['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			if(!isset($GLOBALS['Parameters']['Locale'])) {
 				$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 			}
 
@@ -123,6 +127,10 @@ function Initialize() {
 		$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
 
 		$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+
+		if(!isset($GLOBALS['Parameters']['Locale'])) {
+			$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		}
 
 		$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
 	}
@@ -184,10 +192,6 @@ function Run() {
 		header('Location: '.$Exception->Url);
 	}
 	catch(\Framework\Newnorth\RerouteException $Exception) {
-		$Exception->Parameters['Route'] = $GLOBALS['Parameters']['Route'];
-
-		$Exception->Parameters['RealRoute'] = $GLOBALS['Parameters']['RealRoute'];
-
 		$GLOBALS['Parameters'] = $Exception->Parameters;
 
 		Run();
