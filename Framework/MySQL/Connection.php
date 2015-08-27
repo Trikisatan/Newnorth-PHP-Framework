@@ -177,7 +177,7 @@ class Connection extends DbConnection {
 
 	public function Update(DbUpdateQuery $Query, $Execute = true) {
 		$Query =
-			'UPDATE '.$this->Update_ProcessSources($Query->Sources).
+			'UPDATE '.$this->ProcessSources($Query->Sources).
 			' SET '.$this->Update_ProcessChanges($Query->Changes).
 			$this->Update_ProcessConditions($Query->Conditions);
 
@@ -186,27 +186,6 @@ class Connection extends DbConnection {
 		}
 		else {
 			return $Query;
-		}
-	}
-
-	private function Update_ProcessSources($Sources) {
-		$Count = count($Sources);
-
-		if($Count === 0) {
-			throw new \Framework\Newnorth\RuntimeException('No source specified.');
-		}
-		else {
-			$Sql = $Sources[0]->Expression;
-
-			if($Sources[0]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-			}
-
-			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
-			}
-
-			return $Sql;
 		}
 	}
 
@@ -231,14 +210,21 @@ class Connection extends DbConnection {
 			return '';
 		}
 		else {
-			return ' WHERE '.$this->ProcessCondition($Condition);
+			$Condition = $this->ProcessCondition($Condition);
+
+			if($Condition === null) {
+				return '';
+			}
+			else {
+				return ' WHERE '.$Condition;
+			}
 		}
 	}
 
 	public function Delete(DbDeleteQuery $Query, $Execute = true) {
 		$Query =
 			'DELETE'.$this->Delete_ProcessTargets($Query->Targets).
-			' FROM '.$this->Delete_ProcessSources($Query->Sources).
+			' FROM '.$this->ProcessSources($Query->Sources).
 			$this->Delete_ProcessConditions($Query->Conditions);
 
 		if($Execute) {
@@ -265,40 +251,26 @@ class Connection extends DbConnection {
 		return $Sql;
 	}
 
-	private function Delete_ProcessSources($Sources) {
-		$Count = count($Sources);
-
-		if($Count === 0) {
-			throw new \Framework\Newnorth\RuntimeException('No source specified.');
-		}
-		else {
-			$Sql = $Sources[0]->Expression;
-
-			if($Sources[0]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-			}
-
-			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
-			}
-
-			return $Sql;
-		}
-	}
-
 	private function Delete_ProcessConditions(DbCondition $Condition = null) {
 		if($Condition === null) {
 			return '';
 		}
 		else {
-			return ' WHERE '.$this->ProcessCondition($Condition);
+			$Condition = $this->ProcessCondition($Condition);
+
+			if($Condition === null) {
+				return '';
+			}
+			else {
+				return ' WHERE '.$Condition;
+			}
 		}
 	}
 
 	public function Find(DbSelectQuery $Query, $Execute = true) {
 		$Query =
 			'SELECT '.$this->Find_ProcessColumns($Query->Columns).
-			' FROM '.$this->Find_ProcessSources($Query->Sources).
+			' FROM '.$this->ProcessSources($Query->Sources).
 			$this->Find_ProcessConditions($Query->Conditions).
 			$this->Find_ProcessGroups($Query->Groups).
 			$this->Find_ProcessSorts($Query->Sorts).
@@ -313,54 +285,54 @@ class Connection extends DbConnection {
 	}
 
 	private function Find_ProcessColumns($Columns) {
-		$Sql = '*';
-
-		$Count = count($Columns);
-
-		for($I = 0; $I < $Count; ++$I) {
-			$Column = $Columns[$I];
-
-			$Sql .= ', '.$this->ProcessExpression($Column->Expression);
-
-			if($Column->Alias !== null) {
-				$Sql .= ' AS `'.$Column->Alias.'`';
-			}
-		}
-
-		if(isset($Sql[1])) {
-			$Sql = substr($Sql, 3);
-		}
-
-		return $Sql;
-	}
-
-	private function Find_ProcessSources(array $Sources) {
-		$Count = count($Sources);
-
-		if($Count === 0) {
-			throw new \Framework\Newnorth\RuntimeException('No source specified.');
+		if(count($Columns) === 0) {
+			return '*';
 		}
 		else {
-			$Sql = $Sources[0]->Expression;
+			$I = 0;
 
-			if($Sources[0]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-			}
+			foreach($Columns as $Column) {
+				$Expression = $this->ProcessExpression($Column->Expression);
 
-			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+				$Alias = $Column->Alias;
+
+				if($I === 0) {
+					if($Column->Alias === null) {
+						$Sql = $Expression;
+					}
+					else {
+						$Sql = $Expression.' AS `'.$Alias.'`';
+					}
+				}
+				else {
+					if($Column->Alias === null) {
+						$Sql .= ', '.$Expression;
+					}
+					else {
+						$Sql .= ', '.$Expression.' AS `'.$Alias.'`';
+					}
+				}
+
+				++$I;
 			}
 
 			return $Sql;
 		}
 	}
 
-	private function Find_ProcessConditions(DbCondition $Conditions = null) {
-		if($Conditions === null) {
+	private function Find_ProcessConditions(DbCondition $Condition = null) {
+		if($Condition === null) {
 			return '';
 		}
 		else {
-			return ' WHERE '.$this->ProcessCondition($Conditions);
+			$Condition = $this->ProcessCondition($Condition);
+
+			if($Condition === null) {
+				return '';
+			}
+			else {
+				return ' WHERE '.$Condition;
+			}
 		}
 	}
 
@@ -401,7 +373,7 @@ class Connection extends DbConnection {
 	public function FindAll(DbSelectQuery $Query, $Execute = true) {
 		$Query =
 			'SELECT '.$this->FindAll_ProcessColumns($Query->Columns).
-			' FROM '.$this->FindAll_ProcessSources($Query->Sources).
+			' FROM '.$this->ProcessSources($Query->Sources).
 			$this->FindAll_ProcessConditions($Query->Conditions).
 			$this->FindAll_ProcessGroups($Query->Groups).
 			$this->FindAll_ProcessSorts($Query->Sorts).
@@ -416,54 +388,54 @@ class Connection extends DbConnection {
 	}
 
 	private function FindAll_ProcessColumns($Columns) {
-		$Sql = '*';
-
-		$Count = count($Columns);
-
-		for($I = 0; $I < $Count; ++$I) {
-			$Column = $Columns[$I];
-
-			$Sql .= ', '.$this->ProcessExpression($Column->Expression);
-
-			if($Column->Alias !== null) {
-				$Sql .= ' AS `'.$Column->Alias.'`';
-			}
-		}
-
-		if(isset($Sql[1])) {
-			$Sql = substr($Sql, 3);
-		}
-
-		return $Sql;
-	}
-
-	private function FindAll_ProcessSources(array $Sources) {
-		$Count = count($Sources);
-
-		if($Count === 0) {
-			throw new \Framework\Newnorth\RuntimeException('No source specified.');
+		if(count($Columns) === 0) {
+			return '*';
 		}
 		else {
-			$Sql = $Sources[0]->Expression;
+			$I = 0;
 
-			if($Sources[0]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-			}
+			foreach($Columns as $Column) {
+				$Expression = $this->ProcessExpression($Column->Expression);
 
-			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
+				$Alias = $Column->Alias;
+
+				if($I === 0) {
+					if($Column->Alias === null) {
+						$Sql = $Expression;
+					}
+					else {
+						$Sql = $Expression.' AS `'.$Alias.'`';
+					}
+				}
+				else {
+					if($Column->Alias === null) {
+						$Sql .= ', '.$Expression;
+					}
+					else {
+						$Sql .= ', '.$Expression.' AS `'.$Alias.'`';
+					}
+				}
+
+				++$I;
 			}
 
 			return $Sql;
 		}
 	}
 
-	private function FindAll_ProcessConditions(DbCondition $Conditions = null) {
-		if($Conditions === null) {
+	private function FindAll_ProcessConditions(DbCondition $Condition = null) {
+		if($Condition === null) {
 			return '';
 		}
 		else {
-			return ' WHERE '.$this->ProcessCondition($Conditions);
+			$Condition = $this->ProcessCondition($Condition);
+
+			if($Condition === null) {
+				return '';
+			}
+			else {
+				return ' WHERE '.$Condition;
+			}
 		}
 	}
 
@@ -518,7 +490,7 @@ class Connection extends DbConnection {
 	public function Count(DbSelectQuery $Query, $Execute = true) {
 		$Query =
 			'SELECT COUNT(*)'.
-			' FROM '.$this->Count_ProcessSources($Query->Sources).
+			' FROM '.$this->ProcessSources($Query->Sources).
 			$this->Count_ProcessConditions($Query->Conditions);
 
 		if($Execute) {
@@ -536,33 +508,19 @@ class Connection extends DbConnection {
 		}
 	}
 
-	private function Count_ProcessSources($Sources) {
-		$Count = count($Sources);
-
-		if($Count === 0) {
-			throw new \Framework\Newnorth\RuntimeException('No source specified.');
-		}
-		else {
-			$Sql = $Sources[0]->Expression;
-
-			if($Sources[0]->Alias !== null) {
-				$Sql .= ' AS `'.$Sources[0]->Alias.'`';
-			}
-
-			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ' '.$this->ProcessSource($Sources[$I]);
-			}
-
-			return $Sql;
-		}
-	}
-
-	private function Count_ProcessConditions(DbCondition $Conditions = null) {
-		if($Conditions === null) {
+	private function Count_ProcessConditions(DbCondition $Condition = null) {
+		if($Condition === null) {
 			return '';
 		}
 		else {
-			return ' WHERE '.$this->ProcessCondition($Conditions);
+			$Condition = $this->ProcessCondition($Condition);
+
+			if($Condition === null) {
+				return '';
+			}
+			else {
+				return ' WHERE '.$Condition;
+			}
 		}
 	}
 
@@ -589,16 +547,21 @@ class Connection extends DbConnection {
 		$Result = $this->Base->query($QueryString);
 
 		if($Result === false) {
-			trigger_error('MySQL error #'.$this->Base->errno.': '.$this->Base->error.'.', E_USER_ERROR);
-
-			return false;
+			throw new \Framework\Newnorth\RuntimeException(
+				'MySQL error when executing query.',
+				[
+					'Error number' => $this->Base->errno,
+					'Error messages' => $this->Base->error,
+					'Query string' => $QueryString,
+				]
+			);
 		}
-
-		if($Result === true) {
+		else if($Result === true) {
 			return true;
 		}
-
-		return new Result($Result);
+		else {
+			return new Result($Result);
+		}
 	}
 
 	public function EscapeString($String) {
@@ -616,6 +579,35 @@ class Connection extends DbConnection {
 	public function FoundRows() {
 		$Result = $this->Query('SELECT FOUND_ROWS()');
 		return $Result->Fetch() ? $Result->GetInt(0) : 0;
+	}
+
+	private function ProcessSources($Sources) {
+		$Count = count($Sources);
+
+		if($Count === 0) {
+			throw new \Framework\Newnorth\RuntimeException('No source specified.');
+		}
+		else {
+			$I = 0;
+
+			foreach($Sources as $Source) {
+				if($I === 0) {
+					if($Source->Alias === null) {
+						$Sql = $Source->Expression;
+					}
+					else {
+						$Sql = $Source->Expression.' AS `'.$Source->Alias.'`';
+					}
+				}
+				else {
+					$Sql .= ' '.$this->ProcessSource($Source);
+				}
+
+				++$I;
+			}
+
+			return $Sql;
+		}
 	}
 
 	private function ProcessSource(\Framework\Newnorth\DbSource $Source) {
@@ -714,7 +706,7 @@ class Connection extends DbConnection {
 			return '('.$String.')';
 		}
 		else {
-			throw new \exception('Empty and-grouping.');
+			return null;
 		}
 	}
 
@@ -731,7 +723,7 @@ class Connection extends DbConnection {
 			return '('.$String.')';
 		}
 		else {
-			throw new \exception('Empty or-grouping.');
+			return null;
 		}
 	}
 
