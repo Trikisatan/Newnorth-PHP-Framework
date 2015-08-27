@@ -4,12 +4,16 @@ namespace Framework\Newnorth;
 abstract class DataType {
 	/* Instance variables */
 
-	public $DataManager;
+	public $_DataManager;
+
+	public $_Data;
 
 	/* Magic methods */
 
 	public function __construct(DataManager $DataManager, Array $Data) {
-		$this->DataManager = $DataManager;
+		$this->_DataManager = $DataManager;
+
+		$this->_Data = $Data;
 
 		foreach($Data as $Key => $Value) {
 			if(isset($DataManager->DataMembers[$Key])) {
@@ -24,8 +28,8 @@ abstract class DataType {
 
 			$Member = $Matches[2];
 
-			if(isset($this->DataManager->DataMembers[$Member])) {
-				$Member = $this->DataManager->DataMembers[$Member];
+			if(isset($this->_DataManager->DataMembers[$Member])) {
+				$Member = $this->_DataManager->DataMembers[$Member];
 
 				if(method_exists($Member, $Function)) {
 					return call_user_func_array(
