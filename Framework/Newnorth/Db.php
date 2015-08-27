@@ -410,6 +410,10 @@ class DbArray extends DbExpression {
 			throw new Exception('Invalid value, empty array.');
 		}
 
+		for($I = 0; $I < count($Value); ++$I) {
+			$Value[$I] = DbExpression::Parse($Value[$I]);
+		}
+
 		$this->Value = $Value;
 	}
 }
@@ -635,20 +639,48 @@ class DbSelectQuery {
 
 	public function AddColumn($Expression, $Alias = null) {
 		if($Expression instanceof DbSelectColumn) {
-			return $this->Columns[] = $Expression;
+			$Column = $Expression;
+		}
+		else if($Expression instanceof DataManager) {
+			$Expression = '`'.$Expression->Table.'`.*';
+
+			$Column = new DbSelectColumn($Expression, $Alias);
 		}
 		else {
-			return $this->Columns[] = new DbSelectColumn($Expression, $Alias);
+			$Column = new DbSelectColumn($Expression, $Alias);
 		}
+
+		if($Column->Alias === null) {
+			$this->Columns[] = $Column;
+		}
+		else {
+			$this->Columns[$Column->Alias] = $Column;
+		}
+
+		return $Column;
 	}
 
 	public function AddSource($Expression, $Alias = null, $Method = null, $Conditions = null) {
 		if($Expression instanceof DbSource) {
-			return $this->Sources[] = $Source;
+			$Source = $Expression;
+		}
+		else if($Expression instanceof DataManager) {
+			$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
+
+			$Source = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
 		else {
-			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
+			$Source = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
+
+		if($Source->Alias === null) {
+			$this->Sources[] = $Source;
+		}
+		else {
+			$this->Sources[$Source->Alias] = $Source;
+		}
+
+		return $Source;
 	}
 
 	public function AddGroup($Expression) {
