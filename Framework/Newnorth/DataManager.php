@@ -4,6 +4,8 @@ namespace Framework\Newnorth;
 abstract class DataManager {
 	/* Instance variables */
 
+	public $UseDataType = true;
+
 	public $DataType = null;
 
 	public $Connection = null;

@@ -1,7 +1,7 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class DataType {
+class DataType {
 	/* Instance variables */
 
 	public $_DataManager;

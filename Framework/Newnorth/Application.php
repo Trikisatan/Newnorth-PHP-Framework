@@ -277,33 +277,67 @@ class Application {
 		else {
 			$DataManager = '\\'.str_replace('/', '\\', $Alias).'DataManager';
 
-			if(!class_exists($DataManager, false)) {
-				include($GLOBALS['Config']->Files['DataManagers'].str_replace('\\', '/', $Alias).'DataManager.php');
+			$File = $GLOBALS['Config']->Files['DataManagers'].$Alias.'DataManager.php';
 
-				if(!class_exists($DataManager, false)) {
+			if(class_exists($DataManager, false)) {
+				$DataManager = new $DataManager();
+			}
+			else if(file_exists($File)) {
+				include($File);
+
+				if(class_exists($DataManager, false)) {
+					$DataManager = new $DataManager();
+				}
+				else {
 					throw new RuntimeException(
-						'Unable to load data manager.',
+						'Unable to load data manager, class not found.',
 						[
-							'File' => $GLOBALS['Config']->Files['DataManagers'].$Alias.'DataManager.php',
+							'File' => $File,
 							'Class' => $DataManager,
 						]
 					);
 				}
 			}
+			else {
+				throw new RuntimeException(
+					'Unable to load data manager, file not found.',
+					[
+						'File' => $File,
+						'Class' => $DataManager,
+					]
+				);
+			}
 
-			$DataManager = new $DataManager();
+			if($DataManager->UseDataType) {
+				$DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
 
-			$DataManager->DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
+				$File = $GLOBALS['Config']->Files['DataTypes'].$Alias.'DataType.php';
 
-			if(!class_exists($DataManager->DataType, false)) {
-				include($GLOBALS['Config']->Files['DataTypes'].str_replace('\\', '/', $Alias).'DataType.php');
+				if(class_exists($DataType, false)) {
+					$DataManager->DataType = $DataType;
+				}
+				else if(file_exists($File)) {
+					include($File);
 
-				if(!class_exists($DataManager->DataType, false)) {
+					if(class_exists($DataType, false)) {
+						$DataManager->DataType = $DataType;
+					}
+					else {
+						throw new RuntimeException(
+							'Unable to load data type, class not found',
+							[
+								'File' => $File,
+								'Class' => $DataType,
+							]
+						);
+					}
+				}
+				else {
 					throw new RuntimeException(
-						'Unable to load data manager.',
+						'Unable to load data type, file not found',
 						[
-							'File' => $GLOBALS['Config']->Files['DataTypes'].$Alias.'DataManager.php',
-							'Class' => $DataManager->DataType,
+							'File' => $File,
+							'Class' => $DataType,
 						]
 					);
 				}

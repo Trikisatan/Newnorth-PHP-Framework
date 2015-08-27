@@ -1,10 +1,22 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class TranslationDataManager extends DataManager {
+abstract class TranslationDataManager {
 	/* Instance variables */
 
+	public $UseDataType = false;
+
+	public $Connection = null;
+
+	public $Database = null;
+
+	public $Table = null;
+
+	public $PrimaryKey = null;
+
 	public $ParentPrimaryKey = null;
+
+	public $DataMembers = [];
 
 	/* Instance methods */
 
