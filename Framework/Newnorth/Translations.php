@@ -23,45 +23,58 @@ class Translations {
 	}
 
 	public function Translate(&$Contents) {
-		$Offset = 0;
+		do {
+			$Changes = 0;
 
-		while(0 < preg_match('/(?<!%)%([a-zA-Z0-9_\\/\\\\]+?)%(?!%)/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
-			$Key = str_replace('\/', '/', $Match[1][0]);
+			$Targets = $this->FindTargets($Contents);
 
-			if(isset($this->Items[$Key])) {
-				$Translation = $this->Items[$Key];
-
-				$Contents = substr($Contents, 0, $Match[0][1]).$Translation.substr($Contents, $Match[0][1] + strlen($Match[0][0]));
-
-				$Offset = $Match[0][1];
-			}
-			else {
-				$Offset = $Match[0][1] + strlen($Match[0][0]);
-			}
-		}
-
-		$Offset = 0;
-
-		while(0 < preg_match('/(?<!%)%([a-zA-Z0-9_\\/\\\\]+?)\("(.*?)"\)%(?!%)/', $Contents, $Match, PREG_OFFSET_CAPTURE, $Offset)) {
-			$Key = str_replace('\/', '/', $Match[1][0]);
-
-			if(isset($this->Items[$Key])) {
-				$Translation = $this->Items[$Key];
-
-				$Data = explode('","', $Match[2][0]);
-
-				for($I = 0; $I < count($Data); ++$I) {
-					$Translation = str_replace('\\'.$I, $Data[$I], $Translation);
+			foreach($Targets as $Target) {
+				if($this->ProcessTarget($Contents, $Target)) {
+					++$Changes;
 				}
-
-				$Contents = substr($Contents, 0, $Match[0][1]).$Translation.substr($Contents, $Match[0][1] + strlen($Match[0][0]));
-
-				$Offset = $Match[0][1];
 			}
-			else {
-				$Offset = $Match[0][1] + strlen($Match[0][0]);
+		} while(0 < $Changes);
+	}
+
+	private function FindTargets($Contents) {
+		if(0 < preg_match_all('/(?<!%)%(.+?)%(?!%)/', $Contents, $Matches)) {
+			$Targets = [];
+
+			foreach($Matches[1] as $Target) {
+				if(!in_array($Target, $Targets, true)) {
+					$Targets[] = $Target;
+				}
+			}
+
+			return $Targets;
+		}
+		else {
+			return [];
+		}
+	}
+
+	private function ProcessTarget(&$Contents, $Target) {
+		$Options = explode('|', $Target);
+
+		foreach($Options as $Option) {
+			if(preg_match('/^([^\(\)]+?)(?:\("(.*?)"(?:, *"(.*?)")*\))?$/', $Option, $Match) === 1) {
+				$Translation = $Match[1];
+
+				if(isset($this->Items[$Translation])) {
+					$Translation = $this->Items[$Translation];
+
+					for($I = 2; $I < count($Match); ++$I) {
+						$Translation = str_replace('$'.($I - 2), $Match[$I], $Translation);
+					}
+
+					$Contents = preg_replace('/(?<!%)%'.preg_quote($Target, '/').'%(?!%)/', $Translation, $Contents);
+
+					return true;
+				}
 			}
 		}
+
+		return false;
 	}
 }
 ?>
