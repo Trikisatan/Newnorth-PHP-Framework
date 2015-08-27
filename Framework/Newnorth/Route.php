@@ -110,175 +110,132 @@ class Route {
 	/* Instance methods */
 
 	public function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
-		if($this->Pattern !== null) {
-			if(0 < count($this->TranslatedPatterns)) {
-				foreach($this->TranslatedPatterns as $Locale => $Pattern) {
-					if(isset($Locale[0], $Parameters["Locale"]) && $Locale !== $Parameters["Locale"]) {
-						continue;
-					}
-
-					if(preg_match($Pattern, $Url, $Matches) === 1) {
-						end($Matches);
-
-						$Url = preg_replace($Pattern, '$'.key($Matches), $Url);
-
-						$NewParameters = $Parameters;
-
-						// If a locale is used for this route, add it to its parameters.
-						$NewParameters["Locale"] = $Locale;
-
-						// Add new parameters obtained via the pattern.
-						foreach($Matches as $Key => $Value) {
-							if(isset($Value[0]) && !is_int($Key)) {
-								$NewParameters[$Key] = $Value;
-							}
-						}
-
-						if(isset($Url[0])) {
-							foreach($this->Routes as $PossibleRoute) {
-								if($PossibleRoute->ParseUrl($Url, $Route, $RealRoute, $NewParameters)) {
-									$Parameters = $NewParameters;
-
-									return true;
-								}
-							}
-						}
-						else {
-							$Route = $this;
-
-							if($this->RealRoute === null) {
-								$RealRoute = $this;
-							}
-							else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
-								throw new RuntimeException(
-									'Real route not found.',
-									[
-										'Current route' => $this->__toString(),
-										'Real route' => $this->RealRoute,
-									]
-								);
-							}
-
-							$Parameters = $NewParameters;
-
-							$Parameters['Route'] = $Route->FullName;
-
-							$Parameters['RealRoute'] = $RealRoute->FullName;
-
-							foreach($Route->Parameters as $ParameterName => $ParameterValue) {
-								if(!isset($Parameters[$ParameterName])) {
-									$Parameters[$ParameterName] = $ParameterValue;
-								}
-							}
-
-							foreach($RealRoute->Parameters as $ParameterName => $ParameterValue) {
-								if(!isset($Parameters[$ParameterName])) {
-									$Parameters[$ParameterName] = $ParameterValue;
-								}
-							}
-
-							if(!isset($Parameters['Application'][0])) {
-								$Parameters['Application'] = 'Default';
-							}
-
-							if(!isset($Parameters['Layout'][0])) {
-								$Parameters['Layout'] = 'Default';
-							}
-
-							$Parameters['Page'] = $RealRoute->FullName;
-
-							return true;
-						}
-					}
-				}
-
+		if($this->Pattern === null) {
+			if($this->RealRoute === null) {
 				return false;
 			}
-			else if(preg_match($this->Pattern, $Url, $Matches) === 1) {
+			else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
+				throw new RuntimeException(
+					'Real route not found.',
+					[
+						'Route' => $this->__toString(),
+						'Real route' => $this->RealRoute,
+					]
+				);
+			}
+			else if($Route === null) {
+				return $RealRoute->ParseUrl($Url, $Route = $this, $RealRoute, $Parameters);
+			}
+			else {
+				return $RealRoute->ParseUrl($Url, $Route, $RealRoute, $Parameters);
+			}
+		}
+		else if(0 < count($this->TranslatedPatterns)) {
+			return $this->ParseUrlWithTranslation($Url, $Route, $RealRoute, $Parameters);
+		}
+		else {
+			return $this->ParseUrlWithoutTranslation($Url, $Route, $RealRoute, $Parameters);
+		}
+	}
+
+	private function ParseUrlWithTranslation($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+		foreach($this->TranslatedPatterns as $Locale => $Pattern) {
+			if(isset($Locale[0], $Parameters["Locale"]) && $Locale !== $Parameters["Locale"]) {
+				continue;
+			}
+
+			if(preg_match($Pattern, $Url, $Matches) === 1) {
 				end($Matches);
 
-				$Url = preg_replace($this->Pattern, '$'.key($Matches), $Url);
+				$Url = preg_replace($Pattern, '$'.key($Matches), $Url);
 
-				// Create and use a copy of the parameters in case this route
-				// doesn't prove to be correct in the end, so we easily can switch back.
-				$NewParameters = $Parameters;
+				// If a locale is used for this route, add it to its parameters.
+				$Parameters["Locale"] = $Locale;
 
 				// Add new parameters obtained via the pattern.
 				foreach($Matches as $Key => $Value) {
 					if(isset($Value[0]) && !is_int($Key)) {
-						$NewParameters[$Key] = $Value;
+						$Parameters[$Key] = $Value;
 					}
 				}
 
 				if(isset($Url[0])) {
-					foreach($this->Routes as $PossibleRoute) {
-						if($PossibleRoute->ParseUrl($Url, $Route, $RealRoute, $NewParameters)) {
-							$Parameters = $NewParameters;
-
-							return true;
-						}
-					}
-
-					return false;
+					return $this->ContinueParsingUrl($Url, $Route, $RealRoute, $Parameters);
 				}
 				else {
-					$Route = $this;
-
-					if($this->RealRoute === null) {
-						$RealRoute = $this;
-					}
-					else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
-						throw new RuntimeException(
-							'Real route not found.',
-							[
-								'Current route' => $this->__toString(),
-								'Real route' => $this->RealRoute,
-							]
-						);
-					}
-
-					$Parameters = $NewParameters;
-
-					$Parameters['Route'] = $Route->FullName;
-
-					$Parameters['RealRoute'] = $RealRoute->FullName;
-
-					foreach($Route->Parameters as $ParameterName => $ParameterValue) {
-						if(!isset($Parameters[$ParameterName])) {
-							$Parameters[$ParameterName] = $ParameterValue;
-						}
-					}
-
-					foreach($RealRoute->Parameters as $ParameterName => $ParameterValue) {
-						if(!isset($Parameters[$ParameterName])) {
-							$Parameters[$ParameterName] = $ParameterValue;
-						}
-					}
-
-					if(!isset($Parameters['Application'][0])) {
-						$Parameters['Application'] = 'Default';
-					}
-
-					if(!isset($Parameters['Layout'][0])) {
-						$Parameters['Layout'] = 'Default';
-					}
-
-					$Parameters['Page'] = $RealRoute->FullName;
-
-					if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-						$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-					}
-
-					return true;
+					return $this->FinishParsingUrl($Url, $Route, $RealRoute, $Parameters);
 				}
 			}
+		}
+
+		return false;
+	}
+
+	private function ParseUrlWithoutTranslation($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+		if(preg_match($this->Pattern, $Url, $Matches) === 1) {
+			end($Matches);
+
+			$Url = preg_replace($this->Pattern, '$'.key($Matches), $Url);
+
+			// Add new parameters obtained via the pattern.
+			foreach($Matches as $Key => $Value) {
+				if(isset($Value[0]) && !is_int($Key)) {
+					$Parameters[$Key] = $Value;
+				}
+			}
+
+			if(isset($Url[0])) {
+				return $this->ContinueParsingUrl($Url, $Route, $RealRoute, $Parameters);
+			}
 			else {
-				return false;
+				return $this->FinishParsingUrl($Url, $Route, $RealRoute, $Parameters);
 			}
 		}
 		else {
 			return false;
 		}
+	}
+
+	private function ContinueParsingUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+		if($Route === null) {
+			$PossibleRoutes = $this->Routes;
+		}
+		else {
+			$PossibleRoutes = $Route->Routes;
+		}
+
+		foreach($PossibleRoutes as $PossibleRoute) {
+			$PossibleParameters = $Parameters;
+
+			if($PossibleRoute->ParseUrl($Url, $Route = null, $RealRoute = null, $PossibleParameters)) {
+				$Parameters = $PossibleParameters;
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private function FinishParsingUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+		if($Route === null) {
+			$Route = $this;
+		}
+
+		if($this->RealRoute === null) {
+			$RealRoute = $this;
+		}
+		else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
+			throw new RuntimeException(
+				'Real route not found.',
+				[
+					'Current route' => $this->__toString(),
+					'Real route' => $this->RealRoute,
+				]
+			);
+		}
+
+		return true;
 	}
 
 	public function GetRoute(array $Path, Route &$Route = null) {
@@ -344,13 +301,27 @@ class Route {
 
 	private function GetUrl_GetReversablePattern($Parameters) {
 		if($this->Pattern === null) {
-			throw new RuntimeException(
-				'Pattern not set.',
-				[
-					'Route' => $this->__toString(),
-					'Parameters' => $Parameters,
-				]
-			);
+			if($this->RealRoute === null) {
+				throw new RuntimeException(
+					'Pattern not set.',
+					[
+						'Route' => $this->__toString(),
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+			else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
+				throw new RuntimeException(
+					'Real route not found.',
+					[
+						'Route' => $this->__toString(),
+						'Real route' => $this->RealRoute,
+					]
+				);
+			}
+			else {
+				return $RealRoute->GetUrl_GetReversablePattern($Parameters);
+			}
 		}
 		else {
 			if(0 < count($this->TranslatedReversablePatterns)) {
@@ -435,13 +406,27 @@ class Route {
 
 	private function GetFullUrl_GetReversablePattern($Parameters) {
 		if($this->Pattern === null) {
-			throw new RuntimeException(
-				'Pattern not set.',
-				[
-					'Route' => $this->__toString(),
-					'Parameters' => $Parameters,
-				]
-			);
+			if($this->RealRoute === null) {
+				throw new RuntimeException(
+					'Pattern not set.',
+					[
+						'Route' => $this->__toString(),
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+			else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
+				throw new RuntimeException(
+					'Real route not found.',
+					[
+						'Route' => $this->__toString(),
+						'Real route' => $this->RealRoute,
+					]
+				);
+			}
+			else {
+				return $RealRoute->GetFullUrl_GetReversablePattern($Parameters);
+			}
 		}
 		else {
 			if(0 < count($this->TranslatedReversablePatterns)) {

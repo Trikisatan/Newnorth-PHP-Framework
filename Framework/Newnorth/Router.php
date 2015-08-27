@@ -78,7 +78,42 @@ class Router {
 	}
 
 	public static function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters = null) {
-		return $GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $RealRoute, $Parameters = []);
+		if($GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $RealRoute, $Parameters = [])) {
+			$Parameters['Route'] = $Route->FullName;
+
+			$Parameters['RealRoute'] = $RealRoute->FullName;
+
+			foreach($Route->Parameters as $ParameterName => $ParameterValue) {
+				if(!isset($Parameters[$ParameterName])) {
+					$Parameters[$ParameterName] = $ParameterValue;
+				}
+			}
+
+			foreach($RealRoute->Parameters as $ParameterName => $ParameterValue) {
+				if(!isset($Parameters[$ParameterName])) {
+					$Parameters[$ParameterName] = $ParameterValue;
+				}
+			}
+
+			if(!isset($Parameters['Application'][0])) {
+				$Parameters['Application'] = 'Default';
+			}
+
+			if(!isset($Parameters['Layout'][0])) {
+				$Parameters['Layout'] = 'Default';
+			}
+
+			$Parameters['Page'] = $RealRoute->FullName;
+
+			if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			}
+
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	public static function GetRoute(Route $CurrentRoute = null, $Path = '', Route &$Route = null) {
