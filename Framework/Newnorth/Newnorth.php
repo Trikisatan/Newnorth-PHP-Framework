@@ -48,6 +48,8 @@ require('IntDataMember.php');
 
 require('IntTranslationDataMember.php');
 
+require('ReferenceDataMember.php');
+
 require('StringDataMember.php');
 
 require('StringTranslationDataMember.php');
