@@ -34,25 +34,21 @@ require('TranslationDataManager.php');
 
 require('DataType.php');
 
-require('DataMember.php');
+require('ADataMember.php');
 
-require('BoolDataMember.php');
+require('DataMembers/AValueDataMember.php');
 
-require('BoolTranslationDataMember.php');
+require('DataMembers/BoolValueDataMember.php');
 
-require('FloatDataMember.php');
+require('DataMembers/FloatValueDataMember.php');
 
-require('FloatTranslationDataMember.php');
+require('DataMembers/IntValueDataMember.php');
 
-require('IntDataMember.php');
+require('DataMembers/StringValueDataMember.php');
 
-require('IntTranslationDataMember.php');
+require('DataMembers/ReferenceDataMember.php');
 
-require('ReferenceDataMember.php');
-
-require('StringDataMember.php');
-
-require('StringTranslationDataMember.php');
+require('DataMembers/TranslationDataMember.php');
 
 function Initialize() {
 	session_start();
