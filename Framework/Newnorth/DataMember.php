@@ -8,16 +8,25 @@ abstract class DataMember {
 
 	public $Name;
 
-	public $IsDynamic;
+	public $IsDynamic = false;
+
+	public $IsNullable = true;
 
 	/* Magic methods */
 
-	public function __construct($DataManager, $Name, $IsDynamic) {
-		$this->DataManager = $DataManager;
+	public function __construct($Parameters) {
+		$this->DataManager = $Parameters['DataManager'];
+		if(!isset($Parameters['Name'])) {
+		var_dump($Parameters);die();}
+		$this->Name = $Parameters['Name'];
 
-		$this->Name = $Name;
+		if(isset($Parameters['IsDynamic'])) {
+			$this->IsDynamic = $Parameters['IsDynamic'];
+		}
 
-		$this->IsDynamic = $IsDynamic;
+		if(isset($Parameters['IsNullable'])) {
+			$this->IsNullable = $Parameters['IsNullable'];
+		}
 	}
 
 	/* Instance methods */
