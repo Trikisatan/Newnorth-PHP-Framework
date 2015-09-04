@@ -162,7 +162,7 @@ class Layout {
 	}
 
 	public function CloneControl($Alias, $NewAlias, array $Parameters = []) {
-		$this->_Controls->Add(
+		return $this->_Controls->Add(
 			$NewAlias,
 			array_merge(
 				$this->_Controls->Items[$Alias]->_Parameters,
@@ -179,6 +179,10 @@ class Layout {
 
 	public function GetControl($Alias) {
 		return $this->_Controls->Items[$Alias];
+	}
+
+	public function HasControl($Alias) {
+		return isset($this->_Controls->Items[$Alias]);
 	}
 
 	public function RenderControl($Alias, $Placeholder = null, $Return = false, $Parameters = []) {

@@ -54,7 +54,14 @@ class Controls {
 			);
 		}
 		else {
-			$this->Items[$Alias] = Control::Instantiate($this->Owner, $Parameters['Class'], $Alias, $Parameters);
+			$this->Items[$Alias] = Control::Instantiate(
+				$this->Owner,
+				$Parameters['Class'],
+				$Alias,
+				$Parameters
+			);
+
+			return $this->Items[$Alias];
 		}
 	}
 

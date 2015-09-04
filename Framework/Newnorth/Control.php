@@ -194,7 +194,7 @@ abstract class Control {
 			$Control = $this->_Controls->Items[$Alias];
 		}
 
-		$this->_Controls->Add(
+		return $this->_Controls->Add(
 			$NewAlias,
 			array_merge(
 				$Control->_Parameters,
@@ -211,6 +211,10 @@ abstract class Control {
 
 	public function GetControl($Alias) {
 		return $this->_Controls->Items[$Alias];
+	}
+
+	public function HasControl($Alias) {
+		return isset($this->_Controls->Items[$Alias]);
 	}
 
 	public function RenderControl($Alias, $Placeholder = null, $Return = false, $Parameters = []) {
