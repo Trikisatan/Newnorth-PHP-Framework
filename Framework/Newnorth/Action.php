@@ -149,7 +149,7 @@ class Action {
 
 	private function PreValidate_IsSet($PreValidators) {
 		foreach($PreValidators as $IsSet) {
-			if(!eval('return isset('.$IsSet.');')) {
+			if(!eval('return isset('.str_replace('|', ')||isset(', $IsSet).');')) {
 				return false;
 			}
 		}
@@ -159,7 +159,7 @@ class Action {
 
 	private function PreValidate_IsNotSet($PreValidators) {
 		foreach($PreValidators as $IsNotSet) {
-			if(eval('return isset('.$IsNotSet.');')) {
+			if(!eval('return !isset('.str_replace('|', ')||!isset(', $IsNotSet).');')) {
 				return false;
 			}
 		}
@@ -169,7 +169,7 @@ class Action {
 
 	private function PreValidate_IsEmpty($PreValidators) {
 		foreach($PreValidators as $IsEmpty) {
-			if(eval('return isset('.$IsEmpty.'[0]);')) {
+			if(!eval('return !isset('.str_replace('|', '[0])||!isset(', $IsEmpty).'[0]);')) {
 				return false;
 			}
 		}
@@ -179,7 +179,7 @@ class Action {
 
 	private function PreValidate_IsNotEmpty($PreValidators) {
 		foreach($PreValidators as $IsNotEmpty) {
-			if(!eval('return isset('.$IsNotEmpty.'[0]);')) {
+			if(!eval('return isset('.str_replace('|', '[0])||isset(', $IsNotEmpty).'[0]);')) {
 				return false;
 			}
 		}
