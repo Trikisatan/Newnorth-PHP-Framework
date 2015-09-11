@@ -1,7 +1,7 @@
 <?
-namespace Framework\Newnorth\DataMembers;
+namespace Framework\Newnorth;
 
-class IntValueDataMember extends \Framework\Newnorth\DataMembers\AValueDataMember {
+class IntValueDataMember extends \Framework\Newnorth\AValueDataMember {
 	/* Instance methods */
 
 	public function Parse($Value) {

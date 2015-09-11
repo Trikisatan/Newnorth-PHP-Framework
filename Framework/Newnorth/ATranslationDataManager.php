@@ -1,10 +1,10 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class TranslationDataManager {
+abstract class ATranslationDataManager {
 	/* Instance variables */
 
-	public $UseDataType = false;
+	public $DataType;
 
 	public $Connection = null;
 
@@ -72,7 +72,7 @@ abstract class TranslationDataManager {
 		}
 
 		foreach($Changes as $Column => $Value) {
-			$Query->AddUpdate('`'.$Column.'`', $Value);
+			$Query->AddChange('`'.$Column.'`', $Value);
 		}
 
 		return $this->Connection->InsertUpdate($Query);

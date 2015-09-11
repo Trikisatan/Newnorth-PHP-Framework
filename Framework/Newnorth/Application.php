@@ -308,33 +308,22 @@ class Application {
 				);
 			}
 
-			if($DataManager->UseDataType) {
-				$DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
+			$DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
 
-				$File = $GLOBALS['Config']->Files['DataTypes'].$Alias.'DataType.php';
+			$File = $GLOBALS['Config']->Files['DataTypes'].$Alias.'DataType.php';
+
+			if(class_exists($DataType, false)) {
+				$DataManager->DataType = $DataType;
+			}
+			else if(file_exists($File)) {
+				include($File);
 
 				if(class_exists($DataType, false)) {
 					$DataManager->DataType = $DataType;
 				}
-				else if(file_exists($File)) {
-					include($File);
-
-					if(class_exists($DataType, false)) {
-						$DataManager->DataType = $DataType;
-					}
-					else {
-						throw new RuntimeException(
-							'Unable to load data type, class not found',
-							[
-								'File' => $File,
-								'Class' => $DataType,
-							]
-						);
-					}
-				}
 				else {
 					throw new RuntimeException(
-						'Unable to load data type, file not found',
+						'Unable to load data type, class not found',
 						[
 							'File' => $File,
 							'Class' => $DataType,
@@ -342,8 +331,21 @@ class Application {
 					);
 				}
 			}
+			else {
+				$DataManager->DataType = '\\Framework\\Newnorth\\DataType';
+			}
 
-			return $this->DataManagers[$Alias] = $DataManager;
+			$this->DataManagers[$Alias] = $DataManager;
+
+			$DataManager->InitializeDataMembers();
+
+			$DataManager->InitializeReferenceDataMembers();
+
+			$DataManager->InitializeDataReferences();
+
+			$DataManager->InitializeDataLists();
+
+			return $DataManager;
 		}
 	}
 

@@ -327,7 +327,7 @@ class DbExpression {
 		else if($Expression instanceof DbExpression) {
 			return $Expression;
 		}
-		else if($Expression instanceof DataMember) {
+		else if($Expression instanceof \Framework\Newnorth\AValueDataMember) {
 			return new DbColumn([
 				$Expression->DataManager->Table,
 				$Expression->Name,
@@ -537,7 +537,7 @@ class DbInsertUpdateQuery {
 		}
 	}
 
-	public function AddUpdate($Column, $Value) {
+	public function AddChange($Column, $Value) {
 		if(!($Column instanceof DbColumn)) {
 			$Column = DbExpression::ParseDbColumn($Column);
 		}
@@ -546,7 +546,7 @@ class DbInsertUpdateQuery {
 			$Value = DbExpression::Parse($Value);
 		}
 
-		return $this->Updates[] = new DbUpdate($Column, $Value);
+		return $this->Updates[] = new DbUpdateChange($Column, $Value);
 	}
 }
 
@@ -571,7 +571,13 @@ class DbUpdateQuery {
 	}
 
 	public function AddChange($Column, $Value) {
-		if(!($Column instanceof DbColumn)) {
+		if($Column instanceof \Framework\Newnorth\AValueDataMember) {
+			$Column = new DbColumn([
+				$Column->DataManager->Table,
+				$Column->Name,
+			]);
+		}
+		else if(!$Column instanceof DbColumn) {
 			$Column = DbExpression::ParseDbColumn($Column);
 		}
 
@@ -579,11 +585,11 @@ class DbUpdateQuery {
 			$Value = DbExpression::Parse($Value);
 		}
 
-		return $this->Changes[] = new DbUpdate($Column, $Value);
+		return $this->Changes[] = new DbUpdateChange($Column, $Value);
 	}
 }
 
-class DbUpdate {
+class DbUpdateChange {
 	/* Instance variables */
 
 	public $Column;
@@ -647,15 +653,20 @@ class DbSelectQuery {
 		if($Expression instanceof DbSelectColumn) {
 			$Column = $Expression;
 		}
-		else if($Expression instanceof DataManager) {
-			$Expression = '`'.$Expression->Table.'`.*';
-
-			$Column = new DbSelectColumn($Expression, $Alias);
+		else if($Expression instanceof \Framework\Newnorth\ADataManager) {
+			$Column = new DbSelectColumn(
+				'`'.$Expression->Table.'`.*',
+				$Alias
+			);
 		}
-		else if($Expression instanceof DataMember) {
-			$Expression = '`'.$Expression->DataManager->Table.'`.`'.$Expression->Name.'`';
-
-			$Column = new DbSelectColumn($Expression, $Alias);
+		else if($Expression instanceof \Framework\Newnorth\AValueDataMember) {
+			$Column = new DbSelectColumn(
+				new DbColumn([
+					$Expression->DataManager->Table,
+					$Expression->Name,
+				]),
+				$Alias
+			);
 		}
 		else {
 			$Column = new DbSelectColumn($Expression, $Alias);
@@ -675,7 +686,7 @@ class DbSelectQuery {
 		if($Expression instanceof DbSource) {
 			$Source = $Expression;
 		}
-		else if($Expression instanceof DataManager) {
+		else if($Expression instanceof \Framework\Newnorth\ADataManager) {
 			$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
 
 			$Source = new DbSource($Expression, $Alias, $Method, $Conditions);

@@ -61,7 +61,7 @@ class Router {
 	}
 
 	public static function Reroute($Path = '', array $Parameters = []) {
-		$Url = Router::GetUrl($Path, $Parameters);
+		$Url = Router::CreateUrl($Path, $Parameters);
 
 		Router::ParseUrl($Url, $Route, $RealRoute, $Parameters);
 
@@ -69,23 +69,25 @@ class Router {
 	}
 
 	public static function Redirect($Path = '', array $Parameters = [], $QueryString = '') {
-		if($QueryString === '') {
-			throw new RedirectException(Router::GetFullUrl($Path, $Parameters));
-		}
-		else {
-			throw new RedirectException(Router::GetFullUrl($Path, $Parameters).'?'.$QueryString);
-		}
+		throw new RedirectException(Router::CreateUrl($Path, $Parameters, $QueryString));
 	}
 
 	public static function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters = null) {
 		if($GLOBALS['Routing']->Route->ParseUrl($Url, $Route, $RealRoute, $Parameters = [])) {
-			$Parameters['Route'] = $Route->FullName;
+			if($Route instanceof \Framework\Newnorth\Route) {
+				$Parameters['Route'] = $Route->FullName;
+			}
+			else {
+				$Parameters['Route'] = $Route;
+			}
 
 			$Parameters['RealRoute'] = $RealRoute->FullName;
 
-			foreach($Route->Parameters as $ParameterName => $ParameterValue) {
-				if(!isset($Parameters[$ParameterName])) {
-					$Parameters[$ParameterName] = $ParameterValue;
+			if($Route instanceof \Framework\Newnorth\Route) {
+				foreach($Route->Parameters as $ParameterName => $ParameterValue) {
+					if(!isset($Parameters[$ParameterName])) {
+						$Parameters[$ParameterName] = $ParameterValue;
+					}
 				}
 			}
 
@@ -151,7 +153,7 @@ class Router {
 		}
 	}
 
-	public static function GetUrl($Path = '', array $Parameters = [], $QueryString = '') {
+	public static function CreateUrl($Path = '', array $Parameters = [], $QueryString = '') {
 		// Add current parameters that is not already set.
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -159,53 +161,27 @@ class Router {
 			}
 		}
 
-		if(isset($Path[0])) {
-			if($Path[0] === '/') {
-				if(isset($Path[1])) {
-					return $GLOBALS['Routing']->Route->GetUrl(explode('/', substr($Path, 1)), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
-				}
-				else {
-					return $GLOBALS['Routing']->Route->GetUrl([], false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
-				}
-			}
-			else if($GLOBALS['Route'] === null) {
-				throw new RuntimeException(
-					'Unable to get URL to a relative route from a non-existing route.',
-					[
-						'Current Parameters' => $GLOBALS['Parameters'],
-						'Requested path' => $Path,
-						'Requested parameters' => $Parameters,
-						'Requested query string' => $QueryString,
-					]
-				);
-			}
-			else {
-				return $GLOBALS['Route']->GetUrl(explode('/', $Path), true, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
-			}
-		}
-		else if($GLOBALS['Parameters']['Page'] === $GLOBALS['Routing']->Route->FullName) {
-			return $GLOBALS['Routing']->Route->GetUrl([], false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
+		if($GLOBALS['Route'] instanceof \Framework\Newnorth\Route) {
+			$Route = $GLOBALS['Route']->FullName;
 		}
 		else {
-			return $GLOBALS['Routing']->Route->GetUrl(explode('/', $GLOBALS['Parameters']['Route']), false, $Parameters).(isset($QueryString[0]) ? '?'.$QueryString : '');
-		}
-	}
-
-	public static function GetFullUrl($Path = '', array $Parameters = []) {
-		// Add current parameters that is not already set.
-		foreach($GLOBALS['Parameters'] as $Key => $Value) {
-			if(!isset($Parameters[$Key])) {
-				$Parameters[$Key] = $Value;
-			}
+			$Route = $GLOBALS['Route'];
 		}
 
 		if($Path === '') {
-			return $GLOBALS['Route']->GetFullUrl([], $Parameters);
+			if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Route), $Parameters, $Url)) {
+				return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+			}
 		}
 		else if($Path[0] === '/') {
-			$Path = explode('/', $Path);
-
-			return $GLOBALS['Routing']->Route->GetFullUrl($Path, $Parameters);
+			if(isset($Path[1])) {
+				if($GLOBALS['Routing']->Route->CreateUrl(explode('/', substr($Path, 1)), $Parameters, $Url)) {
+					return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+				}
+			}
+			else if($GLOBALS['Routing']->Route->CreateUrl([], $Parameters, $Url)) {
+				return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+			}
 		}
 		else if($GLOBALS['Route'] === null) {
 			throw new RuntimeException(
@@ -214,15 +190,83 @@ class Router {
 					'Current Parameters' => $GLOBALS['Parameters'],
 					'Requested path' => $Path,
 					'Requested parameters' => $Parameters,
-					'Requested query string' => $QueryString,
 				]
 			);
 		}
 		else {
-			$Path = explode('/', $Path);
+			while(2 < strlen($Path) && substr($Path, 0, 3) === '../') {
+				if(isset($Route[0])) {
+					$Index = strrpos($Route, '/');
 
-			return $GLOBALS['Route']->GetFullUrl($Path, $Parameters);
+					if($Index === -1) {
+						$Route = '';
+					}
+					else {
+						$Route = substr($Route, 0, $Index);
+					}
+
+
+				}
+				else {
+					$Route = null;
+				}
+
+				$Path = substr($Path, 3);
+			}
+
+			if($Path === '..') {
+				if(isset($Route[0])) {
+					$Index = strrpos($Route, '/');
+
+					if($Index === -1) {
+						$Route = '';
+					}
+					else {
+						$Route = substr($Route, 0, $Index);
+					}
+				}
+				else {
+					$Route = null;
+				}
+
+				$Path = '';
+			}
+
+			if(isset($Path[0])) {
+				if(!isset($Route[0])) {
+					if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Path), $Parameters, $Url)) {
+						return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+					}
+				}
+
+				if(isset($Route[0])) {
+					if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Route.'/'.$Path), $Parameters, $Url)) {
+						return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+					}
+				}
+			}
+			else {
+				if(!isset($Route[0])) {
+					if($GLOBALS['Routing']->Route->CreateUrl([], $Parameters, $Url)) {
+						return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+					}
+				}
+
+				if(isset($Route[0])) {
+					if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Route), $Parameters, $Url)) {
+						return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+					}
+				}
+			}
 		}
+
+		throw new RuntimeException(
+			'Route not found.',
+			[
+				'Route' => $Route,
+				'Path' => $Path,
+			]
+		);
 	}
 }
 ?>

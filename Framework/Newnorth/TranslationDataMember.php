@@ -1,49 +1,53 @@
 <?
-namespace Framework\Newnorth\DataMembers;
+namespace Framework\Newnorth;
 
 class TranslationDataMember extends \Framework\Newnorth\ADataMember {
 	/* Instance variables */
 
 	public $DataManager;
 
-	public $DataMember;
+	public $Reference;
 
-	public $Key;
+	public $LocalKey;
 
 	public $Name;
 
 	/* Magic methods */
 
 	public function __construct($Parameters) {
-		$this->DataManager = $Parameters['DataMember']->DataManager;
+		$this->DataManager = $Parameters['Reference']->DataManager;
 
-		$this->DataMember = $Parameters['DataMember'];
+		$this->Reference = $Parameters['Reference'];
 
-		$this->Key = $Parameters['Key'];
+		$this->LocalKey = $Parameters['LocalKey'];
 
 		$this->Name = $Parameters['Name'];
+	}
+
+	public function __toString() {
+		return $this->Reference->__toString();
 	}
 
 	/* Instance methods */
 
 	public function Parse($Value) {
-		return $this->DataMember->Parse($Value);
+		return $this->Reference->Parse($Value);
 	}
 
 	public function ToDbExpression($Value) {
-		return $this->DataMember->ToDbExpression($Value);
+		return $this->Reference->ToDbExpression($Value);
 	}
 
 	public function Set(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		return $this->DataMember->Set($DataType, $Parameters);
+		return $this->Reference->Set($DataType, $Parameters);
 	}
 
 	public function Increment(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		return $this->DataMember->Increment($DataType, $Parameters);
+		return $this->Reference->Increment($DataType, $Parameters);
 	}
 
 	public function Decrement(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		return $this->DataMember->Decrement($DataType, $Parameters);
+		return $this->Reference->Decrement($DataType, $Parameters);
 	}
 }
 ?>

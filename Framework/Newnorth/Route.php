@@ -101,27 +101,30 @@ class Route {
 				$this->Routes[$Name] = new Route($this, $Name, $Data);
 			}
 		}
+
+		\Framework\Newnorth\RegisterObject($this);
 	}
 
 	public function __toString() {
-		return $this->FullName;
+		return '/'.$this->FullName.'Route';
 	}
 
 	/* Instance methods */
 
-	public function ParseUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+	public function ParseUrl($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
+		if($this->RealRoute !== null && !Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
+			throw new RuntimeException(
+				'Real route not found.',
+				[
+					'Route' => $this->FullName,
+					'Real route' => $this->RealRoute,
+				]
+			);
+		}
+
 		if($this->Pattern === null) {
-			if($this->RealRoute === null) {
+			if($RealRoute === null) {
 				return false;
-			}
-			else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
-				throw new RuntimeException(
-					'Real route not found.',
-					[
-						'Route' => $this->__toString(),
-						'Real route' => $this->RealRoute,
-					]
-				);
 			}
 			else if($Route === null) {
 				return $RealRoute->ParseUrl($Url, $Route = $this, $RealRoute, $Parameters);
@@ -138,7 +141,7 @@ class Route {
 		}
 	}
 
-	private function ParseUrlWithTranslation($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+	private function ParseUrlWithTranslation($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
 		foreach($this->TranslatedPatterns as $Locale => $Pattern) {
 			if(isset($Locale[0], $Parameters["Locale"]) && $Locale !== $Parameters["Locale"]) {
 				continue;
@@ -171,7 +174,7 @@ class Route {
 		return false;
 	}
 
-	private function ParseUrlWithoutTranslation($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+	private function ParseUrlWithoutTranslation($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
 		if(preg_match($this->Pattern, $Url, $Matches) === 1) {
 			end($Matches);
 
@@ -196,28 +199,78 @@ class Route {
 		}
 	}
 
-	private function ContinueParsingUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+	private function ContinueParsingUrl($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
 		if($Route === null) {
-			$PossibleRoutes = $this->Routes;
+			foreach($this->Routes as $PossibleRoute) {
+				$NewRoute = null;
+
+				$NewRealRoute = null;
+
+				$NewParameters = $Parameters;
+
+				if($PossibleRoute->ParseUrl($Url, $NewRoute, $NewRealRoute, $NewParameters)) {
+					$Route = $NewRoute;
+
+					$RealRoute = $NewRealRoute;
+
+					$Parameters = $NewParameters;
+
+					return true;
+				}
+			}
 		}
-		else {
-			$PossibleRoutes = $Route->Routes;
+		else if($Route instanceof \Framework\Newnorth\Route) {
+			foreach($Route->Routes as $PossibleRoute) {
+				$NewRoute = null;
+
+				$NewRealRoute = null;
+
+				$NewParameters = $Parameters;
+
+				if($PossibleRoute->ParseUrl($Url, $NewRoute, $NewRealRoute, $NewParameters)) {
+					$Route = $NewRoute;
+
+					$RealRoute = $NewRealRoute;
+
+					$Parameters = $NewParameters;
+
+					return true;
+				}
+			}
 		}
 
-		foreach($PossibleRoutes as $PossibleRoute) {
-			$PossibleParameters = $Parameters;
+		if($RealRoute !== null) {
+			foreach($RealRoute->Routes as $PossibleRoute) {
+				if($Route === null) {
+					$NewRoute = $this->FullName.'/'.$PossibleRoute->Name;
+				}
+				else if($Route instanceof \Framework\Newnorth\Route) {
+					$NewRoute = $Route->FullName.'/'.$PossibleRoute->Name;
+				}
+				else {
+					$NewRoute = $Route.'/'.$PossibleRoute->Name;
+				}
 
-			if($PossibleRoute->ParseUrl($Url, $Route = null, $RealRoute = null, $PossibleParameters)) {
-				$Parameters = $PossibleParameters;
+				$NewRealRoute = $PossibleRoute;
 
-				return true;
+				$NewParameters = $Parameters;
+
+				if($PossibleRoute->ParseUrl($Url, $NewRoute, $NewRealRoute, $NewParameters)) {
+					$Route = $NewRoute;
+
+					$RealRoute = $NewRealRoute;
+
+					$Parameters = $NewParameters;
+
+					return true;
+				}
 			}
 		}
 
 		return false;
 	}
 
-	private function FinishParsingUrl($Url, Route &$Route = null, Route &$RealRoute = null, array &$Parameters) {
+	private function FinishParsingUrl($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
 		if($Route === null) {
 			$Route = $this;
 		}
@@ -229,7 +282,7 @@ class Route {
 			throw new RuntimeException(
 				'Real route not found.',
 				[
-					'Current route' => $this->__toString(),
+					'Current route' => $this->FullName,
 					'Real route' => $this->RealRoute,
 				]
 			);
@@ -249,7 +302,7 @@ class Route {
 				throw new RuntimeException(
 					'Subroute not found.',
 					[
-						'Route' => $this->__toString(),
+						'Route' => $this->FullName,
 						'Subroute' => $Node,
 					]
 				);
@@ -265,47 +318,40 @@ class Route {
 		}
 	}
 
-	public function GetUrl(array $Path, $IsRelative, array $Parameters) {
+	public function CreateUrl(array $Path, array $Parameters, &$Url) {
 		if(0 < count($Path)) {
 			$Node = array_shift($Path);
 
-			if($Node === '..') {
-				return '../'.$this->Parent->GetUrl($Path, true, $Parameters);
+			$RealRoute = \Framework\Newnorth\GetObject('', $this->RealRoute.'Route');
+
+			if(isset($this->Routes[$Node]) && $this->Routes[$Node]->CreateUrl($Path, $Parameters, $Url)) {
+				$Url = $this->CreateUrl_GetReversablePattern($Parameters).$Url;
+
+				return true;
 			}
-			else if($Node === '...') {
-				return $this->Parent->GetUrl($Path, true, $Parameters);
-			}
-			else if(!isset($this->Routes[$Node])) {
-				throw new RuntimeException(
-					'Subroute not found.',
-					[
-						'Route' => $this->__toString(),
-						'Subroute' => $Node,
-					]
-				);
-			}
-			else if($IsRelative) {
-				return $this->Routes[$Node]->GetUrl($Path, false, $Parameters);
+			else if(isset($RealRoute->Routes[$Node]) && $RealRoute->Routes[$Node]->CreateUrl($Path, $Parameters, $Url)) {
+				$Url = $this->CreateUrl_GetReversablePattern($Parameters).$Url;
+
+				return true;
 			}
 			else {
-				return $this->GetUrl_GetReversablePattern($Parameters).$this->Routes[$Node]->GetUrl($Path, false, $Parameters);
+				return false;
 			}
 		}
-		else if($IsRelative) {
-			return '';
-		}
 		else {
-			return $this->GetUrl_GetReversablePattern($Parameters);
+			$Url = $this->CreateUrl_GetReversablePattern($Parameters);
+
+			return true;
 		}
 	}
 
-	private function GetUrl_GetReversablePattern($Parameters) {
+	private function CreateUrl_GetReversablePattern($Parameters) {
 		if($this->Pattern === null) {
 			if($this->RealRoute === null) {
 				throw new RuntimeException(
 					'Pattern not set.',
 					[
-						'Route' => $this->__toString(),
+						'Route' => $this->FullName,
 						'Parameters' => $Parameters,
 					]
 				);
@@ -314,13 +360,13 @@ class Route {
 				throw new RuntimeException(
 					'Real route not found.',
 					[
-						'Route' => $this->__toString(),
+						'Route' => $this->FullName,
 						'Real route' => $this->RealRoute,
 					]
 				);
 			}
 			else {
-				return $RealRoute->GetUrl_GetReversablePattern($Parameters);
+				return $RealRoute->CreateUrl_GetReversablePattern($Parameters);
 			}
 		}
 		else {
@@ -338,121 +384,16 @@ class Route {
 					throw new RuntimeException('Route not available for current locale.');
 				}
 				else {
-					return $this->GetUrl_GetReversablePattern_ApplyParameters($this->TranslatedReversablePatterns[$Parameters['Locale']], $Parameters);
+					return $this->CreateUrl_GetReversablePattern_ApplyParameters($this->TranslatedReversablePatterns[$Parameters['Locale']], $Parameters);
 				}
 			}
 			else {
-				return $this->GetUrl_GetReversablePattern_ApplyParameters($this->ReversablePattern, $Parameters);
+				return $this->CreateUrl_GetReversablePattern_ApplyParameters($this->ReversablePattern, $Parameters);
 			}
 		}
 	}
 
-	private function GetUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
-		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
-			foreach($Matches as $Match) {
-				if(isset($Parameters[$Match[2]])) {
-					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
-				}
-				else {
-					throw new RuntimeException('Parameter "'.$Match[2].'" not set.');
-				}
-			}
-		}
-
-		if(0 < preg_match_all('/(^|\/)\*(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
-			foreach($Matches as $Match) {
-				if(isset($Parameters[$Match[2]])) {
-					$ReversablePattern = str_replace($Match[0], $Match[1].$Parameters[$Match[2]], $ReversablePattern);
-				}
-				else {
-					$ReversablePattern = str_replace($Match[0], $Match[1], $ReversablePattern);
-				}
-			}
-		}
-
-		return $ReversablePattern;
-	}
-
-	public function GetFullUrl(array $Path, array $Parameters) {
-		if(0 < count($Path)) {
-			$Node = array_shift($Path);
-
-			if($Node === '') {
-				return $this->GetFullUrl($Path, $Parameters);
-			}
-			else if($Node === '..') {
-				return $this->Parent->GetFullUrl($Path, $Parameters);
-			}
-			else if(!isset($this->Routes[$Node])) {
-				throw new RuntimeException(
-					'Subroute not found.',
-					[
-						'Route' => $this->__toString(),
-						'Subroute' => $Node,
-					]
-				);
-			}
-			else {
-				return $this->Routes[$Node]->GetFullUrl($Path, $Parameters);
-			}
-		}
-		else if($this->Parent === null) {
-			return $this->GetFullUrl_GetReversablePattern($Parameters);
-		}
-		else {
-			return $this->Parent->GetFullUrl($Path, $Parameters).$this->GetFullUrl_GetReversablePattern($Parameters);
-		}
-	}
-
-	private function GetFullUrl_GetReversablePattern($Parameters) {
-		if($this->Pattern === null) {
-			if($this->RealRoute === null) {
-				throw new RuntimeException(
-					'Pattern not set.',
-					[
-						'Route' => $this->__toString(),
-						'Parameters' => $Parameters,
-					]
-				);
-			}
-			else if(!Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
-				throw new RuntimeException(
-					'Real route not found.',
-					[
-						'Route' => $this->__toString(),
-						'Real route' => $this->RealRoute,
-					]
-				);
-			}
-			else {
-				return $RealRoute->GetFullUrl_GetReversablePattern($Parameters);
-			}
-		}
-		else {
-			if(0 < count($this->TranslatedReversablePatterns)) {
-				if(!isset($Parameters['Locale'])) {
-					if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-						$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-					}
-					else {
-						throw new RuntimeException('Locale not set.');
-					}
-				}
-
-				if(!isset($this->TranslatedReversablePatterns[$Parameters['Locale']])) {
-					throw new RuntimeException('Route not available for current locale.');
-				}
-				else {
-					return $this->GetFullUrl_GetReversablePattern_ApplyParameters($this->TranslatedReversablePatterns[$Parameters['Locale']], $Parameters);
-				}
-			}
-			else {
-				return $this->GetFullUrl_GetReversablePattern_ApplyParameters($this->ReversablePattern, $Parameters);
-			}
-		}
-	}
-
-	private function GetFullUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
+	private function CreateUrl_GetReversablePattern_ApplyParameters($ReversablePattern, $Parameters) {
 		if(0 < preg_match_all('/(^|\/)\+(.*?)(?:\((.*?)\))?(?=\/)/', $ReversablePattern, $Matches, PREG_SET_ORDER)) {
 			foreach($Matches as $Match) {
 				if(isset($Parameters[$Match[2]])) {

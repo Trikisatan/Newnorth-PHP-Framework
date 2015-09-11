@@ -1,7 +1,7 @@
 <?
-namespace Framework\Newnorth\DataMembers;
+namespace Framework\Newnorth;
 
-class StringValueDataMember extends \Framework\Newnorth\DataMembers\AValueDataMember {
+class FloatValueDataMember extends \Framework\Newnorth\AValueDataMember {
 	/* Instance methods */
 
 	public function Parse($Value) {
@@ -9,7 +9,7 @@ class StringValueDataMember extends \Framework\Newnorth\DataMembers\AValueDataMe
 			return null;
 		}
 		else {
-			return (string)$Value;
+			return (float)$Value;
 		}
 	}
 
@@ -18,7 +18,7 @@ class StringValueDataMember extends \Framework\Newnorth\DataMembers\AValueDataMe
 			return null;
 		}
 		else {
-			return '"'.$this->Parse($Value).'"';
+			return $this->Parse($Value);
 		}
 	}
 }

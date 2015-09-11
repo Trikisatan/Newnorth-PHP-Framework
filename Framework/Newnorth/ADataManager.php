@@ -1,12 +1,10 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class DataManager {
+abstract class ADataManager {
 	/* Instance variables */
 
-	public $UseDataType = true;
-
-	public $DataType = null;
+	public $DataType;
 
 	public $Connection = null;
 
@@ -18,7 +16,15 @@ abstract class DataManager {
 
 	public $DataMembers = [];
 
+	public $DataReferences = [];
+
+	public $DataLists = [];
+
 	/* Magic methods */
+
+	public function __toString() {
+		return '`'.$this->Database.'`.`'.$this->Table.'`';
+	}
 
 	public function __call($Function, $Parameters) {
 		if(strpos($Function, 'DeleteBy') === 0) {
@@ -60,10 +66,73 @@ abstract class DataManager {
 		);
 	}
 
-	/* Add methods */
+	/* Instance methods */
 
-	public function AddDataMember($DataMember) {
+	public abstract function InitializeDataMembers();
+
+	public abstract function InitializeReferenceDataMembers();
+
+	public abstract function InitializeDataReferences();
+
+	public abstract function InitializeDataLists();
+
+	public function AddDataMember(\Framework\Newnorth\ADataMember $DataMember) {
 		return $this->DataMembers[$DataMember->Name] = $DataMember;
+	}
+
+	public function AddDataReference(array $Parameters) {
+		$DataReference = new \Framework\Newnorth\DataReference($Parameters);
+
+		$this->DataReferences[$DataReference->Alias] = $DataReference;
+
+		return $DataReference;
+	}
+
+	public function AddDataList(array $Parameters) {
+		$DataList = new \Framework\Newnorth\DataList($Parameters);
+
+		$this->DataLists[$DataList->SingularAlias] = $DataList;
+
+		$this->DataLists[$DataList->PluralAlias] = $DataList;
+
+		return $DataList;
+	}
+
+	public function CreateSelectQuery() {
+		$Query = new \Framework\Newnorth\DbSelectQuery();
+
+		$Query->AddColumn(
+			$this
+		);
+
+		foreach($this->DataMembers as $DataMember) {
+			if($DataMember instanceof ReferenceDataMember) {
+				$Query->AddColumn(
+					$DataMember->Reference,
+					$DataMember->Name
+				);
+			}
+		}
+
+		$Query->AddSource(
+			$this
+		);
+
+		foreach($this->DataMembers as $DataMember) {
+			if($DataMember instanceof ReferenceDataMember) {
+				$Query->AddSource(
+					$DataMember->Reference->DataManager,
+					null,
+					$DataMember->LocalKey->IsNullable ? DB_LEFTJOIN : DB_INNERJOIN,
+					new \Framework\Newnorth\DbEqualTo(
+						$DataMember->Reference->DataManager->PrimaryKey,
+						$DataMember->LocalKey
+					)
+				);
+			}
+		}
+
+		return $Query;
 	}
 
 	/* Get methods */
@@ -123,7 +192,7 @@ abstract class DataManager {
 			return false;
 		}
 		else {
-			$LastInsertId =  $this->Connection->LastInsertId();
+			$LastInsertId = $this->Connection->LastInsertId();
 
 			$this->OnInserted($LastInsertId);
 
@@ -176,6 +245,10 @@ abstract class DataManager {
 	/* Delete methods */
 
 	public function Delete($Item) {
+		$Item->OnDelete();
+
+		$this->OnDelete($Item);
+
 		$Query = new \Framework\Newnorth\DbDeleteQuery();
 
 		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
@@ -266,6 +339,8 @@ abstract class DataManager {
 		}
 	}
 
+	public abstract function OnDelete($Item);
+
 	public abstract function OnDeleted($Item);
 
 	/* Find methods */
@@ -303,34 +378,7 @@ abstract class DataManager {
 	}
 
 	public function FindByArray(array $Conditions = null, $SortColumn = null, $SortOrder = null) {
-		$Query = new \Framework\Newnorth\DbSelectQuery();
-
-		$Query->AddColumn('`'.$this->Table.'`.*');
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddColumn(
-					'`'.$DataMember->DataManager->Table.'`.`'.$DataMember->DataMember->Name.'`',
-					$DataMember->Name
-				);
-			}
-		}
-
-		$Query->AddSource($this);
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddSource(
-					$DataMember->DataManager,
-					null,
-					$DataMember->Key->IsNullable ? DB_LEFTJOIN : DB_INNERJOIN,
-					new \Framework\Newnorth\DbEqualTo(
-						$DataMember->DataManager->PrimaryKey,
-						$DataMember->Key
-					)
-				);
-			}
-		}
+		$Query = $this->CreateSelectQuery();
 
 		if($Conditions !== null) {
 			$Query->Conditions = new \Framework\Newnorth\DbAnd();
@@ -363,35 +411,8 @@ abstract class DataManager {
 
 	/* FindAll methods */
 
-	public function FindAll(array $Sorts = null, $MaxRows = null, $FirstRow = 0) {
-		$Query = new \Framework\Newnorth\DbSelectQuery();
-
-		$Query->AddColumn('`'.$this->Table.'`.*');
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddColumn(
-					$DataMember->DataMember,
-					$DataMember->Name
-				);
-			}
-		}
-
-		$Query->AddSource($this);
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddSource(
-					$DataMember->DataManager,
-					null,
-					DB_INNERJOIN,
-					new \Framework\Newnorth\DbEqualTo(
-						$DataMember->DataManager->PrimaryKey,
-						$DataMember->Key
-					)
-				);
-			}
-		}
+	public function FindAll(array $Sorts = null, $MaxRows = 0, $FirstRow = 0) {
+		$Query = $this->CreateSelectQuery();
 
 		if($Sorts !== null) {
 			foreach($Sorts as $Sort) {
@@ -399,7 +420,7 @@ abstract class DataManager {
 			}
 		}
 
-		if($MaxRows !== null) {
+		if(0 < $MaxRows) {
 			$Query->Limit($MaxRows, $FirstRow);
 		}
 
@@ -438,35 +459,8 @@ abstract class DataManager {
 		}
 	}
 
-	public function FindAllByArray(array $Conditions = null, array $Sorts = null, $MaxRows = null, $FirstRow = 0) {
-		$Query = new \Framework\Newnorth\DbSelectQuery();
-
-		$Query->AddColumn('`'.$this->Table.'`.*');
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddColumn(
-					$DataMember->DataMember,
-					$DataMember->Name
-				);
-			}
-		}
-
-		$Query->AddSource($this);
-
-		foreach($this->DataMembers as $DataMember) {
-			if($DataMember instanceof ReferenceDataMember) {
-				$Query->AddSource(
-					$DataMember->DataManager,
-					null,
-					$DataMember->Key->IsNullable ? DB_LEFTJOIN : DB_INNERJOIN,
-					new \Framework\Newnorth\DbEqualTo(
-						$DataMember->DataManager->PrimaryKey,
-						$DataMember->Key
-					)
-				);
-			}
-		}
+	public function FindAllByArray(array $Conditions = null, array $Sorts = null, $MaxRows = 0, $FirstRow = 0) {
+		$Query = $this->CreateSelectQuery();
 
 		if($Conditions !== null) {
 			$Query->Conditions = new \Framework\Newnorth\DbAnd();
@@ -482,7 +476,7 @@ abstract class DataManager {
 			}
 		}
 
-		if($MaxRows !== null) {
+		if(0 < $MaxRows) {
 			$Query->Limit($MaxRows, $FirstRow);
 		}
 

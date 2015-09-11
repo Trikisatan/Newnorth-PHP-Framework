@@ -28,27 +28,31 @@ require('Controls.php');
 
 require('Db.php');
 
-require('DataManager.php');
+require('ADataManager.php');
 
-require('TranslationDataManager.php');
+require('ATranslationDataManager.php');
 
 require('DataType.php');
 
 require('ADataMember.php');
 
-require('DataMembers/AValueDataMember.php');
+require('AValueDataMember.php');
 
-require('DataMembers/BoolValueDataMember.php');
+require('BoolValueDataMember.php');
 
-require('DataMembers/FloatValueDataMember.php');
+require('FloatValueDataMember.php');
 
-require('DataMembers/IntValueDataMember.php');
+require('IntValueDataMember.php');
 
-require('DataMembers/StringValueDataMember.php');
+require('StringValueDataMember.php');
 
-require('DataMembers/ReferenceDataMember.php');
+require('ReferenceDataMember.php');
 
-require('DataMembers/TranslationDataMember.php');
+require('TranslationDataMember.php');
+
+require('DataReference.php');
+
+require('DataList.php');
 
 function Initialize() {
 	session_start();
@@ -58,6 +62,8 @@ function Initialize() {
 	set_error_handler('\Framework\Newnorth\ConfigErrorHandler');
 
 	$GLOBALS['Url'] = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : '/';
+
+	$GLOBALS['Objects'] = [];
 
 	try {
 		$GLOBALS['Config'] = new \Framework\Newnorth\Config('Config.ini');
@@ -105,7 +111,7 @@ function Initialize() {
 			if(!isset($GLOBALS['Parameters']['Locale'])) {
 				$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 			}
-
+var_dump(\Framework\Newnorth\ErrorHandler::FormatException($Exception));die();
 			$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
 		}
 	}
@@ -267,6 +273,39 @@ function ConfigErrorHandler($Type, $Message, $File, $Line, $Variables) {
 function RuntimeErrorHandler($Type, $Message, $File, $Line, $Variables) {
 	if(error_reporting() !== 0) {
 		throw new RuntimeException($Message);
+	}
+}
+
+function RegisterObject($Object) {
+	$GLOBALS['Objects'][$Object->__toString()] = $Object;
+}
+
+function GetObject($Scope, $Name) {
+	if(!isset($Name[0])) {
+		$Name = $Scope;
+	}
+	else if($Name[0] !== '/') {
+		while(substr($Name, 0, 3) === '../') {
+			$Name = substr($Name, 3);
+
+			$Slash = strrpos($Scope, '/', -1);
+
+			$Scope = substr($Scope, 0, $Slash);
+		}
+
+		if(!isset($Name[0]) || $Name === './') {
+			$Name = $Scope;
+		}
+		else {
+			$Name = $Scope.'/'.$Name;
+		}
+	}
+
+	if(isset($GLOBALS['Objects'][$Name])) {
+		return $GLOBALS['Objects'][$Name];
+	}
+	else {
+		return null;
 	}
 }
 ?>

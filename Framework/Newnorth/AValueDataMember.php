@@ -1,5 +1,5 @@
 <?
-namespace Framework\Newnorth\DataMembers;
+namespace Framework\Newnorth;
 
 abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 	/* Instance variables */
@@ -28,6 +28,10 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 		}
 	}
 
+	public function __toString() {
+		return '`'.$this->DataManager->Table.'`.`'.$this->Name.'`';
+	}
+
 	/* Instance methods */
 
 	public function Set(\Framework\Newnorth\DataType $DataType, array $Parameters) {
@@ -48,9 +52,11 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 				$this->ToDbExpression($Parameters[0])
 			);
 
-			return $this->DataManager->Connection->Update(
-				$Query
-			);
+			$Result = $this->DataManager->Connection->Update($Query);
+
+			$DataType->{$this->Name} = $this->Parse($Parameters[0]);
+
+			return $Result;
 		}
 		else {
 			throw new RuntimeException(
