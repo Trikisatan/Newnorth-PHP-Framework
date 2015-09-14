@@ -173,5 +173,29 @@ class DataList {
 
 		return false;
 	}
+
+	public function CountBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
+		$this->Load($DataType);
+
+		$Count = 0;
+
+		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
+			$IsFound = true;
+
+			for($J = 0; $J < count($DataMembers); ++$J) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+					$IsFound = false;
+
+					break;
+				}
+			}
+
+			if($IsFound) {
+				++$Count;
+			}
+		}
+
+		return $Count;
+	}
 }
 ?>

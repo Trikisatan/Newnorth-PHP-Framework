@@ -55,6 +55,9 @@ class DataType {
 		else if(preg_match('/^Has([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->HasBy($Matches[1], $Matches[2], $Parameters);
 		}
+		else if(preg_match('/^Count([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			return $this->CountBy($Matches[1], $Matches[2], $Parameters);
+		}
 		else if(preg_match('/^([A-Z][a-z]+)([0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			$Function = $Matches[1];
 
@@ -212,6 +215,20 @@ class DataType {
 		}
 
 		return $DataList->HasBy($this, $DataMembers, $Values);
+	}
+
+	private function CountBy($DataList, $DataMembers, $Values) {
+		$DataList = $this->_DataManager->DataLists[$DataList];
+
+		$DataMembers = explode('And', $DataMembers);
+
+		for($I = 0; $I < count($DataMembers); ++$I) {
+			$DataMembers[$I] = $DataList->ForeignDataManager->DataMembers[$DataMembers[$I]];
+
+			$Values[$I] = $DataMembers[$I]->Parse($Values[$I]);
+		}
+
+		return $DataList->CountBy($this, $DataMembers, $Values);
 	}
 }
 ?>
