@@ -1,6 +1,28 @@
 <?
 namespace Framework\Newnorth;
 
+/* Life cycle stage definitions */
+
+define('LIFECYCLESTAGE_PREINITIALIZE', 1);
+
+define('LIFECYCLESTAGE_INITIALIZE', 2);
+
+define('LIFECYCLESTAGE_POSTINITIALIZE', 3);
+
+define('LIFECYCLESTAGE_PRELOAD', 4);
+
+define('LIFECYCLESTAGE_LOAD', 5);
+
+define('LIFECYCLESTAGE_POSTLOAD', 6);
+
+define('LIFECYCLESTAGE_PREEXECUTE', 7);
+
+define('LIFECYCLESTAGE_EXECUTE', 8);
+
+define('LIFECYCLESTAGE_POSTEXECUTE', 9);
+
+define('LIFECYCLESTAGE_RENDER', 10);
+
 require('Exception.php');
 require('ConfigException.php');
 require('RuntimeException.php');

@@ -54,14 +54,52 @@ class Controls {
 			);
 		}
 		else {
-			$this->Items[$Alias] = Control::Instantiate(
+			$Control = Control::Instantiate(
 				$this->Owner,
 				$Parameters['Class'],
 				$Alias,
 				$Parameters
 			);
 
-			return $this->Items[$Alias];
+			$this->Items[$Alias] = $Control;
+
+			if(LIFECYCLESTAGE_PREINITIALIZE < $GLOBALS['Application']->Stage) {
+				$Control->PreInitialize();
+			}
+
+			if(LIFECYCLESTAGE_INITIALIZE < $GLOBALS['Application']->Stage) {
+				$Control->Initialize();
+			}
+
+			if(LIFECYCLESTAGE_POSTINITIALIZE < $GLOBALS['Application']->Stage) {
+				$Control->PostInitialize();
+			}
+
+			if(LIFECYCLESTAGE_PRELOAD < $GLOBALS['Application']->Stage) {
+				$Control->PreLoad();
+			}
+
+			if(LIFECYCLESTAGE_LOAD < $GLOBALS['Application']->Stage) {
+				$Control->Load();
+			}
+
+			if(LIFECYCLESTAGE_POSTLOAD < $GLOBALS['Application']->Stage) {
+				$Control->PostLoad();
+			}
+
+			if(LIFECYCLESTAGE_PREEXECUTE < $GLOBALS['Application']->Stage) {
+				$Control->PreExecute();
+			}
+
+			if(LIFECYCLESTAGE_EXECUTE < $GLOBALS['Application']->Stage) {
+				$Control->Execute();
+			}
+
+			if(LIFECYCLESTAGE_POSTEXECUTE < $GLOBALS['Application']->Stage) {
+				$Control->PostExecute();
+			}
+
+			return $Control;
 		}
 	}
 

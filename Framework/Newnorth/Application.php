@@ -55,6 +55,8 @@ class Application {
 
 	/* Instance variables */
 
+	public $Stage = 0;
+
 	public $Objects = [];
 
 	private $DbConnections = [];
@@ -70,82 +72,81 @@ class Application {
 	/* Life cycle methods */
 
 	public function PreInitialize() {
+		$this->Stage = LIFECYCLESTAGE_PREINITIALIZE;
 
+		$GLOBALS['Layout']->PreInitialize();
+
+		$GLOBALS['Page']->PreInitialize();
 	}
 
 	public function Initialize() {
+		$this->Stage = LIFECYCLESTAGE_INITIALIZE;
 
+		$GLOBALS['Layout']->Initialize();
+
+		$GLOBALS['Page']->Initialize();
 	}
 
 	public function PostInitialize() {
+		$this->Stage = LIFECYCLESTAGE_POSTINITIALIZE;
 
+		$GLOBALS['Layout']->PostInitialize();
+
+		$GLOBALS['Page']->PostInitialize();
 	}
 
 	public function PreLoad() {
+		$this->Stage = LIFECYCLESTAGE_PRELOAD;
 
+		$GLOBALS['Layout']->PreLoad();
+
+		$GLOBALS['Page']->PreLoad();
 	}
 
 	public function Load() {
+		$this->Stage = LIFECYCLESTAGE_LOAD;
 
+		$GLOBALS['Layout']->Load();
+
+		$GLOBALS['Page']->Load();
 	}
 
 	public function PostLoad() {
+		$this->Stage = LIFECYCLESTAGE_POSTLOAD;
 
+		$GLOBALS['Layout']->PostLoad();
+
+		$GLOBALS['Page']->PostLoad();
 	}
 
 	public function PreExecute() {
+		$this->Stage = LIFECYCLESTAGE_PREEXECUTE;
 
+		$GLOBALS['Layout']->PreExecute();
+
+		$GLOBALS['Page']->PreExecute();
 	}
 
 	public function Execute() {
-		if(!isset($GLOBALS['Parameters']['Layout'][0])) {
-			$GLOBALS['Page']->PreInitialize();
-			$GLOBALS['Page']->Initialize();
-			$GLOBALS['Page']->PostInitialize();
+		$this->Stage = LIFECYCLESTAGE_EXECUTE;
 
-			$GLOBALS['Page']->PreLoad();
-			$GLOBALS['Page']->Load();
-			$GLOBALS['Page']->PostLoad();
+		$GLOBALS['Layout']->Execute();
 
-			$GLOBALS['Page']->PreExecute();
-			$GLOBALS['Page']->Execute();
-			$GLOBALS['Page']->PostExecute();
-		}
-		else {
-			$GLOBALS['Layout']->PreInitialize();
-			$GLOBALS['Page']->PreInitialize();
-			$GLOBALS['Layout']->Initialize();
-			$GLOBALS['Page']->Initialize();
-			$GLOBALS['Layout']->PostInitialize();
-			$GLOBALS['Page']->PostInitialize();
-
-			$GLOBALS['Layout']->PreLoad();
-			$GLOBALS['Page']->PreLoad();
-			$GLOBALS['Layout']->Load();
-			$GLOBALS['Page']->Load();
-			$GLOBALS['Layout']->PostLoad();
-			$GLOBALS['Page']->PostLoad();
-
-			$GLOBALS['Layout']->PreExecute();
-			$GLOBALS['Page']->PreExecute();
-			$GLOBALS['Layout']->Execute();
-			$GLOBALS['Page']->Execute();
-			$GLOBALS['Layout']->PostExecute();
-			$GLOBALS['Page']->PostExecute();
-		}
+		$GLOBALS['Page']->Execute();
 	}
 
 	public function PostExecute() {
+		$this->Stage = LIFECYCLESTAGE_POSTEXECUTE;
 
+		$GLOBALS['Layout']->PostExecute();
+
+		$GLOBALS['Page']->PostExecute();
 	}
 
 	public function Render() {
-		if($GLOBALS['Layout'] === null) {
-			$GLOBALS['Page']->Render();
-		}
-		else {
-			$GLOBALS['Layout']->Render();
-		}
+		$this->Stage = LIFECYCLESTAGE_RENDER;
+
+		$GLOBALS['Layout']->Render();
 
 		$Output = ob_get_contents();
 
