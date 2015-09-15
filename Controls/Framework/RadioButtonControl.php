@@ -1,4 +1,6 @@
 <?
+namespace Framework;
+
 class RadioButtonControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 

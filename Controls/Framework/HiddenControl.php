@@ -1,4 +1,6 @@
 <?
+namespace Framework;
+
 class HiddenControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 

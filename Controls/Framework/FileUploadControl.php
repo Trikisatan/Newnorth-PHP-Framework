@@ -1,4 +1,6 @@
 <?
+namespace Framework;
+
 class FileUploadControl extends \Framework\Newnorth\Control {
 	/* Validator methods */
 

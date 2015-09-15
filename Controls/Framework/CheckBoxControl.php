@@ -1,4 +1,6 @@
 <?
+namespace Framework;
+
 class CheckBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 

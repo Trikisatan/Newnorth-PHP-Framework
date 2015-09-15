@@ -1,9 +1,13 @@
 <?
+namespace Framework;
+
 class TextBoxControl extends \Framework\Newnorth\Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
-		$this->_Namespace = '\\';
+		$this->_Directory = $GLOBALS['Config']->Files['Controls'].'Framework/';
+
+		$this->_Namespace = '\\Framework\\';
 
 		$this->_Name = 'TextBoxControl';
 

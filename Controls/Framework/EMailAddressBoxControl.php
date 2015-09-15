@@ -1,4 +1,6 @@
 <?
+namespace Framework;
+
 class EMailAddressBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
