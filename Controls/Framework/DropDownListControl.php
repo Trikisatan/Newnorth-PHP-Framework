@@ -16,16 +16,24 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 
 	/* Life cycle methods */
 
-	public function PostExecute() {
-		parent::PostExecute();
+	public function Initialize() {
+		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		}
 
-		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
 		}
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
 			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
+
+		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
+			$this->_Parameters['Options'] = $this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
+		}
+
+		parent::Initialize();
 	}
 
 	/* Validator methods */
@@ -117,6 +125,34 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		}
 
 		return -1;
+	}
+
+	/* Instance methods */
+
+	public function CreateElement($Name, $Attributes, $OptionalAttributes, $Parameters, $Html) {
+		$Element = new \Framework\HTML\Element($Name);
+
+		foreach($Attributes as $Key => $Value) {
+			$Element->CreateAttribute(
+				$Key,
+				$Value
+			);
+		}
+
+		foreach($OptionalAttributes as $Alias => $Key) {
+			if(isset($Parameters[$Alias])) {
+				$Element->CreateAttribute(
+					$Key,
+					$Parameters[$Alias]
+				);
+			}
+		}
+
+		if($Html !== null) {
+			$Element->AppendHtml($Html);
+		}
+
+		return $Element;
 	}
 }
 ?>

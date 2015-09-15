@@ -1,29 +1,37 @@
 <?
-$Attributes = '';
+$InputElement = $Control->CreateElement(
+	'input',
+	[
+		'type' => 'reset',
+	],
+	[
+		'Id' => 'id',
+		'Form' => 'form',
+		'Name' => 'name',
+		'CssClass' => 'class',
+		'Text' => 'value',
+		'Disabled' => 'disabled',
+	],
+	$Parameters,
+	null
+);
 
-if(isset($Parameters['Id'])) {
-	$Attributes .= ' id="'.$Parameters['Id'].'"';
+if(isset($Parameters['Attributes'])) {
+	foreach($Parameters['Attributes'] as $Attribute) {
+		if(isset($Attribute['Value'])) {
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				$Attribute['Value']
+			);
+		}
+		else {
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				null
+			);
+		}
+	}
 }
-else if(isset($Control->_Parameters['Id'])) {
-	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
-}
 
-if(isset($Control->_Parameters['Name'])) {
-	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
-}
-
-if(isset($Control->_Parameters['Form'])) {
-	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
-}
-
-if(isset($Control->_Parameters['CssClass'])) {
-	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
-}
-
-$Attributes .= ' type="reset"';
-
-if(isset($Control->_Parameters['Text'])) {
-	$Attributes .= ' value="'.$Control->_Parameters['Text'].'"';
-}
-
-?><input<?=$Attributes?> />
+echo $InputElement;
+?>

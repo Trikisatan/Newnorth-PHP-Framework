@@ -1,54 +1,37 @@
 <?
-$Attributes = '';
+$InputElement = $Control->CreateElement(
+	'input',
+	[
+		'type' => 'submit',
+	],
+	[
+		'Id' => 'id',
+		'Form' => 'form',
+		'Name' => 'name',
+		'CssClass' => 'class',
+		'Text' => 'value',
+		'Disabled' => 'disabled',
+	],
+	$Parameters,
+	null
+);
 
-if(isset($Parameters['Id'])) {
-	$Attributes .= ' id="'.$Parameters['Id'].'"';
-}
-else if(isset($Control->_Parameters['Id'])) {
-	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
-}
-
-if(isset($Control->_Parameters['Name'])) {
-	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
-}
-
-if(isset($Parameters['Form'])) {
-	$Attributes .= ' form="'.$Parameters['Form'].'"';
-}
-else if(isset($Control->_Parameters['Form'])) {
-	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
-}
-
-if(isset($Control->_Parameters['CssClass'])) {
-	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
-}
-
-$Attributes .= ' type="submit"';
-
-if(isset($Control->_Parameters['Text'])) {
-	$Attributes .= ' value="'.$Control->_Parameters['Text'].'"';
-}
-
-if(isset($Parameters['IsDisabled'])) {
-	if($Parameters['IsDisabled'] === true || $Parameters['IsDisabled'] === '1') {
-		$Attributes .= ' disabled="disabled"';
-	}
-}
-else if(isset($Control->_Parameters['IsDisabled'])) {
-	if($Control->_Parameters['IsDisabled'] === true || $Control->_Parameters['IsDisabled'] === '1') {
-		$Attributes .= ' disabled="disabled"';
-	}
-}
-
-if(isset($Control->_Parameters['Attributes'])) {
-	foreach($Control->_Parameters['Attributes'] as $Attribute) {
+if(isset($Parameters['Attributes'])) {
+	foreach($Parameters['Attributes'] as $Attribute) {
 		if(isset($Attribute['Value'])) {
-			$Attributes .= ' '.$Attribute['Name'].'="'.$Attribute['Value'].'"';
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				$Attribute['Value']
+			);
 		}
 		else {
-			$Attributes .= ' '.$Attribute['Name'];
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				null
+			);
 		}
 	}
 }
 
-?><input<?=$Attributes?> />
+echo $InputElement;
+?>

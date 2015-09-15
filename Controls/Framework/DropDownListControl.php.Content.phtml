@@ -1,90 +1,76 @@
 <?
-if(isset($Control->_Parameters['Label'])) {
-	$Attributes = '';
+if(isset($Parameters['Label'])) {
+	$LabelElement = $Control->CreateElement(
+		'label',
+		[],
+		[
+			'Id' => 'for',
+			'LabelCssClass' => 'class',
+		],
+		$Parameters,
+		$Parameters['Label']
+	);
 
-	if(isset($Parameters['Id'])) {
-		$Attributes .= ' for="'.$Parameters['Id'].'"';
-	}
-	else if(isset($Control->_Parameters['Id'])) {
-		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
-	}
-
-	if(isset($Control->_Parameters['LabelCssClass'])) {
-		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
-	}
-
-	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
+	echo $LabelElement;
 }
 
-$Attributes = '';
+$SelectElement = $Control->CreateElement(
+	'select',
+	[
+		'type' => 'text',
+	],
+	[
+		'Id' => 'id',
+		'Form' => 'form',
+		'Name' => 'name',
+		'CssClass' => 'class',
+		'Disabled' => 'disabled',
+	],
+	$Parameters,
+	null
+);
 
-if(isset($Parameters['Id'])) {
-	$Attributes .= ' id="'.$Parameters['Id'].'"';
-}
-else if(isset($Control->_Parameters['Id'])) {
-	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
-}
-
-if(isset($Control->_Parameters['Name'])) {
-	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
-}
-
-if(isset($Control->_Parameters['Form'])) {
-	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
-}
-
-if(isset($Control->_Parameters['CssClass'])) {
-	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
-}
-
-if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
-	$Attributes .= ' disabled="disabled"';
-}
-
-?><select<?=$Attributes?>><?
-	if(isset($Control->_Parameters['Options'])) {
-		foreach($Control->_Parameters['Options'] as $Option) {
-			$Attributes = '';
-
-			if(isset($Option['Value'])) {
-				$Attributes .= ' value="'.$Option['Value'].'"';
-			}
-
-			if(isset($Option['CssClass'])) {
-				$Attributes .= ' class="'.$Option['CssClass'].'"';
-			}
-
-			if(isset($Parameters['Value'])) {
-				if(isset($Option['Value'])) {
-					if($Option['Value'] == $Parameters['Value']) {
-						$Attributes .= ' selected="selected"';
-					}
-				}
-				else if($Option['Text'] == $Parameters['Value']) {
-					$Attributes .= ' selected="selected"';
-				}
-			}
-			else if(isset($Control->_Parameters['Value'])) {
-				if(isset($Option['Value'])) {
-					if($Option['Value'] == $Control->_Parameters['Value']) {
-						$Attributes .= ' selected="selected"';
-					}
-				}
-				else if($Option['Text'] == $Control->_Parameters['Value']) {
-					$Attributes .= ' selected="selected"';
-				}
-			}
-
-			?><option<?=$Attributes?>><?=$Option['Text']?></option><?
+if(isset($Parameters['Attributes'])) {
+	foreach($Parameters['Attributes'] as $Attribute) {
+		if(isset($Attribute['Value'])) {
+			$SelectElement->CreateAttribute(
+				$Attribute['Name'],
+				$Attribute['Value']
+			);
+		}
+		else {
+			$SelectElement->CreateAttribute(
+				$Attribute['Name'],
+				null
+			);
 		}
 	}
-?></select><?
-
-if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
-	?><div class="ErrorMessages"><?
-		foreach($Control->_ErrorMessages as $ErrorMessage) {
-			?><p><?=$ErrorMessage?></p><?
-		}
-	?></div><?
 }
+
+if(isset($Control->_Parameters['Options'])) {
+	foreach($Control->_Parameters['Options'] as $Option) {
+		if(isset($Parameters['Value'])) {
+			if($Option['Value'] == $Parameters['Value']) {
+				$Option['Selected'] = 'selected';
+			}
+		}
+
+		$OptionElement = $Control->CreateElement(
+			'option',
+			[
+				'Value' => $Option['Value'],
+			],
+			[
+				'CssClass' => 'class',
+				'Selected' => 'selected',
+			],
+			$Option,
+			$Option['Text']
+		);
+
+		$SelectElement->AppendChild($OptionElement);
+	}
+}
+
+echo $SelectElement;
 ?>

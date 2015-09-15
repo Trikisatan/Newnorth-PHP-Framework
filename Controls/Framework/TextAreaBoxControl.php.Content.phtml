@@ -1,71 +1,51 @@
 <?
-if(isset($Control->_Parameters['Label'])) {
-	$Attributes = '';
+if(isset($Parameters['Label'])) {
+	$LabelElement = $Control->CreateElement(
+		'label',
+		[],
+		[
+			'Id' => 'for',
+			'LabelCssClass' => 'class',
+		],
+		$Parameters,
+		$Parameters['Label']
+	);
 
-	if(isset($Parameters['Id'])) {
-		$Attributes .= ' for="'.$Parameters['Id'].'"';
-	}
-	else if(isset($Control->_Parameters['Id'])) {
-		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
-	}
-
-	if(isset($Control->_Parameters['LabelCssClass'])) {
-		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
-	}
-
-	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
+	echo $LabelElement;
 }
 
-$Attributes = '';
+$TextAreaElement = $Control->CreateElement(
+	'textarea',
+	[],
+	[
+		'Id' => 'id',
+		'Form' => 'form',
+		'Name' => 'name',
+		'CssClass' => 'class',
+		'Rows' => 'rows',
+		'Disabled' => 'disabled',
+		'Readonly' => 'readonly',
+	],
+	$Parameters,
+	isset($Parameters['Value']) ? htmlspecialchars($Parameters['Value']) : null
+);
 
-if(isset($Parameters['Id'])) {
-	$Attributes .= ' id="'.$Parameters['Id'].'"';
-}
-else if(isset($Control->_Parameters['Id'])) {
-	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
-}
-
-if(isset($Parameters['Name'])) {
-	$Attributes .= ' name="'.$Parameters['Name'].'"';
-}
-else if(isset($Control->_Parameters['Name'])) {
-	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
-}
-
-if(isset($Control->_Parameters['Form'])) {
-	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
-}
-
-if(isset($Control->_Parameters['CssClass'])) {
-	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
-}
-
-if(isset($Control->_Parameters['Rows'])) {
-	$Attributes .= ' rows="'.$Control->_Parameters['Rows'].'"';
-}
-
-if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
-	$Attributes .= ' disabled="disabled"';
-}
-
-if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOnly']) {
-	$Attributes .= ' readonly="readonly"';
-}
-
-?><textarea<?=$Attributes?>><?
-	if(isset($Parameters['Value'])) {
-		echo htmlspecialchars($Parameters['Value']);
-	}
-	else if(isset($Control->_Parameters['Value'])) {
-		echo htmlspecialchars($Control->_Parameters['Value']);
-	}
-?></textarea><?
-
-if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
-	?><div class="ErrorMessages"><?
-		foreach($Control->_ErrorMessages as $ErrorMessage) {
-			?><p><?=$ErrorMessage?></p><?
+if(isset($Parameters['Attributes'])) {
+	foreach($Parameters['Attributes'] as $Attribute) {
+		if(isset($Attribute['Value'])) {
+			$TextAreaElement->CreateAttribute(
+				$Attribute['Name'],
+				$Attribute['Value']
+			);
 		}
-	?></div><?
+		else {
+			$TextAreaElement->CreateAttribute(
+				$Attribute['Name'],
+				null
+			);
+		}
+	}
 }
+
+echo $TextAreaElement;
 ?>

@@ -147,7 +147,16 @@ abstract class Control {
 	}
 
 	public function Render($PlaceHolder = null, $Return = false, $Parameters = []) {
-		return call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder, $Return, $Parameters);
+		return call_user_func(
+			$this->_Renderer.'::Render',
+			$this,
+			$PlaceHolder,
+			$Return,
+			array_merge(
+				$this->_Parameters,
+				$Parameters
+			)
+		);
 	}
 
 	/* Instance methods */

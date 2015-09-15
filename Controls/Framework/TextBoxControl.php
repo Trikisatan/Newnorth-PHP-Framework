@@ -16,9 +16,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 
 	/* Life cycle methods */
 
-	public function PostExecute() {
-		parent::PostExecute();
-
+	public function Initialize() {
 		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
 			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
 		}
@@ -30,6 +28,8 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
 			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
+
+		parent::Initialize();
 	}
 
 	/* Validator methods */
@@ -145,6 +145,34 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 
 	public function PostNotEmptyValidator($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']][0]);
+	}
+
+	/* Instance methods */
+
+	public function CreateElement($Name, $Attributes, $OptionalAttributes, $Parameters, $Html) {
+		$Element = new \Framework\HTML\Element($Name);
+
+		foreach($Attributes as $Key => $Value) {
+			$Element->CreateAttribute(
+				$Key,
+				$Value
+			);
+		}
+
+		foreach($OptionalAttributes as $Alias => $Key) {
+			if(isset($Parameters[$Alias])) {
+				$Element->CreateAttribute(
+					$Key,
+					$Parameters[$Alias]
+				);
+			}
+		}
+
+		if($Html !== null) {
+			$Element->AppendHtml($Html);
+		}
+
+		return $Element;
 	}
 }
 ?>

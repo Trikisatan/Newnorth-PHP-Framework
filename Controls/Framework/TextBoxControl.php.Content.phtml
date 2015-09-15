@@ -1,92 +1,56 @@
 <?
-if(isset($Control->_Parameters['Label'])) {
-	$Attributes = '';
+if(isset($Parameters['Label'])) {
+	$LabelElement = $Control->CreateElement(
+		'label',
+		[],
+		[
+			'Id' => 'for',
+			'LabelCssClass' => 'class',
+		],
+		$Parameters,
+		$Parameters['Label']
+	);
 
-	if(isset($Parameters['Id'])) {
-		$Attributes .= ' for="'.$Parameters['Id'].'"';
-	}
-	else if(isset($Control->_Parameters['Id'])) {
-		$Attributes .= ' for="'.$Control->_Parameters['Id'].'"';
-	}
-
-	if(isset($Control->_Parameters['LabelCssClass'])) {
-		$Attributes .= ' class="'.$Control->_Parameters['LabelCssClass'].'"';
-	}
-
-	?><label<?=$Attributes?>><?=$Control->_Parameters['Label']?></label><?
+	echo $LabelElement;
 }
 
-$Attributes = '';
+$InputElement = $Control->CreateElement(
+	'input',
+	[
+		'type' => 'text',
+	],
+	[
+		'Id' => 'id',
+		'Form' => 'form',
+		'Name' => 'name',
+		'CssClass' => 'class',
+		'Value' => 'value',
+		'Placeholder' => 'placeholder',
+		'MaxLength' => 'maxlength',
+		'Autocomplete' => 'autocomplete',
+		'Disabled' => 'disabled',
+		'Readonly' => 'readonly',
+	],
+	$Parameters,
+	null
+);
 
-if(isset($Parameters['Id'])) {
-	$Attributes .= ' id="'.$Parameters['Id'].'"';
-}
-else if(isset($Control->_Parameters['Id'])) {
-	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
-}
-
-if(isset($Parameters['Name'])) {
-	$Attributes .= ' name="'.$Parameters['Name'].'"';
-}
-else if(isset($Control->_Parameters['Name'])) {
-	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
-}
-
-if(isset($Control->_Parameters['Form'])) {
-	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
-}
-
-if(isset($Control->_Parameters['CssClass'])) {
-	$Attributes .= ' class="'.$Control->_Parameters['CssClass'].'"';
-}
-
-$Attributes .= ' type="text"';
-
-if(isset($Parameters['Value'])) {
-	$Attributes .= ' value="'.htmlspecialchars($Parameters['Value'], ENT_QUOTES).'"';
-}
-else if(isset($Control->_Parameters['Value'])) {
-	$Attributes .= ' value="'.htmlspecialchars($Control->_Parameters['Value'], ENT_QUOTES).'"';
-}
-
-if(isset($Control->_Parameters['Placeholder'])) {
-	$Attributes .= ' placeholder="'.$Control->_Parameters['Placeholder'].'"';
-}
-
-if(isset($Control->_Parameters['MaxLength'])) {
-	$Attributes .= ' maxlength="'.$Control->_Parameters['MaxLength'].'"';
-}
-
-if(isset($Control->_Parameters['AutoComplete'])) {
-	$Attributes .= ' autocomplete="'.$Control->_Parameters['AutoComplete'].'"';
-}
-
-if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabled']) {
-	$Attributes .= ' disabled="disabled"';
-}
-
-if(isset($Control->_Parameters['IsReadOnly']) && $Control->_Parameters['IsReadOnly']) {
-	$Attributes .= ' readonly="readonly"';
-}
-
-if(isset($Control->_Parameters['Attributes'])) {
-	foreach($Control->_Parameters['Attributes'] as $Attribute) {
+if(isset($Parameters['Attributes'])) {
+	foreach($Parameters['Attributes'] as $Attribute) {
 		if(isset($Attribute['Value'])) {
-			$Attributes .= ' '.$Attribute['Name'].'="'.$Attribute['Value'].'"';
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				$Attribute['Value']
+			);
 		}
 		else {
-			$Attributes .= ' '.$Attribute['Name'];
+			$InputElement->CreateAttribute(
+				$Attribute['Name'],
+				null
+			);
 		}
 	}
 }
 
-?><input<?=$Attributes?> /><?
-
-if(isset($Control->_Parameters['ShowErrorMessages']) && $Control->_Parameters['ShowErrorMessages'] && 0 < count($Control->_ErrorMessages)) {
-	?><div class="ErrorMessages"><?
-		foreach($Control->_ErrorMessages as $ErrorMessage) {
-			?><p><?=$ErrorMessage?></p><?
-		}
-	?></div><?
-}
+echo $InputElement;
 ?>
