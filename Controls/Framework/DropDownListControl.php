@@ -20,7 +20,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		parent::PostExecute();
 
 		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
-			$this->_Parameters['Options'] = $this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
+			$this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
 		}
 
 		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
@@ -62,6 +62,61 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		else {
 			return false;
 		}
+	}
+
+	/* Instance methods */
+
+	public function CreateOption($Text, $Value) {
+		$this->_Parameters['Options'][] = [
+			'Text' => $Text,
+			'Value' => $Value,
+		];
+	}
+
+	public function DeleteOptionByText($Text) {
+		$Index = $this->IndexOfOptionByText($Text);
+
+		if($Index === -1) {
+			return false;
+		}
+		else {
+			array_splice($this->_Parameters['Options'], $Index, 1);
+
+			return true;
+		}
+	}
+
+	public function DeleteOptionByValue($Value) {
+		$Index = $this->IndexOfOptionByValue($Value);
+
+		if($Index === -1) {
+			return false;
+		}
+		else {
+			array_splice($this->_Parameters['Options'], $Index, 1);
+
+			return true;
+		}
+	}
+
+	public function IndexOfOptionByText($Text) {
+		for($I = 0; $I < count($this->_Parameters['Options']); ++$I) {
+			if($this->_Parameters['Options'][$I]['Text'] === $Text) {
+				return $I;
+			}
+		}
+
+		return -1;
+	}
+
+	public function IndexOfOptionByValue($Value) {
+		for($I = 0; $I < count($this->_Parameters['Options']); ++$I) {
+			if($this->_Parameters['Options'][$I]['Value'] === $Value) {
+				return $I;
+			}
+		}
+
+		return -1;
 	}
 }
 ?>

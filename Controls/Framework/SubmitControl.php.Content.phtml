@@ -12,7 +12,10 @@ if(isset($Control->_Parameters['Name'])) {
 	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
 }
 
-if(isset($Control->_Parameters['Form'])) {
+if(isset($Parameters['Form'])) {
+	$Attributes .= ' form="'.$Parameters['Form'].'"';
+}
+else if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
@@ -24,6 +27,17 @@ $Attributes .= ' type="submit"';
 
 if(isset($Control->_Parameters['Text'])) {
 	$Attributes .= ' value="'.$Control->_Parameters['Text'].'"';
+}
+
+if(isset($Parameters['IsDisabled'])) {
+	if($Parameters['IsDisabled'] === true || $Parameters['IsDisabled'] === '1') {
+		$Attributes .= ' disabled="disabled"';
+	}
+}
+else if(isset($Control->_Parameters['IsDisabled'])) {
+	if($Control->_Parameters['IsDisabled'] === true || $Control->_Parameters['IsDisabled'] === '1') {
+		$Attributes .= ' disabled="disabled"';
+	}
 }
 
 if(isset($Control->_Parameters['Attributes'])) {

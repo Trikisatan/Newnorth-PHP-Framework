@@ -56,21 +56,21 @@ if(isset($Control->_Parameters['IsDisabled']) && $Control->_Parameters['IsDisabl
 
 			if(isset($Parameters['Value'])) {
 				if(isset($Option['Value'])) {
-					if($Option['Value'] === $Parameters['Value']) {
+					if($Option['Value'] == $Parameters['Value']) {
 						$Attributes .= ' selected="selected"';
 					}
 				}
-				else if($Option['Text'] === $Parameters['Value']) {
+				else if($Option['Text'] == $Parameters['Value']) {
 					$Attributes .= ' selected="selected"';
 				}
 			}
 			else if(isset($Control->_Parameters['Value'])) {
 				if(isset($Option['Value'])) {
-					if($Option['Value'] === $Control->_Parameters['Value']) {
+					if($Option['Value'] == $Control->_Parameters['Value']) {
 						$Attributes .= ' selected="selected"';
 					}
 				}
-				else if($Option['Text'] === $Control->_Parameters['Value']) {
+				else if($Option['Text'] == $Control->_Parameters['Value']) {
 					$Attributes .= ' selected="selected"';
 				}
 			}

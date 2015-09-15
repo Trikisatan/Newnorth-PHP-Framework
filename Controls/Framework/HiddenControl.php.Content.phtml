@@ -8,11 +8,17 @@ else if(isset($Control->_Parameters['Id'])) {
 	$Attributes .= ' id="'.$Control->_Parameters['Id'].'"';
 }
 
-if(isset($Control->_Parameters['Name'])) {
+if(isset($Parameters['Name'])) {
+	$Attributes .= ' name="'.$Parameters['Name'].'"';
+}
+else if(isset($Control->_Parameters['Name'])) {
 	$Attributes .= ' name="'.$Control->_Parameters['Name'].'"';
 }
 
-if(isset($Control->_Parameters['Form'])) {
+if(isset($Parameters['Form'])) {
+	$Attributes .= ' form="'.$Parameters['Form'].'"';
+}
+else if(isset($Control->_Parameters['Form'])) {
 	$Attributes .= ' form="'.$Control->_Parameters['Form'].'"';
 }
 
