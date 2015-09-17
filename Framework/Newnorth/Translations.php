@@ -57,7 +57,7 @@ class Translations {
 		$Options = explode('|', $Target);
 
 		foreach($Options as $Option) {
-			if(preg_match('/^([^\(\)]+?)(?:\(\\\\?"(.*?)\\\\?"(?:, ?\\\\?"(.*?)\\\\?")*\))?$/', $Option, $Match) === 1) {
+			if(preg_match('/^([^\(\)]+?)(?:\((?:\\\\?"|&quot;)(.*?)(?:\\\\?"|&quot;)(?:, ?(?:\\\\?"|&quot;)"(.*?)(?:\\\\?"|&quot;)")*\))?$/', $Option, $Match) === 1) {
 				$Translation = $Match[1];
 
 				if(isset($this->Items[$Translation])) {
