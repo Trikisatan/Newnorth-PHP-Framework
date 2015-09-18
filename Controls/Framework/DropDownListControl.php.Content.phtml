@@ -47,8 +47,8 @@ if(isset($Parameters['Attributes'])) {
 	}
 }
 
-if(isset($Control->_Parameters['Options'])) {
-	foreach($Control->_Parameters['Options'] as $Option) {
+if(isset($Parameters['Options'])) {
+	foreach($Parameters['Options'] as $Option) {
 		if(isset($Parameters['Value'])) {
 			if($Option['Value'] == $Parameters['Value']) {
 				$Option['Selected'] = 'selected';

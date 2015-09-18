@@ -30,7 +30,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		}
 
 		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
-			$this->_Parameters['Options'] = $this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
+			$this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
 		}
 
 		parent::Initialize();
