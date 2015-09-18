@@ -20,7 +20,14 @@ class HtmlRenderer {
 
 				ob_clean();
 
-				HtmlRenderer::RenderContents($Object, $Directory, $File, $Parameters);
+				HtmlRenderer::RenderContents(
+					$GLOBALS['Layout'],
+					$GLOBALS['Page'],
+					$Object,
+					$Directory,
+					$File,
+					$Parameters
+				);
 
 				$NewOutput = ob_get_contents();
 
@@ -31,7 +38,14 @@ class HtmlRenderer {
 				return $NewOutput;
 			}
 			else {
-				HtmlRenderer::RenderContents($Object, $Directory, $File, $Parameters);
+				HtmlRenderer::RenderContents(
+					$GLOBALS['Layout'],
+					$GLOBALS['Page'],
+					$Object,
+					$Directory,
+					$File,
+					$Parameters
+				);
 			}
 		}
 		else {
@@ -40,7 +54,14 @@ class HtmlRenderer {
 
 				ob_clean();
 
-				HtmlRenderer::RenderContents(null, $Directory, $File, $Parameters);
+				HtmlRenderer::RenderContents(
+					$GLOBALS['Layout'],
+					$GLOBALS['Page'],
+					null,
+					$Directory,
+					$File,
+					$Parameters
+				);
 
 				$NewOutput = ob_get_contents();
 
@@ -51,12 +72,19 @@ class HtmlRenderer {
 				return $NewOutput;
 			}
 			else {
-				HtmlRenderer::RenderContents(null, $Directory, $File, $Parameters);
+				HtmlRenderer::RenderContents(
+					$GLOBALS['Layout'],
+					$GLOBALS['Page'],
+					null,
+					$Directory,
+					$File,
+					$Parameters
+				);
 			}
 		}
 	}
 
-	private static function RenderContents($Control, $Directory, $File, $Parameters) {
+	private static function RenderContents($Layout, $Page, $Control, $Directory, $File, $Parameters) {
 		include($Directory.$File);
 	}
 }
