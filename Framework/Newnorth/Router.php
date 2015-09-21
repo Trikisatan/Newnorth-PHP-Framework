@@ -162,24 +162,34 @@ class Router {
 		}
 
 		if($GLOBALS['Route'] instanceof \Framework\Newnorth\Route) {
-			$Route = $GLOBALS['Route']->FullName;
+			if($GLOBALS['Route']->FullName === 'Index') {
+				$Route = '';
+			}
+			else {
+				$Route = $GLOBALS['Route']->FullName;
+			}
 		}
 		else {
 			$Route = $GLOBALS['Route'];
 		}
 
 		if($Path === '') {
-			if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Route), $Parameters, $Url)) {
+			if($Route === '') {
+				if($GLOBALS['Routing']->Route->CreateUrl([], $Parameters, $Url)) {
+					return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+				}
+			}
+			else if($GLOBALS['Routing']->Route->CreateUrl(explode('/', $Route), $Parameters, $Url)) {
+				return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
+			}
+		}
+		else if($Path === '/') {
+			if($GLOBALS['Routing']->Route->CreateUrl([], $Parameters, $Url)) {
 				return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
 			}
 		}
 		else if($Path[0] === '/') {
-			if(isset($Path[1])) {
-				if($GLOBALS['Routing']->Route->CreateUrl(explode('/', substr($Path, 1)), $Parameters, $Url)) {
-					return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
-				}
-			}
-			else if($GLOBALS['Routing']->Route->CreateUrl([], $Parameters, $Url)) {
+			if($GLOBALS['Routing']->Route->CreateUrl(explode('/', substr($Path, 1)), $Parameters, $Url)) {
 				return $Url.(isset($QueryString[0]) ? '?'.$QueryString : '');
 			}
 		}
@@ -204,8 +214,6 @@ class Router {
 					else {
 						$Route = substr($Route, 0, $Index);
 					}
-
-
 				}
 				else {
 					$Route = null;
