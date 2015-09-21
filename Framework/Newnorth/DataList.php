@@ -8,13 +8,13 @@ class DataList {
 
 	public $ForeignDataManager;
 
-	public $ForeignKey;
-
 	public $ForeignPrimaryKey;
 
-	public $SingularAlias;
+	public $ForeignKey;
 
-	public $PluralAlias;
+	public $SingularAlias = null;
+
+	public $PluralAlias = null;
 
 	public $Sorts = [];
 
@@ -31,9 +31,13 @@ class DataList {
 
 		$this->ForeignKey = $Parameters['ForeignKey'];
 
-		$this->SingularAlias = $Parameters['SingularAlias'];
+		if(isset($Parameters['SingularAlias'])) {
+			$this->SingularAlias = $Parameters['SingularAlias'];
+		}
 
-		$this->PluralAlias = $Parameters['PluralAlias'];
+		if(isset($Parameters['PluralAlias'])) {
+			$this->PluralAlias = $Parameters['PluralAlias'];
+		}
 
 		if(isset($Parameters['Sorts'])) {
 			$this->Sorts = $Parameters['Sorts'];
