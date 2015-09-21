@@ -183,27 +183,7 @@ abstract class Control {
 		return $this->_Actions->Items[$Alias]->IsExecuted;
 	}
 
-	/* Instance methods */
-
-	public function Destroy() {
-		$this->_Actions->Destroy();
-
-		$this->_Actions = null;
-
-		$this->_Controls->Destroy();
-
-		$this->_Controls = null;
-
-		$GLOBALS['Application']->UnregisterObject($this);
-	}
-
-	public function GetTranslation($Key, $DefaultValue = null) {
-		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;
-	}
-
-	public function SetTranslation($Key, $Value) {
-		$this->_Translations[$Key] = $Value;
-	}
+	/* Control methods */
 
 	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
 		$this->_Controls->Items[$Alias] = $Control;
@@ -242,6 +222,28 @@ abstract class Control {
 
 	public function RenderControl($Alias, $Placeholder = null, $Return = false, $Parameters = []) {
 		return $this->_Controls->Items[$Alias]->Render($Placeholder, $Return, $Parameters);
+	}
+
+	/* Instance methods */
+
+	public function Destroy() {
+		$this->_Actions->Destroy();
+
+		$this->_Actions = null;
+
+		$this->_Controls->Destroy();
+
+		$this->_Controls = null;
+
+		$GLOBALS['Application']->UnregisterObject($this);
+	}
+
+	public function GetTranslation($Key, $DefaultValue = null) {
+		return isset($this->_Translations[$Key]) ? $this->_Translations[$Key] : $DefaultValue;
+	}
+
+	public function SetTranslation($Key, $Value) {
+		$this->_Translations[$Key] = $Value;
 	}
 
 	/* Validator methods */
