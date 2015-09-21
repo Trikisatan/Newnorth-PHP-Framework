@@ -63,15 +63,15 @@ class DataReference {
 				[]
 			);
 		}
-		else if(!isset($Parameters['Alias'])) {
-			throw new RuntimeException(
-				'DataReference requires the parameter "Alias".',
-				[]
-			);
-		}
 		else if(count($Parameters['LocalKeys']) !== count($Parameters['ForeignKeys'])) {
 			throw new RuntimeException(
 				'DataReference requires the parameters "LocalKeys" and "ForeignKeys" to be equal sized arrays.',
+				[]
+			);
+		}
+		else if(!isset($Parameters['Alias'])) {
+			throw new RuntimeException(
+				'DataReference requires the parameter "Alias".',
 				[]
 			);
 		}
