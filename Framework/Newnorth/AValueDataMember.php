@@ -6,7 +6,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 	public $DataManager;
 
-	public $Name;
+	public $Alias;
 
 	public $IsDynamic = false;
 
@@ -17,7 +17,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 	public function __construct($Parameters) {
 		$this->DataManager = $Parameters['DataManager'];
 
-		$this->Name = $Parameters['Name'];
+		$this->Alias = $Parameters['Alias'];
 
 		if(isset($Parameters['IsDynamic'])) {
 			$this->IsDynamic = $Parameters['IsDynamic'];
@@ -29,7 +29,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 	}
 
 	public function __toString() {
-		return '`'.$this->DataManager->Table.'`.`'.$this->Name.'`';
+		return '`'.$this->DataManager->Table.'`.`'.$this->Alias.'`';
 	}
 
 	/* Instance methods */
@@ -44,7 +44,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
 				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Name}
+				$DataType->{$this->DataManager->PrimaryKey->Alias}
 			);
 
 			$Query->AddChange(
@@ -54,7 +54,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 			$Result = $this->DataManager->Connection->Update($Query);
 
-			$DataType->{$this->Name} = $this->Parse($Parameters[0]);
+			$DataType->{$this->Alias} = $this->Parse($Parameters[0]);
 
 			return $Result;
 		}
@@ -62,7 +62,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 			throw new RuntimeException(
 				'This data member is static.',
 				[
-					'Data member' => $this->Name,
+					'Data member' => $this->Alias,
 				]
 			);
 		}
@@ -78,7 +78,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
 				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Name}
+				$DataType->{$this->DataManager->PrimaryKey->Alias}
 			);
 
 			$Query->AddChange(
@@ -94,7 +94,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 			throw new RuntimeException(
 				'This data member is static.',
 				[
-					'Data member' => $this->Name,
+					'Data member' => $this->Alias,
 				]
 			);
 		}
@@ -110,7 +110,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
 				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Name}
+				$DataType->{$this->DataManager->PrimaryKey->Alias}
 			);
 
 			$Query->AddChange(
@@ -126,7 +126,7 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 			throw new RuntimeException(
 				'This data member is static.',
 				[
-					'Data member' => $this->Name,
+					'Data member' => $this->Alias,
 				]
 			);
 		}

@@ -1,22 +1,10 @@
 <?
 namespace Framework\Newnorth;
 
-abstract class ATranslationDataManager {
+abstract class ATranslationDataManager extends ADataManager {
 	/* Instance variables */
 
-	public $DataType;
-
-	public $Connection = null;
-
-	public $Database = null;
-
-	public $Table = null;
-
-	public $PrimaryKey = null;
-
 	public $ParentPrimaryKey = null;
-
-	public $DataMembers = [];
 
 	/* Instance methods */
 
@@ -29,7 +17,7 @@ abstract class ATranslationDataManager {
 
 		$Query->Source = '`'.$this->Database.'`.`'.$this->Table.'`';
 
-		$Query->AddColumn('`'.$this->ParentPrimaryKey->Name.'`');
+		$Query->AddColumn('`'.$this->ParentPrimaryKey->Alias.'`');
 
 		$Query->AddValue($ParentPrimaryKey);
 
@@ -57,7 +45,7 @@ abstract class ATranslationDataManager {
 
 		$Query->Source = '`'.$this->Database.'`.`'.$this->Table.'`';
 
-		$Query->AddColumn('`'.$this->ParentPrimaryKey->Name.'`');
+		$Query->AddColumn('`'.$this->ParentPrimaryKey->Alias.'`');
 
 		$Query->AddValue($ParentPrimaryKey);
 
@@ -88,7 +76,7 @@ abstract class ATranslationDataManager {
 		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
 
 		$Query->Conditions = new \Framework\Newnorth\DbAnd([
-			new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Name.'`', $ParentPrimaryKey),
+			new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Alias.'`', $ParentPrimaryKey),
 			new \Framework\Newnorth\DbEqualTo('`Locale`', '"'.$Locale.'"'),
 		]);
 
@@ -100,7 +88,7 @@ abstract class ATranslationDataManager {
 
 		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
 
-		$Query->Conditions = new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Name.'`', $ParentPrimaryKey);
+		$Query->Conditions = new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Alias.'`', $ParentPrimaryKey);
 
 		return $this->Connection->Delete($Query);
 	}
@@ -114,7 +102,7 @@ abstract class ATranslationDataManager {
 
 		$Query->AddSource('`'.$this->Database.'`.`'.$this->Table.'`');
 
-		$Query->Conditions = new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Name.'`', $ParentPrimaryKey);
+		$Query->Conditions = new \Framework\Newnorth\DbEqualTo('`'.$this->ParentPrimaryKey->Alias.'`', $ParentPrimaryKey);
 
 		$Result = $this->Connection->FindAll($Query);
 

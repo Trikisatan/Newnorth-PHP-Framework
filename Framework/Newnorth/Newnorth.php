@@ -52,6 +52,8 @@ require('Db.php');
 
 require('ADataManager.php');
 
+require('AStandardDataManager.php');
+
 require('ATranslationDataManager.php');
 
 require('DataType.php');
@@ -131,7 +133,7 @@ function Initialize() {
 			if(!isset($GLOBALS['Parameters']['Locale'])) {
 				$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
 			}
-var_dump(\Framework\Newnorth\ErrorHandler::FormatException($Exception));die();
+
 			$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
 		}
 	}

@@ -330,7 +330,7 @@ class DbExpression {
 		else if($Expression instanceof \Framework\Newnorth\AValueDataMember) {
 			return new DbColumn([
 				$Expression->DataManager->Table,
-				$Expression->Name,
+				$Expression->Alias,
 			]);
 		}
 		else if(is_array($Expression)) {
@@ -574,7 +574,7 @@ class DbUpdateQuery {
 		if($Column instanceof \Framework\Newnorth\AValueDataMember) {
 			$Column = new DbColumn([
 				$Column->DataManager->Table,
-				$Column->Name,
+				$Column->Alias,
 			]);
 		}
 		else if(!$Column instanceof DbColumn) {
@@ -663,7 +663,7 @@ class DbSelectQuery {
 			$Column = new DbSelectColumn(
 				new DbColumn([
 					$Expression->DataManager->Table,
-					$Expression->Name,
+					$Expression->Alias,
 				]),
 				$Alias
 			);
