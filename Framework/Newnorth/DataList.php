@@ -27,55 +27,49 @@ class DataList {
 	public function __construct($Parameters) {
 		if(!isset($Parameters['LocalKeys'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "LocalKeys".',
+				'DataList requires the parameter "LocalKeys".',
 				[]
 			);
 		}
 		else if(!is_array($Parameters['LocalKeys'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "LocalKeys" to be an array.',
+				'DataList requires the parameter "LocalKeys" to be an array.',
 				[]
 			);
 		}
 		else if(count($Parameters['LocalKeys']) === 0) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "LocalKeys" to not be an empty array.',
+				'DataList requires the parameter "LocalKeys" to not be an empty array.',
 				[]
 			);
 		}
 		else if(!isset($Parameters['ForeignDataManager'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "ForeignDataManager".',
+				'DataList requires the parameter "ForeignDataManager".',
 				[]
 			);
 		}
 		else if(!isset($Parameters['ForeignKeys'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "ForeignKeys".',
+				'DataList requires the parameter "ForeignKeys".',
 				[]
 			);
 		}
 		else if(!is_array($Parameters['ForeignKeys'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "ForeignKeys" to be an array.',
+				'DataList requires the parameter "ForeignKeys" to be an array.',
 				[]
 			);
 		}
 		else if(count($Parameters['ForeignKeys']) === 0) {
 			throw new RuntimeException(
-				'DataReference requires the parameter "ForeignKeys" to not be an empty array.',
-				[]
-			);
-		}
-		else if(!isset($Parameters['Alias'])) {
-			throw new RuntimeException(
-				'DataReference requires the parameter "Alias".',
+				'DataList requires the parameter "ForeignKeys" to not be an empty array.',
 				[]
 			);
 		}
 		else if(count($Parameters['LocalKeys']) !== count($Parameters['ForeignKeys'])) {
 			throw new RuntimeException(
-				'DataReference requires the parameters "LocalKeys" and "ForeignKeys" to be equal sized arrays.',
+				'DataList requires the parameters "LocalKeys" and "ForeignKeys" to be equal sized arrays.',
 				[]
 			);
 		}
