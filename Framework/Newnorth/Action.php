@@ -76,6 +76,8 @@ class Action {
 
 					if($this->Validate()) {
 						$this->Owner->{$this->Name}();
+
+						$this->IsExecuted = true;
 					}
 				}
 				catch(\Exception $Exception) {
@@ -83,8 +85,6 @@ class Action {
 				}
 				finally {
 					$this->UnlockDbConnections();
-
-					$this->IsExecuted = true;
 				}
 			}
 		}
