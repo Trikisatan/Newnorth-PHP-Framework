@@ -5,11 +5,17 @@ class FileUploadControl extends \Framework\Newnorth\Control {
 	/* Magic methods */
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
-		$this->_Directory = $GLOBALS['Config']->Files['Controls'].'Framework/';
+		if($this->_Directory === null) {
+			$this->_Directory = $GLOBALS['Config']->Files['Controls'].'Framework/';
+		}
 
-		$this->_Namespace = '\\Framework\\';
+		if($this->_Namespace === null) {
+			$this->_Namespace = '\\Framework\\';
+		}
 
-		$this->_Name = 'FileUploadControl';
+		if($this->_Name === null) {
+			$this->_Name = 'FileUploadControl';
+		}
 
 		parent::__construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters);
 	}
