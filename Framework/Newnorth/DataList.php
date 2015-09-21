@@ -170,6 +170,21 @@ class DataList {
 		return $Item;
 	}
 
+	public function Remove(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
+		$this->Load($DataType);
+
+		for($I = 0; $I < $this->KeyCount; ++$I) {
+			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+				$Item->{'Set'.$this->ForeignKeys[$I]->Name}($DataType->{$this->LocalKeys[$I]->Name});
+			}
+			else {
+				$Item->{'Set'.$this->ForeignKeys[$I]->Name}($this->LocalKeys[$I]);
+			}
+		}
+
+		$DataType->{$this->PluralAlias}[] = $Item;
+	}
+
 	public function Delete(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
 		$this->Load($DataType);
 
@@ -184,7 +199,9 @@ class DataList {
 		$this->Load($DataType);
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
-			$Item->{'Set'.$this->ForeignKeys[$I]->Name}(null);
+			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+				$Item->{'Set'.$this->ForeignKeys[$I]->Name}(null);
+			}
 		}
 
 		$Index = $this->IndexOf($DataType, $Item);

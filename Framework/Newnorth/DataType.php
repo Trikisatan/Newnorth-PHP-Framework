@@ -39,6 +39,9 @@ class DataType {
 		else if(preg_match('/^Create([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->Create($Matches[1], $Parameters[0]);
 		}
+		else if(preg_match('/^Add([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			return $this->Add($Matches[1], $Parameters[0]);
+		}
 		else if(preg_match('/^Delete([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			if($this->Delete($Matches[1], $Parameters, $Result)) {
 				return $Result;
@@ -119,6 +122,10 @@ class DataType {
 
 	private function Create($DataList, $Data) {
 		return $this->_DataManager->DataLists[$DataList]->Create($this, $Data);
+	}
+
+	private function Add($DataList, $Data) {
+		return $this->_DataManager->DataLists[$DataList]->Add($this, $Data);
 	}
 
 	public function OnDelete() {
