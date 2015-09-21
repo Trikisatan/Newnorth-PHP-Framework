@@ -137,6 +137,30 @@ class Page {
 		return call_user_func($this->_Renderer.'::Render', $this, $PlaceHolder, $Return, $Parameters);
 	}
 
+	/* Action methods */
+
+	public function _AddAction($Alias, \Framework\Newnorth\Action $Action) {
+		$this->_Actions->Items[$Alias] = $Action;
+	}
+
+	public function _RemoveAction($Action) {
+		$this->_Actions->Items[$Alias]->Destroy();
+
+		unset($this->_Actions->Items[$Alias]);
+	}
+
+	public function GetAction($Alias) {
+		return $this->_Actions->Items[$Alias];
+	}
+
+	public function HasAction($Alias) {
+		return isset($this->_Actions->Items[$Alias]);
+	}
+
+	public function IsActionExecuted($Alias) {
+		return $this->_Actions->Items[$Alias]->IsExecuted;
+	}
+
 	/* Instance methods */
 
 	public function GetTranslation($Key, $DefaultValue = null) {
@@ -145,16 +169,6 @@ class Page {
 
 	public function SetTranslation($Key, $Value) {
 		$this->_Translations[$Key] = $Value;
-	}
-
-	public function _RemoveAction($Action) {
-		for($I = 0; $I < count($this->_Actions->Items); ++$I) {
-			if($this->_Actions->Items[$I] === $Alias) {
-				$this->_Actions->Items[$I]->Destroy();
-
-				array_splice($this->_Actions->Items, $I);
-			}
-		}
 	}
 
 	public function AddControl($Alias, \Framework\Newnorth\Control $Control) {
