@@ -170,7 +170,7 @@ class DataList {
 		return $Item;
 	}
 
-	public function Remove(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
+	public function Add(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
 		$this->Load($DataType);
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
