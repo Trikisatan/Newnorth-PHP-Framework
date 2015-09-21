@@ -70,8 +70,6 @@ require('StringValueDataMember.php');
 
 require('ReferenceDataMember.php');
 
-require('TranslationDataMember.php');
-
 require('DataReference.php');
 
 require('DataList.php');
