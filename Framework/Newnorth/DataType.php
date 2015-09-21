@@ -49,6 +49,12 @@ class DataType {
 				return $Result;
 			}
 		}
+		else if(preg_match('/^Find([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			return $this->FindBy($Matches[1], $Matches[2], $Parameters);
+		}
+		else if(preg_match('/^FindAll([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			return $this->FindAllBy($Matches[1], $Matches[2], $Parameters);
+		}
 		else if(preg_match('/^IndexOf([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->IndexOfBy($Matches[1], $Matches[2], $Parameters);
 		}
@@ -187,6 +193,34 @@ class DataType {
 		else {
 			return false;
 		}
+	}
+
+	private function FindBy($DataList, $DataMembers, $Values) {
+		$DataList = $this->_DataManager->DataLists[$DataList];
+
+		$DataMembers = explode('And', $DataMembers);
+
+		for($I = 0; $I < count($DataMembers); ++$I) {
+			$DataMembers[$I] = $DataList->ForeignDataManager->DataMembers[$DataMembers[$I]];
+
+			$Values[$I] = $DataMembers[$I]->Parse($Values[$I]);
+		}
+
+		return $DataList->FindBy($this, $DataMembers, $Values);
+	}
+
+	private function FindAllBy($DataList, $DataMembers, $Values) {
+		$DataList = $this->_DataManager->DataLists[$DataList];
+
+		$DataMembers = explode('And', $DataMembers);
+
+		for($I = 0; $I < count($DataMembers); ++$I) {
+			$DataMembers[$I] = $DataList->ForeignDataManager->DataMembers[$DataMembers[$I]];
+
+			$Values[$I] = $DataMembers[$I]->Parse($Values[$I]);
+		}
+
+		return $DataList->FindAllBy($this, $DataMembers, $Values);
 	}
 
 	private function IndexOfBy($DataList, $DataMembers, $Values) {

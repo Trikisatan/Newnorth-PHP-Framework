@@ -110,6 +110,52 @@ class DataList {
 		array_splice($DataType->{$this->PluralAlias}, $Index, 1);
 	}
 
+	public function FindBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
+		$this->Load($DataType);
+
+		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
+			$IsFound = true;
+
+			for($J = 0; $J < count($DataMembers); ++$J) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+					$IsFound = false;
+
+					break;
+				}
+			}
+
+			if($IsFound) {
+				return $DataType->{$this->PluralAlias}[$I];
+			}
+		}
+
+		return null;
+	}
+
+	public function FindAllBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
+		$this->Load($DataType);
+
+		$Items = [];
+
+		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
+			$IsFound = true;
+
+			for($J = 0; $J < count($DataMembers); ++$J) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+					$IsFound = false;
+
+					break;
+				}
+			}
+
+			if($IsFound) {
+				$Items[] = $DataType->{$this->PluralAlias}[$I];
+			}
+		}
+
+		return $Items;
+	}
+
 	public function IndexOf(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
 		$this->Load($DataType);
 
