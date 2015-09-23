@@ -1,6 +1,8 @@
 <?
 if(isset($Parameters['IsChecked'])) {
-	$Parameters['IsChecked'] = $Parameters['IsChecked'] ? 'checked' : '';
+	if(!$Parameters['IsChecked']) {
+		unset($Parameters['IsChecked']);
+	}
 }
 
 $InputElement = $Control->CreateElement(
