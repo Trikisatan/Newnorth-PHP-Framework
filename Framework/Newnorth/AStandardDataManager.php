@@ -331,7 +331,7 @@ abstract class AStandardDataManager extends ADataManager {
 			}
 
 			if(isset($Parameters[0])) {
-				foreach($Parameters as $Sort) {
+				foreach($Parameters[0] as $Sort) {
 					$Query->AddSort(
 						$Sort['Column'],
 						$Sort['Order']
