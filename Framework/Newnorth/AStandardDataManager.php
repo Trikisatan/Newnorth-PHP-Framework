@@ -71,10 +71,18 @@ abstract class AStandardDataManager extends ADataManager {
 				$Conditions = new \Framework\Newnorth\DbAnd();
 
 				for($I = 0; $I < $DataMember->KeyCount; ++$I) {
-					$Conditions->EqualTo(
-						'`'.$DataMember->Alias.'`.`'.$DataMember->ForeignKeys[$I]->Alias.'`',
-						$DataMember->LocalKeys[$I]
-					);
+					if($DataMember->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+						$Conditions->EqualTo(
+							'`'.$DataMember->Alias.'`.`'.$DataMember->ForeignKeys[$I]->Alias.'`',
+							$DataMember->LocalKeys[$I]
+						);
+					}
+					else {
+						$Conditions->EqualTo(
+							'`'.$DataMember->Alias.'`.`'.$DataMember->ForeignKeys[$I]->Alias.'`',
+							$DataMember->ForeignKeys[$I]->ToDbExpression($DataMember->LocalKeys[$I])
+						);
+					}
 				}
 
 				$Query->AddSource(

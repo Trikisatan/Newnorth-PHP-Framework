@@ -117,10 +117,10 @@ class DataList {
 
 			for($I = 0; $I < $this->KeyCount; ++$I) {
 				if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $DataType->{$this->LocalKeys[$I]->Name});
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
 				}
 				else {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->LocalKeys[$I]);
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
 				}
 			}
 
@@ -142,7 +142,12 @@ class DataList {
 		$this->Load($DataType);
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
-			$Data[$this->ForeignKeys[$I]->Name] = $DataType->{$this->LocalKeys[$I]->Name};
+			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+				$Data[$this->ForeignKeys[$I]->Alias] = $DataType->{$this->LocalKeys[$I]->Alias};
+			}
+			else {
+				$Data[$this->ForeignKeys[$I]->Alias] = $this->LocalKeys[$I];
+			}
 		}
 
 		foreach($Data as $Key => $Value) {
@@ -151,7 +156,7 @@ class DataList {
 
 		$Id = $this->ForeignDataManager->InsertByArray($Data);
 
-		$Item = $this->ForeignDataManager->{'FindBy'.$this->ForeignPrimaryKey->Name}($Id);
+		$Item = $this->ForeignDataManager->{'FindBy'.$this->ForeignPrimaryKey->Alias}($Id);
 
 		foreach($this->ForeignDataManager->DataLists as $DataList) {
 			$Item->{$DataList->PluralAlias} = [];
@@ -169,10 +174,10 @@ class DataList {
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
 			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Name}($DataType->{$this->LocalKeys[$I]->Name});
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($DataType->{$this->LocalKeys[$I]->Alias});
 			}
 			else {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Name}($this->LocalKeys[$I]);
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($this->LocalKeys[$I]);
 			}
 		}
 
@@ -182,7 +187,7 @@ class DataList {
 	public function Delete(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
 		$this->Load($DataType);
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Name}($Item->{$this->ForeignPrimaryKey->Name});
+		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($Item->{$this->ForeignPrimaryKey->Alias});
 
 		$Index = $this->IndexOf($DataType, $Item);
 
@@ -194,7 +199,7 @@ class DataList {
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
 			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Name}(null);
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}(null);
 			}
 		}
 
@@ -210,7 +215,7 @@ class DataList {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;
@@ -234,7 +239,7 @@ class DataList {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;
@@ -253,7 +258,7 @@ class DataList {
 		$this->Load($DataType);
 
 		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
-			if($DataType->{$this->PluralAlias}[$I]->{$this->ForeignPrimaryKey->Name} === $Item->{$this->ForeignPrimaryKey->Name}) {
+			if($DataType->{$this->PluralAlias}[$I]->{$this->ForeignPrimaryKey->Alias} === $Item->{$this->ForeignPrimaryKey->Alias}) {
 				return $I;
 			}
 		}
@@ -268,7 +273,7 @@ class DataList {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;
@@ -287,7 +292,7 @@ class DataList {
 		$this->Load($DataType);
 
 		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
-			if($DataType->{$this->PluralAlias}[$I]->{$this->ForeignPrimaryKey->Name} === $Item->{$this->ForeignPrimaryKey->Name}) {
+			if($DataType->{$this->PluralAlias}[$I]->{$this->ForeignPrimaryKey->Alias} === $Item->{$this->ForeignPrimaryKey->Alias}) {
 				return true;
 			}
 		}
@@ -302,7 +307,7 @@ class DataList {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;
@@ -317,6 +322,28 @@ class DataList {
 		return false;
 	}
 
+	public function Count(\Framework\Newnorth\DataType $DataType, array $Values) {
+		if($DataType->{'Is'.$this->PluralAlias.'Loaded'}) {
+			return count($DataType->{$this->PluralAlias});
+		}
+		else {
+			$Query = $this->ForeignDataManager->CreateSelectQuery();
+
+			$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+			for($I = 0; $I < $this->KeyCount; ++$I) {
+				if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
+				}
+				else {
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
+				}
+			}
+
+			return $this->ForeignDataManager->CountByQuery($Query);
+		}
+	}
+
 	public function CountBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
 		$this->Load($DataType);
 
@@ -326,7 +353,7 @@ class DataList {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Name} !== $Values[$J]) {
+				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;

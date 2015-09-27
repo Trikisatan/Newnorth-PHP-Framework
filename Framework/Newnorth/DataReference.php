@@ -109,10 +109,10 @@ class DataReference {
 
 			for($I = 0; $I < $this->KeyCount; ++$I) {
 				if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $DataType->{$this->LocalKeys[$I]->Name});
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
 				}
 				else {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->LocalKeys[$I]);
+					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
 				}
 			}
 
@@ -127,7 +127,7 @@ class DataReference {
 	public function Delete(\Framework\Newnorth\DataType $DataType) {
 		$this->Load($DataType);
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Name}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Name});
+		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias});
 
 		$DataType->{$this->Alias} = null;
 	}
@@ -137,7 +137,7 @@ class DataReference {
 
 		foreach($this->ForeignKeys as $ForeignKey)
 		{
-			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Name}(null);
+			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Alias}(null);
 		}
 
 		$DataType->{$this->Alias} = null;
