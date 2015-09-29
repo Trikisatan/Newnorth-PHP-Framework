@@ -5,7 +5,7 @@ class Translator {
 	/* Static methods */
 
 	public static function EscapeTranslations($Contents) {
-		return preg_replace('/(?<!%)%([a-zA-Z0-9_\\/\\\\]+?(?:\("(.*?)"\))?)%(?!%)/', '&#x25;$1&#x25;', $Contents);
+		return str_replace('%', '&#x25;', $Contents);
 	}
 
 	public static function GetMissingTranslations($Contents) {
