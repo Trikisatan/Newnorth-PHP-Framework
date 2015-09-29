@@ -173,7 +173,9 @@ class Application {
 							[
 								'Type' => 'Translation(s) not found',
 								'Message' => 'Unable to translate content.',
-								'Url' => $GLOBALS['Url'],
+								'Request URI' => $_SERVER['REQUEST_URI'],
+								'Request method' => $_SERVER['REQUEST_METHOD'],
+								'Request data' => $_POST,
 								'Missing translations' => $MissingTranslations,
 							]
 						);
@@ -187,7 +189,9 @@ class Application {
 							[
 								'Type' => 'Translation(s) not found',
 								'Message' => 'Unable to translate content.',
-								'Url' => $GLOBALS['Url'],
+								'Request URI' => $_SERVER['REQUEST_URI'],
+								'Request method' => $_SERVER['REQUEST_METHOD'],
+								'Request data' => $_POST,
 								'Missing translations' => $MissingTranslations,
 							]
 						);
