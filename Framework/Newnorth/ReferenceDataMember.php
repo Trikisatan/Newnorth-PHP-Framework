@@ -114,24 +114,15 @@ class ReferenceDataMember extends \Framework\Newnorth\ADataMember {
 	}
 
 	public function Set(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		throw new RuntimeException(
-			'Not implemented.',
-			[]
-		);
+		return $this->ForeignDataMember->Set($DataType, $Parameters);
 	}
 
 	public function Increment(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		throw new RuntimeException(
-			'Not implemented.',
-			[]
-		);
+		return $this->ForeignDataMember->Increment($DataType, $Parameters);
 	}
 
 	public function Decrement(\Framework\Newnorth\DataType $DataType, array $Parameters) {
-		throw new RuntimeException(
-			'Not implemented.',
-			[]
-		);
+		return $this->ForeignDataMember->Decrement($DataType, $Parameters);
 	}
 }
 ?>
