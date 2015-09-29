@@ -40,6 +40,10 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 
 	/* Validator methods */
 
+	public function GetDateTimeValidator($Parameters) {
+		return strptime($_GET[$this->_Parameters['Name']], $this->_Parameters['Format']) !== false;
+	}
+
 	public function GetIsBetweenExclusiveValidator($Parameters) {
 		return $Parameters['Min'] < $_GET[$this->_Parameters['Name']] && $_GET[$this->_Parameters['Name']] < $Parameters['Max'];
 	}
@@ -94,6 +98,10 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 
 	public function GetNotEmptyValidator($Parameters) {
 		return isset($_GET[$this->_Parameters['Name']][0]);
+	}
+
+	public function PostDateTimeValidator($Parameters) {
+		return strptime($_POST[$this->_Parameters['Name']], $this->_Parameters['Format']) !== false;
 	}
 
 	public function PostIsBetweenExclusiveValidator($Parameters) {
