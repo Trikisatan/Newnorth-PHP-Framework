@@ -64,11 +64,11 @@ class DataType {
 		else if(preg_match('/^Has([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->HasBy($Matches[1], $Matches[2], $Parameters);
 		}
-		else if(preg_match('/^Count([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
-			return $this->Count($Matches[1], $Parameters);
-		}
 		else if(preg_match('/^Count([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->CountBy($Matches[1], $Matches[2], $Parameters);
+		}
+		else if(preg_match('/^Count([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			return $this->Count($Matches[1], $Parameters);
 		}
 		else if(preg_match('/^([A-Z][a-z]+)([0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			$Function = $Matches[1];
