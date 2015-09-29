@@ -41,7 +41,7 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	/* Validator methods */
 
 	public function GetDateTimeValidator($Parameters) {
-		return strptime($_GET[$this->_Parameters['Name']], $this->_Parameters['Format']) !== false;
+		return strptime($_GET[$this->_Parameters['Name']], $Parameters['Format']) !== false;
 	}
 
 	public function GetIsBetweenExclusiveValidator($Parameters) {
@@ -100,8 +100,12 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 		return isset($_GET[$this->_Parameters['Name']][0]);
 	}
 
+	public function GetUrlValidator($Parameters) {
+		return 0 < preg_match('/^'.preg_quote($Parameters['Protocol'], '/').'.+$/', $_GET[$this->_Parameters['Name']]);
+	}
+
 	public function PostDateTimeValidator($Parameters) {
-		return strptime($_POST[$this->_Parameters['Name']], $this->_Parameters['Format']) !== false;
+		return strptime($_POST[$this->_Parameters['Name']], $Parameters['Format']) !== false;
 	}
 
 	public function PostIsBetweenExclusiveValidator($Parameters) {
@@ -159,6 +163,10 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 
 	public function PostNotEmptyValidator($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']][0]);
+	}
+
+	public function PostUrlValidator($Parameters) {
+		return 0 < preg_match('/^'.preg_quote($Parameters['Protocol'], '/').'.+$/', $_POST[$this->_Parameters['Name']]);
 	}
 
 	/* Instance methods */
