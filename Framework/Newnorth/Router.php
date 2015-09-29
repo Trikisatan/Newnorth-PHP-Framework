@@ -24,6 +24,24 @@ class Router {
 		throw new RerouteException($Parameters);
 	}
 
+	public static function RerouteBadRequestPage() {
+		header('HTTP/1.0 400 Bad Request');
+
+		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['BadRequest'];
+
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
+			}
+		}
+
+		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		}
+
+		throw new RerouteException($Parameters);
+	}
+
 	public static function RerouteForbiddenPage() {
 		header('HTTP/1.0 403 Forbidden');
 

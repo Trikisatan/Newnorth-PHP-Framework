@@ -8,78 +8,73 @@ class Config {
 
 	public $Data;
 
-	public $Defaults;
+	public $Defaults = [
+		'Locale' => '',
+	];
 
-	public $Files;
+	public $Files = [
+		'Applications' => '',
+		'Layouts' => '',
+		'Pages' => '',
+		'Controls' => '',
+		'DataManagers' => '',
+		'DataTypes' => '',
+		'ErrorLog' => 'errors.log',
+		'EMailTemplates' => '',
+	];
 
-	public $ErrorHandling;
+	public $ErrorHandling = [
+		'Log' => true,
+		'LogMethods' => [
+			'\Framework\Newnorth\Logger::ErrorLog',
+		],
+		'Report' => false,
+		'ReportMethods' => [
+			'\Framework\Newnorth\EMailer::ErrorReport',
+		],
+		'DisplayErrorMessages' => true,
+		'DisplayErrorMessageDetails' => true,
+		'Pages' => [
+			'BadRequest' => [
+				'Application' => 'Default',
+				'Layout' => 'Default',
+				'Page' => 'BadRequest',
+			],
+			'Error' => [
+				'Application' => 'Default',
+				'Layout' => 'Default',
+				'Page' => 'Error',
+			],
+			'Forbidden' => [
+				'Application' => 'Default',
+				'Layout' => 'Default',
+				'Page' => 'Forbidden',
+			],
+			'NotFound' => [
+				'Application' => 'Default',
+				'Layout' => 'Default',
+				'Page' => 'NotFound',
+			],
+		],
+	];
 
-	public $Translation;
+	public $Translation = [
+		'ThrowException' => true,
+		'Log' => true,
+		'Report' => false,
+	];
 
-	public $EMailer;
+	public $EMailer = [
+		'ErrorReport' => [
+			'From' => '',
+			'To' => '',
+		],
+	];
 
 	/* Magic methods */
 
 	public function __construct($FilePath = null) {
 		$this->FilePath = $FilePath;
-
-		$this->Defaults = [
-			'Locale' => '',
-		];
-
-		$this->Files = [
-			'Applications' => '',
-			'Layouts' => '',
-			'Pages' => '',
-			'Controls' => '',
-			'DataManagers' => '',
-			'DataTypes' => '',
-			'ErrorLog' => 'errors.log',
-			'EMailTemplates' => '',
-		];
-
-		$this->ErrorHandling = [
-			'Log' => true,
-			'LogMethods' => [
-				'\Framework\Newnorth\Logger::ErrorLog',
-			],
-			'Report' => false,
-			'ReportMethods' => [
-				'\Framework\Newnorth\EMailer::ErrorReport',
-			],
-			'DisplayErrorMessages' => true,
-			'DisplayErrorMessageDetails' => true,
-			'Pages' => [
-				'Error' => [
-					'Application' => 'Default',
-					'Layout' => 'Default',
-					'Page' => 'Error',
-				],
-				'Forbidden' => [
-					'Application' => 'Default',
-					'Layout' => 'Default',
-					'Page' => 'Forbidden',
-				],
-				'NotFound' => [
-					'Application' => 'Default',
-					'Layout' => 'Default',
-					'Page' => 'NotFound',
-				],
-			],
-		];
-
-		$this->Translation = [
-			'ThrowException' => true,
-			'Log' => true,
-			'Report' => false,
-		];
-
-		$this->EMailer = [
-			'ErrorReport' => [
-				'From' => '',
-				'To' => '',
-			],
-		];
 	}
 
 	/* Instance methods */
