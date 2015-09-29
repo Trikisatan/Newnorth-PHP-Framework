@@ -88,7 +88,7 @@ abstract class AStandardDataManager extends ADataManager {
 				$Query->AddSource(
 					$DataMember->ForeignDataManager,
 					$DataMember->Alias,
-					$DataMember->IsRequired ? DB_LEFTJOIN : DB_INNERJOIN,
+					$DataMember->IsRequired ? DB_INNERJOIN : DB_LEFTJOIN,
 					$Conditions
 				);
 			}
