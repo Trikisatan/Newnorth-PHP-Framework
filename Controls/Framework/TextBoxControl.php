@@ -35,6 +35,10 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
 		}
 
+		if(method_exists($this->_Parent, 'SetControlReadonly_'.$this->_Alias)) {
+			$this->_Parameters['Readonly'] = $this->_Parent->{'SetControlReadonly_'.$this->_Alias}($this);
+		}
+
 		parent::Initialize();
 	}
 
