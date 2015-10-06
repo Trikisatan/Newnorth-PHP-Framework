@@ -49,6 +49,12 @@ class PasswordBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function GetNotEmptyValidator($Parameters) {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_GET[$this->_Parameters['Name']])) {
+				return true;
+			}
+		}
+
 		return isset($_GET[$this->_Parameters['Name']][0]);
 	}
 
@@ -61,6 +67,12 @@ class PasswordBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function PostNotEmptyValidator($Parameters) {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_POST[$this->_Parameters['Name']])) {
+				return true;
+			}
+		}
+
 		return isset($_POST[$this->_Parameters['Name']][0]);
 	}
 

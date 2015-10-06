@@ -61,35 +61,35 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function GetIsFloatValidator($Parameters) {
-		$Value = $_GET[$this->_Parameters['Name']];
-
-		if($Parameters['AllowEmpty']) {
-			if(isset($Value[0])) {
-				return is_numeric($Value);
-			}
-			else {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_GET[$this->_Parameters['Name']])) {
 				return true;
 			}
 		}
-		else {
-			return is_numeric($_POST[$this->_Parameters['Name']]);
+
+		if(isset($Parameters['AllowEmpty']) && $Parameters['AllowEmpty']) {
+			if(!isset($_GET[$this->_Parameters['Name']][0])) {
+				return true;
+			}
 		}
+
+		return is_numeric($_GET[$this->_Parameters['Name']]);
 	}
 
 	public function GetIsIntValidator($Parameters) {
-		$Value = $_GET[$this->_Parameters['Name']];
-
-		if($Parameters['AllowEmpty']) {
-			if(isset($Value[0])) {
-				return ctype_digit($Value);
-			}
-			else {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_GET[$this->_Parameters['Name']])) {
 				return true;
 			}
 		}
-		else {
-			return ctype_digit($Value);
+
+		if(isset($Parameters['AllowEmpty']) && $Parameters['AllowEmpty']) {
+			if(!isset($_GET[$this->_Parameters['Name']][0])) {
+				return true;
+			}
 		}
+
+		return ctype_digit($_GET[$this->_Parameters['Name']]);
 	}
 
 	public function GetMaxLengthValidator($Parameters) {
@@ -101,6 +101,12 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function GetNotEmptyValidator($Parameters) {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_GET[$this->_Parameters['Name']])) {
+				return true;
+			}
+		}
+
 		return isset($_GET[$this->_Parameters['Name']][0]);
 	}
 
@@ -125,36 +131,35 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function PostIsFloatValidator($Parameters) {
-		$Value = $_POST[$this->_Parameters['Name']];
-
-		if($Parameters['AllowEmpty']) {
-
-			if(isset($Value[0])) {
-				return is_numeric($Value);
-			}
-			else {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_POST[$this->_Parameters['Name']])) {
 				return true;
 			}
 		}
-		else {
-			return is_numeric($Value);
+
+		if(isset($Parameters['AllowEmpty']) && $Parameters['AllowEmpty']) {
+			if(!isset($_POST[$this->_Parameters['Name']][0])) {
+				return true;
+			}
 		}
+
+		return is_numeric($_POST[$this->_Parameters['Name']]);
 	}
 
 	public function PostIsIntValidator($Parameters) {
-		$Value = $_POST[$this->_Parameters['Name']];
-
-		if($Parameters['AllowEmpty']) {
-			if(isset($Value[0])) {
-				return ctype_digit($Value);
-			}
-			else {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_POST[$this->_Parameters['Name']])) {
 				return true;
 			}
 		}
-		else {
-			return is_numeric($Value);
+
+		if(isset($Parameters['AllowEmpty']) && $Parameters['AllowEmpty']) {
+			if(!isset($_POST[$this->_Parameters['Name']][0])) {
+				return true;
+			}
 		}
+
+		return ctype_digit($_POST[$this->_Parameters['Name']]);
 	}
 
 	public function PostMaxLengthValidator($Parameters) {
@@ -166,6 +171,12 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 	}
 
 	public function PostNotEmptyValidator($Parameters) {
+		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
+			if(!isset($_POST[$this->_Parameters['Name']])) {
+				return true;
+			}
+		}
+
 		return isset($_POST[$this->_Parameters['Name']][0]);
 	}
 
