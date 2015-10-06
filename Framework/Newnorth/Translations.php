@@ -60,6 +60,8 @@ class Translations {
 			if(preg_match('/^([^\(\)]+?)(?:\((?:\\\\?"|&quot;)(.*?)(?:\\\\?"|&quot;)(?:, ?(?:\\\\?"|&quot;)"(.*?)(?:\\\\?"|&quot;)")*\))?$/', $Option, $Match) === 1) {
 				$Translation = $Match[1];
 
+				$Translation = str_replace('\\/', '/', $Translation);
+
 				if(isset($this->Items[$Translation])) {
 					$Translation = $this->Items[$Translation];
 
