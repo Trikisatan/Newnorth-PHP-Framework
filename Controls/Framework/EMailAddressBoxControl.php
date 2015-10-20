@@ -23,20 +23,20 @@ class EMailAddressBoxControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
 	public function Initialize() {
-		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
-			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Id»'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControl»Id»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
-			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Name»'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControl»Name»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Value»'.$this->_Alias)) {
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControl»Value»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlReadonly_'.$this->_Alias)) {
-			$this->_Parameters['Readonly'] = $this->_Parent->{'SetControlReadonly_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Readonly»'.$this->_Alias)) {
+			$this->_Parameters['Readonly'] = $this->_Parent->{'SetControl»Readonly»'.$this->_Alias}($this);
 		}
 
 		parent::Initialize();
@@ -44,19 +44,19 @@ class EMailAddressBoxControl extends \Framework\Newnorth\Control {
 
 	/* Validator methods */
 
-	public function GetIsEMailAddressValidator($Parameters) {
+	public function Validators»GetIsEMailAddress($Parameters) {
 		return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+)?$/', $_GET[$this->_Parameters['Name']]);
 	}
 
-	public function GetMaxLengthValidator($Parameters) {
+	public function Validators»GetMaxLength($Parameters) {
 		return isset($_GET[$this->_Parameters['Name']][$Parameters['Max']]);
 	}
 
-	public function GetMinLengthValidator($Parameters) {
+	public function Validators»GetMinLength($Parameters) {
 		return isset($_GET[$this->_Parameters['Name']][$Parameters['Min']]);
 	}
 
-	public function GetNotEmptyValidator($Parameters) {
+	public function Validators»GetNotEmpty($Parameters) {
 		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
 			if(!isset($_GET[$this->_Parameters['Name']])) {
 				return true;
@@ -66,19 +66,19 @@ class EMailAddressBoxControl extends \Framework\Newnorth\Control {
 		return isset($_GET[$this->_Parameters['Name']][0]);
 	}
 
-	public function PostIsEMailAddressValidator($Parameters) {
+	public function Validators»PostIsEMailAddress($Parameters) {
 		return 0 < preg_match('/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+)?$/', $_POST[$this->_Parameters['Name']]);
 	}
 
-	public function PostMaxLengthValidator($Parameters) {
+	public function Validators»PostMaxLength($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']][$Parameters['Max']]);
 	}
 
-	public function PostMinLengthValidator($Parameters) {
+	public function Validators»PostMinLength($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']][$Parameters['Min']]);
 	}
 
-	public function PostNotEmptyValidator($Parameters) {
+	public function Validators»PostNotEmpty($Parameters) {
 		if(isset($Parameters['AllowUnset']) && $Parameters['AllowUnset']) {
 			if(!isset($_POST[$this->_Parameters['Name']])) {
 				return true;

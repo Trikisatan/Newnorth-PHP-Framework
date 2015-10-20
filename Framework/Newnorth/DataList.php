@@ -104,108 +104,193 @@ class DataList {
 	/* Instance methods */
 
 	public function Initialize(\Framework\Newnorth\DataType $DataType) {
-		$DataType->{$this->PluralAlias} = null;
+		if($this->PluralAlias !== null) {
+			$DataType->{$this->PluralAlias} = null;
 
-		$DataType->{'Is'.$this->PluralAlias.'Loaded'} = false;
+			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = false;
+		}
 	}
 
 	public function Load(\Framework\Newnorth\DataType $DataType) {
-		if(!$DataType->{'Is'.$this->PluralAlias.'Loaded'}) {
-			$Query = $this->ForeignDataManager->CreateSelectQuery();
-
-			$Query->Conditions = new \Framework\Newnorth\DbAnd();
-
-			for($I = 0; $I < $this->KeyCount; ++$I) {
-				if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
-				}
-				else {
-					$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
-				}
+		if($this->PluralAlias === null || !$DataType->{'Is'.$this->PluralAlias.'Loaded'}) {
+			if($this->ForeignDataManager instanceof \Framework\Newnorth\AStandardDataManager) {
+				return $this->Load_AStandardDataManager($DataType);
 			}
-
-			if($this->Sorts !== null) {
-				foreach($this->Sorts as $Sort) {
-					$Query->AddSort($Sort['Column'], $Sort['Order']);
-				}
+			else if($this->ForeignDataManager instanceof \Framework\Newnorth\ATranslationDataManager) {
+				return $this->Load_ATranslationDataManager($DataType);
 			}
+			else {
+				throw new RuntimeException(
+					'DataList does not support loading from "'.get_class($this->ForeignDataManager).'".',
+					[]
+				);
+			}
+		}
+		else {
+			return $DataType->{$this->PluralAlias};
+		}
+	}
 
-			$DataType->{$this->PluralAlias} = $this->ForeignDataManager->FindAllByQuery($Query);
+	public function Load_AStandardDataManager(\Framework\Newnorth\DataType $DataType) {
+		$Query = $this->ForeignDataManager->CreateSelectQuery();
+
+		$Query->Conditions = new \Framework\Newnorth\DbAnd();
+
+		for($I = 0; $I < $this->KeyCount; ++$I) {
+			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+				$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
+			}
+			else {
+				$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
+			}
+		}
+
+		if($this->Sorts !== null) {
+			foreach($this->Sorts as $Sort) {
+				$Query->AddSort($Sort['Column'], $Sort['Order']);
+			}
+		}
+
+		$Result = $this->ForeignDataManager->FindAllByQuery($Query);
+
+		if($this->PluralAlias !== null) {
+			$DataType->{$this->PluralAlias} = $Result;
 
 			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = true;
 		}
 
-		return 0 < count($DataType->{$this->PluralAlias});
+		return $Result;
 	}
 
-	public function Create(\Framework\Newnorth\DataType $DataType, array $Data) {
-		$this->Load($DataType);
+	public function Load_ATranslationDataManager(\Framework\Newnorth\DataType $DataType) {
+		$Query = $this->ForeignDataManager->CreateSelectQuery();
+
+		$Query->Conditions = new \Framework\Newnorth\DbAnd();
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
 			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-				$Data[$this->ForeignKeys[$I]->Alias] = $DataType->{$this->LocalKeys[$I]->Alias};
+				$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
 			}
 			else {
-				$Data[$this->ForeignKeys[$I]->Alias] = $this->LocalKeys[$I];
+				$Query->Conditions->EqualTo($this->ForeignKeys[$I], $this->ForeignKeys[$I]->ToDbExpression($this->LocalKeys[$I]));
+			}
+		}
+
+		$Result = $this->ForeignDataManager->FindAllByQuery($Query);
+
+		$Items = [];
+
+		while(($Item = array_shift($Result)) !== null) {
+			$Items[$Item->Locale] = $Item;
+		}
+
+		if($this->PluralAlias !== null) {
+			$DataType->{$this->PluralAlias} = $Items;
+
+			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = true;
+		}
+
+		return $Items;
+	}
+
+	public function Create(\Framework\Newnorth\DataType $DataType, array $Data, $Source) {
+		if($this->PluralAlias !== null) {
+			$this->Load($DataType);
+		}
+
+		$Query = new \Framework\Newnorth\DbInsertQuery();
+
+		$Query->Source = $this->ForeignDataManager;
+
+		for($I = 0; $I < $this->KeyCount; ++$I) {
+			$DataMember = $this->ForeignKeys[$I];
+
+			$Query->AddColumn($DataMember);
+
+			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
+				$Query->AddValue($DataMember->ToDbExpression($DataType->{$this->LocalKeys[$I]->Alias}));
+			}
+			else {
+				$Query->AddValue($DataMember->ToDbExpression($this->LocalKeys[$I]));
 			}
 		}
 
 		foreach($Data as $Key => $Value) {
-			$Data[$Key] = $this->ForeignDataManager->DataMembers[$Key]->ToDbExpression($Value);
+			$DataMember = $this->ForeignDataManager->DataMembers[$Key];
+
+			$Query->AddColumn($DataMember);
+
+			$Query->AddValue($DataMember->ToDbExpression($Value));
 		}
 
-		$Id = $this->ForeignDataManager->InsertByArray($Data);
+		$Item = $this->ForeignDataManager->InsertByQuery($Query, $Source);
 
-		$Item = $this->ForeignDataManager->{'FindBy'.$this->ForeignPrimaryKey->Alias}($Id);
-
-		foreach($this->ForeignDataManager->DataLists as $DataList) {
-			$Item->{$DataList->PluralAlias} = [];
-
-			$Item->{'Is'.$DataList->PluralAlias.'Loaded'} = true;
+		if($this->PluralAlias !== null) {
+			$DataType->{$this->PluralAlias}[] = $Item;
 		}
-
-		$DataType->{$this->PluralAlias}[] = $Item;
 
 		return $Item;
 	}
 
-	public function Add(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
-		$this->Load($DataType);
+	public function Add(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item, $Source) {
+		if($this->PluralAlias !== null) {
+			$this->Load($DataType);
+		}
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
 			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($DataType->{$this->LocalKeys[$I]->Alias});
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($DataType->{$this->LocalKeys[$I]->Alias}, $Source);
 			}
 			else {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($this->LocalKeys[$I]);
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}($this->LocalKeys[$I], $Source);
 			}
 		}
 
-		$DataType->{$this->PluralAlias}[] = $Item;
+		if($this->PluralAlias !== null) {
+			$DataType->{$this->PluralAlias}[] = $Item;
+		}
 	}
 
-	public function Delete(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
-		$this->Load($DataType);
+	public function Delete(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item, $Source) {
+		if($this->PluralAlias !== null) {
+			$this->Load($DataType);
+		}
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($Item->{$this->ForeignPrimaryKey->Alias});
+		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($Item->{$this->ForeignPrimaryKey->Alias}, $Source);
 
-		$Index = $this->IndexOf($DataType, $Item);
+		if($this->PluralAlias !== null) {
+			$Index = $this->IndexOf($DataType, $Item);
 
-		array_splice($DataType->{$this->PluralAlias}, $Index, 1);
+			if(is_int($Index)) {
+				array_splice($DataType->{$this->PluralAlias}, $Index, 1);
+			}
+			else {
+				unset($DataType->{$this->PluralAlias}[$Index]);
+			}
+		}
 	}
 
-	public function Remove(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
-		$this->Load($DataType);
+	public function Remove(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item, $Source) {
+		if($this->PluralAlias !== null) {
+			$this->Load($DataType);
+		}
 
 		for($I = 0; $I < $this->KeyCount; ++$I) {
 			if($this->LocalKeys[$I] instanceof \Framework\Newnorth\ADataMember) {
-				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}(null);
+				$Item->{'Set'.$this->ForeignKeys[$I]->Alias}(null, $Source);
 			}
 		}
 
-		$Index = $this->IndexOf($DataType, $Item);
+		if($this->PluralAlias !== null) {
+			$Index = $this->IndexOf($DataType, $Item);
 
-		array_splice($DataType->{$this->PluralAlias}, $Index, 1);
+			if(is_int($Index)) {
+				array_splice($DataType->{$this->PluralAlias}, $Index, 1);
+			}
+			else {
+				unset($DataType->{$this->PluralAlias}[$Index]);
+			}
+		}
 	}
 
 	public function FindBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
@@ -254,26 +339,26 @@ class DataList {
 		return $Items;
 	}
 
-	public function IndexOf(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {
+	public function IndexOf(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $OriginalItem) {
 		$this->Load($DataType);
 
-		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
-			if($DataType->{$this->PluralAlias}[$I]->{$this->ForeignPrimaryKey->Alias} === $Item->{$this->ForeignPrimaryKey->Alias}) {
-				return $I;
+		foreach($DataType->{$this->PluralAlias} as $Key => $Item) {
+			if($Item->{$this->ForeignPrimaryKey->Alias} === $OriginalItem->{$this->ForeignPrimaryKey->Alias}) {
+				return $Key;
 			}
 		}
 
-		return -1;
+		return null;
 	}
 
 	public function IndexOfBy(\Framework\Newnorth\DataType $DataType, array $DataMembers, array $Values) {
 		$this->Load($DataType);
 
-		for($I = 0; $I < count($DataType->{$this->PluralAlias}); ++$I) {
+		foreach($DataType->{$this->PluralAlias} as $Key => $Item) {
 			$IsFound = true;
 
 			for($J = 0; $J < count($DataMembers); ++$J) {
-				if($DataType->{$this->PluralAlias}[$I]->{$DataMembers[$J]->Alias} !== $Values[$J]) {
+				if($Item->{$DataMembers[$J]->Alias} !== $Values[$J]) {
 					$IsFound = false;
 
 					break;
@@ -281,11 +366,11 @@ class DataList {
 			}
 
 			if($IsFound) {
-				return $I;
+				return $Key;
 			}
 		}
 
-		return -1;
+		return null;
 	}
 
 	public function Has(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item) {

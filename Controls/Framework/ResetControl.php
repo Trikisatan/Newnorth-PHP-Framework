@@ -23,16 +23,16 @@ class ResetControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
 	public function Initialize() {
-		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
-			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Id»'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControl»Id»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
-			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Name»'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControl»Name»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlText_'.$this->_Alias)) {
-			$this->_Parameters['Text'] = $this->_Parent->{'SetControlText_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Text»'.$this->_Alias)) {
+			$this->_Parameters['Text'] = $this->_Parent->{'SetControl»Text»'.$this->_Alias}($this);
 		}
 
 		parent::Initialize();

@@ -328,10 +328,10 @@ class DbExpression {
 			return $Expression;
 		}
 		else if($Expression instanceof \Framework\Newnorth\AValueDataMember) {
-			return new DbColumn([
-				$Expression->DataManager->Table,
-				$Expression->Alias,
-			]);
+			return new DbColumn([$Expression->DataManager->Table, $Expression->Alias]);
+		}
+		else if($Expression instanceof \Framework\Newnorth\ReferenceDataMember) {
+			return new DbColumn([$Expression->Alias, $Expression->ForeignDataMember->Alias]);
 		}
 		else if(is_array($Expression)) {
 			return new DbArray($Expression);
@@ -488,8 +488,11 @@ class DbInsertQuery {
 	/* Instance methods */
 
 	public function AddColumn($Expression) {
-		if($Expression instanceof DbColumn) {
+		if($Expression instanceof \Framework\Newnorth\DbColumn) {
 			return $this->Columns[] = $Expression;
+		}
+		else if($Expression instanceof \Framework\Newnorth\AValueDataMember) {
+			return $this->Columns[] = new DbColumn([$Expression->DataManager->Table, $Expression->Alias]);
 		}
 		else {
 			return $this->Columns[] = DbExpression::ParseDbColumn($Expression);

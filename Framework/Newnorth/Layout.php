@@ -100,6 +100,8 @@ class Layout {
 	}
 
 	public function Initialize() {
+		$this->_Actions->Initialize();
+
 		$this->_Controls->Initialize();
 	}
 
@@ -207,35 +209,35 @@ class Layout {
 
 	/* Validator methods */
 
-	public function IsBetweenExclusiveValidator($Parameters) {
+	public function Validators»IsBetweenExclusive($Parameters) {
 		return eval('return $Parameters[\'Min\'] < '.$Parameters['Variable'].' && '.$Parameters['Variable'].' < $Parameters[\'Max\'];');
 	}
 
-	public function IsBetweenInclusiveValidator($Parameters) {
+	public function Validators»IsBetweenInclusive($Parameters) {
 		return eval('return $Parameters[\'Min\'] <= '.$Parameters['Variable'].' && '.$Parameters['Variable'].' <= $Parameters[\'Max\'];');
 	}
 
-	public function IsEMailAddressValidator($Parameters) {
+	public function Validators»IsEMailAddress($Parameters) {
 		return eval('return 0 < preg_match(\'/^([a-zA-Z0-9_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+)?$/\', '.$Parameters['Variable'].');');
 	}
 
-	public function IsFloatValidator($Parameters) {
+	public function Validators»IsFloat($Parameters) {
 		return eval('return is_numeric('.$Parameters['Variable'].');');
 	}
 
-	public function IsIntValidator($Parameters) {
+	public function Validators»IsInt($Parameters) {
 		return eval('return ctype_digit('.$Parameters['Variable'].');');
 	}
 
-	public function MaxLengthValidator($Parameters) {
+	public function Validators»MaxLength($Parameters) {
 		return eval('return isset('.$Parameters['Variable'].'[$Parameters[\'Max\']]);');
 	}
 
-	public function MinLengthValidator($Parameters) {
+	public function Validators»MinLength($Parameters) {
 		return eval('return isset('.$Parameters['Variable'].'[$Parameters[\'Min\']]);');
 	}
 
-	public function NotEmptyValidator($Parameters) {
+	public function Validators»NotEmpty($Parameters) {
 		return eval('return isset('.$Parameters['Variable'].'[0]);');
 	}
 }

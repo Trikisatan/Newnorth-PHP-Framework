@@ -8,6 +8,8 @@ class Config {
 
 	public $Data;
 
+	public $System = '';
+
 	public $Defaults = [
 		'Locale' => '',
 	];
@@ -81,6 +83,8 @@ class Config {
 
 	public function Initialize() {
 		$this->Data = ParseIniFile($this->FilePath);
+
+		$this->System = isset($this->Data['System']) ? $this->Data['System'] : $this->System;
 
 		if(isset($this->Data['Defaults'])) {
 			$this->Initialize_Defaults($this->Data['Defaults']);

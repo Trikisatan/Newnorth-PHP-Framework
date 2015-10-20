@@ -27,7 +27,7 @@ class Action {
 	public function __construct($Owner, $Name, $Parameters) {
 		$this->Owner = $Owner;
 
-		$this->Name = $Name.'Action';
+		$this->Name = $Name;
 
 		if(isset($Parameters['RealAction'])) {
 			$this->RealAction = $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['RealAction']);
@@ -63,10 +63,24 @@ class Action {
 	}
 
 	public function __toString() {
-		return $this->Owner.'/'.$this->Name;
+		return $this->Owner.'/'.$this->Name.'Action';
 	}
 
 	/* Life cycle methods */
+
+	public function Initialize() {
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»PreValidators')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»PreValidators'}($this);
+		}
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»DbLocks')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»DbLocks'}($this);
+		}
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»Validators')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»Validators'}($this);
+		}
+	}
 
 	public function Execute() {
 		if($this->RealAction === null) {
@@ -75,7 +89,7 @@ class Action {
 					$this->LockDbConnections();
 
 					if($this->Validate()) {
-						$this->Owner->{$this->Name}();
+						$this->Owner->{'Actions»'.$this->Name}();
 
 						$this->IsExecuted = true;
 					}
@@ -114,6 +128,10 @@ class Action {
 				array_splice($this->SubActions, $I, 1);
 			}
 		}
+	}
+
+	public function AddPreValidator($Type, $Parameters) {
+		$this->PreValidators[$Type][] = $Parameters;
 	}
 
 	private function PreValidate() {
@@ -250,7 +268,11 @@ class Action {
 				);
 			}
 
-			$Method = $Parameters['Method'].'Validator';
+			$Method = 'Validators»'.$this->Name.'»'.$Parameters['Method'];
+
+			if(!method_exists($Object, $Method)) {
+				$Method = 'Validators»'.$Parameters['Method'];
+			}
 
 			if(!method_exists($Object, $Method)) {
 				throw new RuntimeException(

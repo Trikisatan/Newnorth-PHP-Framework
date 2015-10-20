@@ -124,7 +124,7 @@ class DataReference {
 		return $DataType->{$this->Alias} !== null;
 	}
 
-	public function Delete(\Framework\Newnorth\DataType $DataType) {
+	public function Delete(\Framework\Newnorth\DataType $DataType, $Source) {
 		$this->Load($DataType);
 
 		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias});

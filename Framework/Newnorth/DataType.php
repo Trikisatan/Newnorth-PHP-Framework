@@ -37,10 +37,27 @@ class DataType {
 			}
 		}
 		else if(preg_match('/^Create([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
-			return $this->Create($Matches[1], $Parameters[0]);
+			return $this->Create($Matches[1], $Parameters);
 		}
 		else if(preg_match('/^Add([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
-			return $this->Add($Matches[1], $Parameters[0]);
+			return $this->Add($Matches[1], $Parameters);
+		}
+		else if(preg_match('/^Delete([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
+			if($this->FindAllBy($Matches[1], $Matches[2], $Parameters, $Items)) {
+				$Count = 0;
+
+				foreach($Items as $Item) {
+					array_unshift($Parameters, $Item);
+
+					if($this->Delete($Matches[1], $Parameters, $Result) && $Result) {
+						++$Count;
+					}
+
+					array_shift($Parameters);
+				}
+
+				return $Count;
+			}
 		}
 		else if(preg_match('/^Delete([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			if($this->Delete($Matches[1], $Parameters, $Result)) {
@@ -56,7 +73,9 @@ class DataType {
 			return $this->FindBy($Matches[1], $Matches[2], $Parameters);
 		}
 		else if(preg_match('/^FindAll([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
-			return $this->FindAllBy($Matches[1], $Matches[2], $Parameters);
+			if($this->FindAllBy($Matches[1], $Matches[2], $Parameters, $Result)) {
+				return $Result;
+			}
 		}
 		else if(preg_match('/^IndexOf([A-Z][0-9A-Za-z]+)By([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
 			return $this->IndexOfBy($Matches[1], $Matches[2], $Parameters);
@@ -123,64 +142,79 @@ class DataType {
 		}
 	}
 
-	private function Create($DataList, $Data) {
-		return $this->_DataManager->DataLists[$DataList]->Create($this, $Data);
+	private function Create($DataList, $Parameters) {
+		return $this->_DataManager->DataLists[$DataList]->Create(
+			$this,
+			$Parameters[0],
+			$Parameters[1]
+		);
 	}
 
-	private function Add($DataList, $Data) {
-		return $this->_DataManager->DataLists[$DataList]->Add($this, $Data);
+	private function Add($DataList, $Parameters) {
+		return $this->_DataManager->DataLists[$DataList]->Add(
+			$this,
+			$Parameters[0],
+			$Parameters[1]
+		);
 	}
 
-	public function OnDelete() {
+	public function OnDelete($Source) {
 		foreach($this->_DataManager->DataReferences as $DataReference) {
 			if($DataReference->OnDelete !== null) {
-				$this->{'OnDelete_DataReference_'.$DataReference->OnDelete}($DataReference);
+				$this->{'OnDelete_DataReference_'.$DataReference->OnDelete}($DataReference, $Source);
 			}
 		}
 
 		foreach($this->_DataManager->DataLists as $DataList) {
 			if($DataList->OnDelete !== null) {
-				$this->{'OnDelete_DataList_'.$DataList->OnDelete}($DataList);
+				$this->{'OnDelete_DataList_'.$DataList->OnDelete}($DataList, $Source);
 			}
 		}
 	}
 
-	private function OnDelete_DataReference_Delete($DataReference) {
+	private function OnDelete_DataReference_Delete($DataReference, $Source) {
 		if($DataReference->Load($this)) {
-			$DataReference->Delete($this);
+			$DataReference->Delete($this, $Source);
 		}
 	}
 
-	private function OnDelete_DataReference_Remove($DataReference) {
+	private function OnDelete_DataReference_Remove($DataReference, $Source) {
 		if($DataReference->Load($this)) {
-			$DataReference->Remove($this);
+			$DataReference->Remove($this, $Source);
 		}
 	}
 
-	private function OnDelete_DataList_Delete($DataList) {
-		$DataList->Load($this);
+	private function OnDelete_DataList_Delete($DataList, $Source) {
+		$Items = $DataList->Load($this);
 
-		foreach($this->{$DataList->PluralAlias} as $Item) {
-			$DataList->Delete($this, $Item);
+		foreach($Items as $Item) {
+			$DataList->Delete($this, $Item, $Source);
 		}
 	}
 
-	private function OnDelete_DataList_Remove($DataList) {
-		$DataList->Load($this);
+	private function OnDelete_DataList_Remove($DataList, $Source) {
+		$Items = $DataList->Load($this);
 
-		foreach($this->{$DataList->PluralAlias} as $Item) {
-			$DataList->Remove($this, $Item);
+		foreach($Items as $Item) {
+			$DataList->Remove($this, $Item, $Source);
 		}
 	}
 
 	private function Delete($Alias, $Parameters, &$Result) {
 		if(isset($this->_DataManager->DataReferences[$Alias])) {
-			$Result = $this->_DataManager->DataReferences[$Alias]->Delete($this);
+			$Result = $this->_DataManager->DataReferences[$Alias]->Delete(
+				$this,
+				$Parameters[0]
+			);
 
 			return true;
 		}
 		else if(isset($this->_DataManager->DataLists[$Alias])) {
-			$Result = $this->_DataManager->DataLists[$Alias]->Delete($this, $Parameters[0]);
+			$Result = $this->_DataManager->DataLists[$Alias]->Delete(
+				$this,
+				$Parameters[0],
+				$Parameters[1]
+			);
 
 			return true;
 		}
@@ -219,18 +253,24 @@ class DataType {
 		return $DataList->FindBy($this, $DataMembers, $Values);
 	}
 
-	private function FindAllBy($DataList, $DataMembers, $Values) {
+	private function FindAllBy($DataList, $DataMembers, &$Parameters, &$Result) {
 		$DataList = $this->_DataManager->DataLists[$DataList];
 
 		$DataMembers = explode('And', $DataMembers);
 
+		$Values = [];
+
 		for($I = 0; $I < count($DataMembers); ++$I) {
 			$DataMembers[$I] = $DataList->ForeignDataManager->DataMembers[$DataMembers[$I]];
 
-			$Values[$I] = $DataMembers[$I]->Parse($Values[$I]);
+			$Values[] = $DataMembers[$I]->Parse($Parameters[0]);
+
+			array_splice($Parameters, 0, 1);
 		}
 
-		return $DataList->FindAllBy($this, $DataMembers, $Values);
+		$Result = $DataList->FindAllBy($this, $DataMembers, $Values);
+
+		return true;
 	}
 
 	private function IndexOfBy($DataList, $DataMembers, $Values) {

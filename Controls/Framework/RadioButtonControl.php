@@ -23,20 +23,20 @@ class RadioButtonControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
 	public function Initialize() {
-		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
-			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Id»'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControl»Id»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
-			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Name»'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControl»Name»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Value»'.$this->_Alias)) {
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControl»Value»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlIsChecked_'.$this->_Alias)) {
-			$this->_Parameters['IsChecked'] = $this->_Parent->{'SetControlIsChecked_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»IsChecked»'.$this->_Alias)) {
+			$this->_Parameters['IsChecked'] = $this->_Parent->{'SetControl»IsChecked»'.$this->_Alias}($this);
 		}
 
 		parent::Initialize();
@@ -44,19 +44,19 @@ class RadioButtonControl extends \Framework\Newnorth\Control {
 
 	/* Validator methods */
 
-	public function GetIsCheckedValidator($Parameters) {
+	public function Validators»GetIsChecked($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']]);
 	}
 
-	public function GetIsNotCheckedValidator($Parameters) {
+	public function Validators»GetIsNotChecked($Parameters) {
 		return !isset($_POST[$this->_Parameters['Name']]);
 	}
 
-	public function PostIsCheckedValidator($Parameters) {
+	public function Validators»PostIsChecked($Parameters) {
 		return isset($_POST[$this->_Parameters['Name']]);
 	}
 
-	public function PostIsNotCheckedValidator($Parameters) {
+	public function Validators»PostIsNotChecked($Parameters) {
 		return !isset($_POST[$this->_Parameters['Name']]);
 	}
 

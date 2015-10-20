@@ -21,6 +21,8 @@ class ReferenceDataMember extends \Framework\Newnorth\ADataMember {
 	/* Magic methods */
 
 	public function __construct($Parameters) {
+		parent::__construct($Parameters);
+
 		if(!isset($Parameters['LocalKeys'])) {
 			throw new RuntimeException(
 				'ReferenceDataMember requires the parameter "LocalKeys".',

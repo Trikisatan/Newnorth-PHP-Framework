@@ -8,6 +8,9 @@ class StringValueDataMember extends \Framework\Newnorth\AValueDataMember {
 		if($Value === null) {
 			return null;
 		}
+		else if(is_bool($Value)) {
+			return $Value ? '1' : '0';
+		}
 		else {
 			return (string)$Value;
 		}

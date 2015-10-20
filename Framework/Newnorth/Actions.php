@@ -22,6 +22,12 @@ class Actions {
 
 	/* Life cycle methods */
 
+	public function Initialize() {
+		foreach($this->Items as $Action) {
+			$Action->Initialize();
+		}
+	}
+
 	public function Execute() {
 		foreach($this->Items as $Action) {
 			$Action->Execute();

@@ -15,6 +15,8 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 	/* Magic methods */
 
 	public function __construct($Parameters) {
+		parent::__construct($Parameters);
+
 		$this->DataManager = $Parameters['DataManager'];
 
 		$this->Alias = $Parameters['Alias'];
@@ -36,27 +38,32 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 
 	public function Set(\Framework\Newnorth\DataType $DataType, array $Parameters) {
 		if($this->IsDynamic) {
-			$Query = new \Framework\Newnorth\DbUpdateQuery();
+			$Value = $this->Parse($Parameters[0]);
 
-			$Query->AddSource(
-				$this->DataManager
-			);
+			array_splice($Parameters, 0, 1);
 
-			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
-				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Alias}
-			);
+			if($DataType->{$this->Alias} === $Value) {
+				return true;
+			}
+			else {
+				$Query = new \Framework\Newnorth\DbUpdateQuery();
 
-			$Query->AddChange(
-				$this,
-				$this->ToDbExpression($Parameters[0])
-			);
+				$Query->AddSource($this->DataManager);
 
-			$Result = $this->DataManager->Connection->Update($Query);
+				$Query->Conditions = new \Framework\Newnorth\DbEqualTo($this->DataManager->PrimaryKey, $DataType->{$this->DataManager->PrimaryKey->Alias});
 
-			$DataType->{$this->Alias} = $this->Parse($Parameters[0]);
+				$Query->AddChange($this, $this->ToDbExpression($Value));
 
-			return $Result;
+				$Result = $this->DataManager->Connection->Update($Query);
+
+				$DataType->{$this->Alias} = $Value;
+
+				if($this->UseLogUpdate) {
+					$this->LogUpdate($DataType, isset($Parameters[0]) ? $Parameters[0] : '');
+				}
+
+				return $Result;
+			}
 		}
 		else {
 			throw new RuntimeException(
@@ -72,23 +79,21 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 		if($this->IsDynamic) {
 			$Query = new \Framework\Newnorth\DbUpdateQuery();
 
-			$Query->AddSource(
-				$this->DataManager
-			);
+			$Query->AddSource($this->DataManager);
 
-			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
-				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Alias}
-			);
+			$Query->Conditions = new \Framework\Newnorth\DbEqualTo($this->DataManager->PrimaryKey, $DataType->{$this->DataManager->PrimaryKey->Alias});
 
-			$Query->AddChange(
-				$this,
-				$this.' + 1'
-			);
+			$Query->AddChange($this, $this.' + 1');
 
-			return $this->DataManager->Connection->Update(
-				$Query
-			);
+			$Result = $this->DataManager->Connection->Update($Query);
+
+			++$DataType->{$this->Alias};
+
+			if($this->UseLogUpdate) {
+				$this->LogUpdate($DataType, isset($Parameters[0]) ? $Parameters[0] : '');
+			}
+
+			return $Result;
 		}
 		else {
 			throw new RuntimeException(
@@ -104,23 +109,21 @@ abstract class AValueDataMember extends \Framework\Newnorth\ADataMember {
 		if($this->IsDynamic) {
 			$Query = new \Framework\Newnorth\DbUpdateQuery();
 
-			$Query->AddSource(
-				$this->DataManager
-			);
+			$Query->AddSource($this->DataManager);
 
-			$Query->Conditions = new \Framework\Newnorth\DbEqualTo(
-				$this->DataManager->PrimaryKey,
-				$DataType->{$this->DataManager->PrimaryKey->Alias}
-			);
+			$Query->Conditions = new \Framework\Newnorth\DbEqualTo($this->DataManager->PrimaryKey, $DataType->{$this->DataManager->PrimaryKey->Alias});
 
-			$Query->AddChange(
-				$this,
-				$this.' - 1'
-			);
+			$Query->AddChange($this, $this.' - 1');
 
-			return $this->DataManager->Connection->Update(
-				$Query
-			);
+			$Result = $this->DataManager->Connection->Update($Query);
+
+			--$DataType->{$this->Alias};
+
+			if($this->UseLogUpdate) {
+				$this->LogUpdate($DataType, isset($Parameters[0]) ? $Parameters[0] : '');
+			}
+
+			return $Result;
 		}
 		else {
 			throw new RuntimeException(

@@ -23,20 +23,20 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 	/* Life cycle methods */
 
 	public function Initialize() {
-		if(method_exists($this->_Parent, 'SetControlId_'.$this->_Alias)) {
-			$this->_Parameters['Id'] = $this->_Parent->{'SetControlId_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Id»'.$this->_Alias)) {
+			$this->_Parameters['Id'] = $this->_Parent->{'SetControl»Id»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlName_'.$this->_Alias)) {
-			$this->_Parameters['Name'] = $this->_Parent->{'SetControlName_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Name»'.$this->_Alias)) {
+			$this->_Parameters['Name'] = $this->_Parent->{'SetControl»Name»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlValue_'.$this->_Alias)) {
-			$this->_Parameters['Value'] = $this->_Parent->{'SetControlValue_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Value»'.$this->_Alias)) {
+			$this->_Parameters['Value'] = $this->_Parent->{'SetControl»Value»'.$this->_Alias}($this);
 		}
 
-		if(method_exists($this->_Parent, 'SetControlOptions_'.$this->_Alias)) {
-			$this->_Parent->{'SetControlOptions_'.$this->_Alias}($this);
+		if(method_exists($this->_Parent, 'SetControl»Options»'.$this->_Alias)) {
+			$this->_Parent->{'SetControl»Options»'.$this->_Alias}($this);
 		}
 
 		parent::Initialize();
@@ -44,7 +44,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 
 	/* Validator methods */
 
-	public function GetValueValidator($Parameters) {
+	public function Validators»GetValue($Parameters) {
 		if(isset($this->_Parameters['Options'])) {
 			$Value = $_GET[$this->_Parameters['Name']];
 
@@ -61,7 +61,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 		}
 	}
 
-	public function PostValueValidator($Parameters) {
+	public function Validators»PostValue($Parameters) {
 		if(isset($this->_Parameters['Options'])) {
 			$Value = $_POST[$this->_Parameters['Name']];
 
