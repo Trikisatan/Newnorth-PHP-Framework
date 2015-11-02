@@ -151,11 +151,7 @@ class DataType {
 	}
 
 	private function Add($DataList, $Parameters) {
-		return $this->_DataManager->DataLists[$DataList]->Add(
-			$this,
-			$Parameters[0],
-			$Parameters[1]
-		);
+		return $this->_DataManager->DataLists[$DataList]->Add($this, $Parameters[0], $Parameters[1]);
 	}
 
 	public function OnDelete($Source) {
@@ -225,12 +221,12 @@ class DataType {
 
 	private function Remove($Alias, $Parameters, &$Result) {
 		if(isset($this->_DataManager->DataReferences[$Alias])) {
-			$Result = $this->_DataManager->DataReferences[$Alias]->Remove($this);
+			$Result = $this->_DataManager->DataReferences[$Alias]->Remove($this, $Parameters[0]);
 
 			return true;
 		}
 		else if(isset($this->_DataManager->DataLists[$Alias])) {
-			$Result = $this->_DataManager->DataLists[$Alias]->Remove($this, $Parameters[0]);
+			$Result = $this->_DataManager->DataLists[$Alias]->Remove($this, $Parameters[0], $Parameters[1]);
 
 			return true;
 		}

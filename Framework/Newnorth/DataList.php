@@ -256,9 +256,9 @@ class DataList {
 			$this->Load($DataType);
 		}
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($Item->{$this->ForeignPrimaryKey->Alias}, $Source);
+		$Success = $this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($Item->{$this->ForeignPrimaryKey->Alias}, $Source);
 
-		if($this->PluralAlias !== null) {
+		if($Success && $this->PluralAlias !== null) {
 			$Index = $this->IndexOf($DataType, $Item);
 
 			if(is_int($Index)) {
@@ -268,6 +268,8 @@ class DataList {
 				unset($DataType->{$this->PluralAlias}[$Index]);
 			}
 		}
+
+		return $Success;
 	}
 
 	public function Remove(\Framework\Newnorth\DataType $DataType, \Framework\Newnorth\DataType $Item, $Source) {

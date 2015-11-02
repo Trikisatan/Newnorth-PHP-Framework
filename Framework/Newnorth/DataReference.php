@@ -127,17 +127,17 @@ class DataReference {
 	public function Delete(\Framework\Newnorth\DataType $DataType, $Source) {
 		$this->Load($DataType);
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias});
+		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias}, $Source);
 
 		$DataType->{$this->Alias} = null;
 	}
 
-	public function Remove(\Framework\Newnorth\DataType $DataType) {
+	public function Remove(\Framework\Newnorth\DataType $DataType, $Source) {
 		$this->Load($DataType);
 
 		foreach($this->ForeignKeys as $ForeignKey)
 		{
-			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Alias}(null);
+			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Alias}(null, $Source);
 		}
 
 		$DataType->{$this->Alias} = null;
