@@ -248,6 +248,12 @@ abstract class Control {
 		$this->_Translations[$Key] = $Value;
 	}
 
+	/* Pre formatter methods */
+
+	public function PreFormatters»Trim($Parameters) {
+		eval($Parameters['Variable'].' = trim('.$Parameters['Variable'].');');
+	}
+
 	/* Validator methods */
 
 	public function Validators»IsBetweenExclusive($Parameters) {

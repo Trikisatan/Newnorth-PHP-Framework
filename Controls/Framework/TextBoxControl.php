@@ -42,6 +42,16 @@ class TextBoxControl extends \Framework\Newnorth\Control {
 		parent::Initialize();
 	}
 
+	/* Pre formatter methods */
+
+	public function PreFormatters»GetTrim($Parameters) {
+		$_GET[$this->_Parameters['Name']] = trim($_GET[$this->_Parameters['Name']]);
+	}
+
+	public function PreFormatters»PostTrim($Parameters) {
+		$_POST[$this->_Parameters['Name']] = trim($_POST[$this->_Parameters['Name']]);
+	}
+
 	/* Validator methods */
 
 	public function Validators»GetDateTime($Parameters) {

@@ -12,34 +12,94 @@ class Action {
 
 	private $SubActions = [];
 
-	private $PreValidators = [];
+	private $PreValidators;
 
-	private $DbLocks = [];
+	private $PreFormatters;
 
-	private $Validators = [];
+	private $DbLocks;
 
-	private $PostValidators = [];
+	private $Validators;
+
+	private $Formatters;
 
 	public $IsExecuted = false;
 
 	/* Magic methods */
 
-	public function __construct($Owner, $Name, $Parameters) {
+	public function __construct($Owner, $Name) {
 		$this->Owner = $Owner;
 
 		$this->Name = $Name;
 
+		$GLOBALS['Application']->RegisterObject($this);
+	}
+
+	public function __toString() {
+		return $this->Owner.'/'.$this->Name.'Action';
+	}
+
+	/* Life cycle methods */
+
+	public function Initialize(array $Parameters) {
 		if(isset($Parameters['RealAction'])) {
 			$this->RealAction = $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['RealAction']);
 
 			$this->RealAction->AddSubAction($this);
 		}
 
-		$this->PreValidators = isset($Parameters['PreValidators']) ? $Parameters['PreValidators'] : $this->PreValidators;
+		$this->Initialize_PreValidators(isset($Parameters['PreValidators']) ? $Parameters['PreValidators'] : []);
 
-		$this->DbLocks = isset($Parameters['DbLocks']) ? $Parameters['DbLocks'] : $this->DbLocks;
+		$this->Initialize_PreFormatters(isset($Parameters['PreFormatters']) ? $Parameters['PreFormatters'] : []);
 
-		$this->Validators = isset($Parameters['Validators']) ? $Parameters['Validators'] : $this->Validators;
+		$this->Initialize_DbLocks(isset($Parameters['DbLocks']) ? $Parameters['DbLocks'] : []);
+
+		$this->Initialize_Validators(isset($Parameters['Validators']) ? $Parameters['Validators'] : []);
+
+		$this->Initialize_Formatters(isset($Parameters['Formatters']) ? $Parameters['Formatters'] : []);
+	}
+
+	public function Initialize_PreValidators(array $PreValidators) {
+		$this->PreValidators = $PreValidators;
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»PreValidators')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»PreValidators'}($this);
+		}
+	}
+
+	public function Initialize_PreFormatters(array $PreFormatters) {
+		$this->PreFormatters = $PreFormatters;
+
+		foreach($this->PreFormatters as $Name => &$Parameters) {
+			if(!isset($Parameters['Method'])) {
+				throw new ConfigException(
+					'Pre formatter method is not set.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'PreFormatter' => $Name,
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Parameters['Parameters'] = isset($Parameters['Parameters']) ? $Parameters['Parameters'] : [];
+		}
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»PreFormatters')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»PreFormatters'}($this);
+		}
+	}
+
+	public function Initialize_DbLocks(array $DbLocks) {
+		$this->DbLocks = $DbLocks;
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»DbLocks')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»DbLocks'}($this);
+		}
+	}
+
+	public function Initialize_Validators(array $Validators) {
+		$this->Validators = $Validators;
 
 		foreach($this->Validators as $Name => &$Parameters) {
 			if(!isset($Parameters['Method'])) {
@@ -54,27 +114,11 @@ class Action {
 				);
 			}
 
+			$Parameters['Parameters'] = isset($Parameters['Parameters']) ? $Parameters['Parameters'] : [];
+
 			$Parameters['AllowFailures'] = isset($Parameters['AllowFailures']) ? $Parameters['AllowFailures'] === '1' : true;
 
 			$Parameters['AbortOnFailure'] = isset($Parameters['AbortOnFailure']) ? $Parameters['AbortOnFailure'] === '1' : false;
-		}
-
-		$GLOBALS['Application']->RegisterObject($this);
-	}
-
-	public function __toString() {
-		return $this->Owner.'/'.$this->Name.'Action';
-	}
-
-	/* Life cycle methods */
-
-	public function Initialize() {
-		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»PreValidators')) {
-			$this->Owner->{'InitializeAction»'.$this->Name.'»PreValidators'}($this);
-		}
-
-		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»DbLocks')) {
-			$this->Owner->{'InitializeAction»'.$this->Name.'»DbLocks'}($this);
 		}
 
 		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»Validators')) {
@@ -82,13 +126,41 @@ class Action {
 		}
 	}
 
+	public function Initialize_Formatters(array $Formatters) {
+		$this->Formatters = $Formatters;
+
+		foreach($this->Formatters as $Name => &$Parameters) {
+			if(!isset($Parameters['Method'])) {
+				throw new ConfigException(
+					'Formatter method is not set.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'Formatter' => $Name,
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Parameters['Parameters'] = isset($Parameters['Parameters']) ? $Parameters['Parameters'] : [];
+		}
+
+		if(method_exists($this->Owner, 'InitializeAction»'.$this->Name.'»Formatters')) {
+			$this->Owner->{'InitializeAction»'.$this->Name.'»Formatters'}($this);
+		}
+	}
+
 	public function Execute() {
 		if($this->RealAction === null) {
 			if($this->PreValidate()) {
+				$this->PreFormat();
+
 				try {
 					$this->LockDbConnections();
 
 					if($this->Validate()) {
+						$this->Format();
+
 						$this->Owner->{'Actions»'.$this->Name}();
 
 						$this->IsExecuted = true;
@@ -225,6 +297,51 @@ class Action {
 		return true;
 	}
 
+	private function PreFormat() {
+		foreach($this->PreFormatters as $Name => $Parameters) {
+			$Object = isset($Parameters['Object']) ? $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['Object']) : $this->Owner;
+
+			if($Object === null) {
+				throw new RuntimeException(
+					'Unable to find pre formatter object.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'Validator' => $Name,
+						'Object' => $Parameters['Object'],
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Method = 'PreFormatters»'.$this->Name.'»'.$Parameters['Method'];
+
+			if(!method_exists($Object, $Method)) {
+				$Method = 'PreFormatters»'.$Parameters['Method'];
+			}
+
+			if(!method_exists($Object, $Method)) {
+				throw new RuntimeException(
+					'Unable to find pre formatter method.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'Validator' => $Name,
+						'Object' => $Object->__toString(),
+						'Method' => $Method,
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Object->$Method($Parameters['Parameters']);
+		}
+
+		foreach($this->SubActions as $SubAction) {
+			$SubAction->PreFormat();
+		}
+	}
+
 	private function LockDbConnections() {
 		foreach($this->DbLocks as $DbConnection => $Sources) {
 			$GLOBALS['Application']->GetDbConnection($DbConnection)->Lock($Sources);
@@ -288,7 +405,7 @@ class Action {
 				);
 			}
 
-			if(!$Object->$Method(isset($Parameters['Parameters']) ? $Parameters['Parameters'] : null)) {
+			if(!$Object->$Method($Parameters['Parameters'])) {
 				$IsValid = false;
 
 				if(isset($Parameters['ErrorMessage'])) {
@@ -321,6 +438,51 @@ class Action {
 		}
 
 		return $IsValid;
+	}
+
+	private function Format() {
+		foreach($this->Formatters as $Name => $Parameters) {
+			$Object = isset($Parameters['Object']) ? $GLOBALS['Application']->GetObject($this->Owner->__toString(), $Parameters['Object']) : $this->Owner;
+
+			if($Object === null) {
+				throw new RuntimeException(
+					'Unable to find formatter object.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'Validator' => $Name,
+						'Object' => $Parameters['Object'],
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Method = 'Formatters»'.$this->Name.'»'.$Parameters['Method'];
+
+			if(!method_exists($Object, $Method)) {
+				$Method = 'Formatters»'.$Parameters['Method'];
+			}
+
+			if(!method_exists($Object, $Method)) {
+				throw new RuntimeException(
+					'Unable to find formatter method.',
+					[
+						'Owner' => $this->Owner->__toString(),
+						'Action' => $this->Name,
+						'Validator' => $Name,
+						'Object' => $Object->__toString(),
+						'Method' => $Method,
+						'Parameters' => $Parameters,
+					]
+				);
+			}
+
+			$Object->$Method($Parameters['Parameters']);
+		}
+
+		foreach($this->SubActions as $SubAction) {
+			$SubAction->Format();
+		}
 	}
 }
 ?>
