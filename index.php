@@ -27,7 +27,7 @@ function P() {
 
 /* Execution of application */
 
-\Framework\Newnorth\Initialize();
+\Framework\Newnorth\Initialize(['Config.ini']);
 
 \Framework\Newnorth\Run();
 ?>

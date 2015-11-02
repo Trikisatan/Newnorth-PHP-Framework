@@ -76,7 +76,7 @@ require('DataReference.php');
 
 require('DataList.php');
 
-function Initialize() {
+function Initialize(array $ConfigFilePaths) {
 	session_start();
 
 	ob_start();
@@ -88,9 +88,9 @@ function Initialize() {
 	$GLOBALS['Objects'] = [];
 
 	try {
-		$GLOBALS['Config'] = new \Framework\Newnorth\Config('Config.ini');
+		$GLOBALS['Config'] = new \Framework\Newnorth\Config();
 
-		$GLOBALS['Config']->Initialize();
+		$GLOBALS['Config']->Initialize($ConfigFilePaths);
 
 		try {
 			$GLOBALS['Routing'] = new \Framework\Newnorth\Routing('Routes.json');

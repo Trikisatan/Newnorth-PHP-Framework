@@ -4,9 +4,7 @@ namespace Framework\Newnorth;
 class Config {
 	/* Instance variables */
 
-	public $FilePath;
-
-	public $Data;
+	public $Data = [];
 
 	public $System = '';
 
@@ -73,45 +71,56 @@ class Config {
 		],
 	];
 
-	/* Magic methods */
-
-	public function __construct($FilePath = null) {
-		$this->FilePath = $FilePath;
-	}
-
 	/* Instance methods */
 
-	public function Initialize() {
-		$this->Data = ParseIniFile($this->FilePath);
+	public function Initialize(array $FilePaths) {
+		foreach($FilePaths as $FilePath) {
+			$this->AppendData($this->Data, ParseIniFile($FilePath));
+		}
 
+		$this->Load();
+	}
+
+	public function AppendData(array &$A, array $B) {
+		foreach($B as $K => $V) {
+			if(is_array($V) && isset($A[$K]) && is_array($A[$K])) {
+				$this->AppendData($A[$K], $V);
+			}
+			else {
+				$A[$K] = $V;
+			}
+		}
+	}
+
+	public function Load() {
 		$this->System = isset($this->Data['System']) ? $this->Data['System'] : $this->System;
 
 		if(isset($this->Data['Defaults'])) {
-			$this->Initialize_Defaults($this->Data['Defaults']);
+			$this->Load_Defaults($this->Data['Defaults']);
 		}
 
 		if(isset($this->Data['Files'])) {
-			$this->Initialize_Files($this->Data['Files']);
+			$this->Load_Files($this->Data['Files']);
 		}
 
 		if(isset($this->Data['ErrorHandling'])) {
-			$this->Initialize_ErrorHandling($this->Data['ErrorHandling']);
+			$this->Load_ErrorHandling($this->Data['ErrorHandling']);
 		}
 
 		if(isset($this->Data['Translation'])) {
-			$this->Initialize_Translation($this->Data['Translation']);
+			$this->Load_Translation($this->Data['Translation']);
 		}
 
 		if(isset($this->Data['DbConnections'])) {
-			$this->Initialize_DbConnections($this->Data['DbConnections']);
+			$this->Load_DbConnections($this->Data['DbConnections']);
 		}
 	}
 
-	private function Initialize_Defaults($Section) {
+	private function Load_Defaults($Section) {
 		$this->Defaults['Locale'] = isset($Section['Locale']) ? $Section['Locale'] : $this->Defaults['Locale'];
 	}
 
-	private function Initialize_Files($Section) {
+	private function Load_Files($Section) {
 		$this->Files['Applications'] = isset($Section['Applications']) ? $Section['Applications'] : $this->Files['Applications'];
 
 		$this->Files['Layouts'] = isset($Section['Layouts']) ? $Section['Layouts'] : $this->Files['Layouts'];
@@ -129,7 +138,7 @@ class Config {
 		$this->Files['EMailTemplates'] = isset($Section['EMailTemplates']) ? $Section['EMailTemplates'] : $this->Files['EMailTemplates'];
 	}
 
-	private function Initialize_ErrorHandling($Section) {
+	private function Load_ErrorHandling($Section) {
 		$this->ErrorHandling['Log'] = isset($Section['Log']) ? $Section['Log'] : $this->ErrorHandling['Log'];
 
 		$this->ErrorHandling['LogMethods'] = isset($Section['LogMethods']) ? explode(';', $Section['LogMethods']) : $this->ErrorHandling['LogMethods'];
@@ -143,11 +152,11 @@ class Config {
 		$this->ErrorHandling['DisplayErrorMessageDetails'] = isset($Section['DisplayErrorMessageDetails']) ? $Section['DisplayErrorMessageDetails'] : $this->ErrorHandling['DisplayErrorMessageDetails'];
 
 		if(isset($Section['Pages'])) {
-			$this->Initialize_ErrorHandling_Pages($Section['Pages']);
+			$this->Load_ErrorHandling_Pages($Section['Pages']);
 		}
 	}
 
-	private function Initialize_ErrorHandling_Pages($Section) {
+	private function Load_ErrorHandling_Pages($Section) {
 		$this->ErrorHandling['Pages']['Error'] = isset($Section['Error']) ? $Section['Error'] : $this->ErrorHandling['Pages']['Error'];
 
 		$this->ErrorHandling['Pages']['Forbidden'] = isset($Section['Forbidden']) ? $Section['Forbidden'] : $this->ErrorHandling['Pages']['Forbidden'];
@@ -155,7 +164,7 @@ class Config {
 		$this->ErrorHandling['Pages']['NotFound'] = isset($Section['NotFound']) ? $Section['NotFound'] : $this->ErrorHandling['Pages']['NotFound'];
 	}
 
-	private function Initialize_Translation($Section) {
+	private function Load_Translation($Section) {
 		$this->Translation['ThrowException'] = isset($Section['ThrowException']) ? ($Section['ThrowException'] === '1') : $this->Translation['ThrowException'];
 
 		$this->Translation['Log'] = isset($Section['Log']) ? ($Section['Log'] === '1') : $this->Translation['Log'];
@@ -163,7 +172,7 @@ class Config {
 		$this->Translation['Report'] = isset($Section['Report']) ? ($Section['Report'] === '1') : $this->Translation['Report'];
 	}
 
-	private function Initialize_DbConnections($DbConnections) {
+	private function Load_DbConnections($DbConnections) {
 		$this->DbConnections = $DbConnections;
 	}
 }
