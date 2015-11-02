@@ -21,6 +21,7 @@ class HtmlRenderer {
 				ob_clean();
 
 				HtmlRenderer::RenderContents(
+					$GLOBALS['Application'],
 					$GLOBALS['Layout'],
 					$GLOBALS['Page'],
 					$Object,
@@ -39,6 +40,7 @@ class HtmlRenderer {
 			}
 			else {
 				HtmlRenderer::RenderContents(
+					$GLOBALS['Application'],
 					$GLOBALS['Layout'],
 					$GLOBALS['Page'],
 					$Object,
@@ -55,6 +57,7 @@ class HtmlRenderer {
 				ob_clean();
 
 				HtmlRenderer::RenderContents(
+					$GLOBALS['Application'],
 					$GLOBALS['Layout'],
 					$GLOBALS['Page'],
 					null,
@@ -73,6 +76,7 @@ class HtmlRenderer {
 			}
 			else {
 				HtmlRenderer::RenderContents(
+					$GLOBALS['Application'],
 					$GLOBALS['Layout'],
 					$GLOBALS['Page'],
 					null,
@@ -84,7 +88,7 @@ class HtmlRenderer {
 		}
 	}
 
-	private static function RenderContents($Layout, $Page, $Control, $Directory, $File, $Parameters) {
+	private static function RenderContents($Application, $Layout, $Page, $Control, $Directory, $File, $Parameters) {
 		include($Directory.$File);
 	}
 }
