@@ -326,6 +326,17 @@ abstract class ADataManager {
 			array_splice($Parameters, 0, 1);
 		}
 
+		if(isset($Parameters[1])) {
+			$Query->Limit($Parameters[0], $Parameters[1]);
+
+			array_splice($Parameters, 0, 2);
+		}
+		else if(isset($Parameters[0])) {
+			$Query->Limit($Parameters[0]);
+
+			array_splice($Parameters, 0, 1);
+		}
+
 		$Result = $this->FindAllByQuery($Query);
 
 		return true;
