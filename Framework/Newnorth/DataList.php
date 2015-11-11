@@ -159,7 +159,7 @@ class DataList {
 			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = true;
 		}
 
-		return $Result;
+		return 0 < count($Result);
 	}
 
 	public function Load_ATranslationDataManager(\Framework\Newnorth\DataType $DataType) {
@@ -190,7 +190,7 @@ class DataList {
 			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = true;
 		}
 
-		return $Items;
+		return 0 < count($Result);
 	}
 
 	public function Create(\Framework\Newnorth\DataType $DataType, array $Data, $Source) {
