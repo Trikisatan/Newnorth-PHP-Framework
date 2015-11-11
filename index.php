@@ -13,6 +13,18 @@ function A() {
 	return $GLOBALS['Application'];
 }
 
+function C($Key = null, $DefaultValue = null) {
+	if($Key === null) {
+		return $GLOBALS['Config'];
+	}
+	else if(isset($GLOBALS['Config']->Data[$Key])) {
+		return $GLOBALS['Config']->Data[$Key];
+	}
+	else {
+		return $DefaultValue;
+	}
+}
+
 function DM($Alias) {
 	return $GLOBALS['Application']->GetDataManager($Alias);
 }

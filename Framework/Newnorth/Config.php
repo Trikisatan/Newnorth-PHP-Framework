@@ -78,6 +78,8 @@ class Config {
 			$this->AppendData($this->Data, ParseIniFile($FilePath));
 		}
 
+		$this->MergeData($this->Data);
+
 		$this->Load();
 	}
 
@@ -88,6 +90,25 @@ class Config {
 			}
 			else {
 				$A[$K] = $V;
+			}
+		}
+	}
+
+	public function MergeData(array $Data, $Path = null) {
+		foreach($Data as $K => $V) {
+			if(is_array($V)) {
+				if($Path === null) {
+					$this->MergeData($V, $K);
+				}
+				else {
+					$this->MergeData($V, $Path.'/'.$K);
+				}
+			}
+			else if($Path === null) {
+				$this->Data[$K] = $V;
+			}
+			else {
+				$this->Data[$Path.'/'.$K] = $V;
 			}
 		}
 	}
