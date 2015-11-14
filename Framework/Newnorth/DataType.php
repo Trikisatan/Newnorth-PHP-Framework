@@ -181,18 +181,18 @@ class DataType {
 	}
 
 	private function OnDelete_DataList_Delete($DataList, $Source) {
-		$Items = $DataList->Load($this);
-
-		foreach($Items as $Item) {
-			$DataList->Delete($this, $Item, $Source);
+		if($DataList->Load($this, $Items)) {
+			foreach($Items as $Item) {
+				$DataList->Delete($this, $Item, $Source);
+			}
 		}
 	}
 
 	private function OnDelete_DataList_Remove($DataList, $Source) {
-		$Items = $DataList->Load($this);
-
-		foreach($Items as $Item) {
-			$DataList->Remove($this, $Item, $Source);
+		if($DataList->Load($this, $Items)) {
+			foreach($Items as $Item) {
+				$DataList->Remove($this, $Item, $Source);
+			}
 		}
 	}
 

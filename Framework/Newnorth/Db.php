@@ -568,6 +568,16 @@ class DbUpdateQuery {
 		if($Expression instanceof DbSource) {
 			return $this->Sources[] = $Source;
 		}
+		else if($Expression instanceof \Framework\Newnorth\ADataManager) {
+			if($Expression->Database === null) {
+				$Expression = '`'.$Expression->Table.'`';
+			}
+			else {
+				$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
+			}
+
+			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
+		}
 		else {
 			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
@@ -626,6 +636,16 @@ class DbDeleteQuery {
 	public function AddSource($Expression, $Alias = null, $Method = null, $Conditions = null) {
 		if($Expression instanceof DbSource) {
 			return $this->Sources[] = $Source;
+		}
+		else if($Expression instanceof \Framework\Newnorth\ADataManager) {
+			if($Expression->Database === null) {
+				$Expression = '`'.$Expression->Table.'`';
+			}
+			else {
+				$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
+			}
+
+			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}
 		else {
 			return $this->Sources[] = new DbSource($Expression, $Alias, $Method, $Conditions);
@@ -690,7 +710,12 @@ class DbSelectQuery {
 			$Source = $Expression;
 		}
 		else if($Expression instanceof \Framework\Newnorth\ADataManager) {
-			$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
+			if($Expression->Database === null) {
+				$Expression = '`'.$Expression->Table.'`';
+			}
+			else {
+				$Expression = '`'.$Expression->Database.'`.`'.$Expression->Table.'`';
+			}
 
 			$Source = new DbSource($Expression, $Alias, $Method, $Conditions);
 		}

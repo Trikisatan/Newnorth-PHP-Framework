@@ -111,13 +111,13 @@ class DataList {
 		}
 	}
 
-	public function Load(\Framework\Newnorth\DataType $DataType) {
+	public function Load(\Framework\Newnorth\DataType $DataType, &$Items = []) {
 		if($this->PluralAlias === null || !$DataType->{'Is'.$this->PluralAlias.'Loaded'}) {
 			if($this->ForeignDataManager instanceof \Framework\Newnorth\AStandardDataManager) {
-				return $this->Load_AStandardDataManager($DataType);
+				return $this->Load_AStandardDataManager($DataType, $Items);
 			}
 			else if($this->ForeignDataManager instanceof \Framework\Newnorth\ATranslationDataManager) {
-				return $this->Load_ATranslationDataManager($DataType);
+				return $this->Load_ATranslationDataManager($DataType, $Items);
 			}
 			else {
 				throw new RuntimeException(
@@ -131,7 +131,7 @@ class DataList {
 		}
 	}
 
-	public function Load_AStandardDataManager(\Framework\Newnorth\DataType $DataType) {
+	private function Load_AStandardDataManager(\Framework\Newnorth\DataType $DataType, &$Items) {
 		$Query = $this->ForeignDataManager->CreateSelectQuery();
 
 		$Query->Conditions = new \Framework\Newnorth\DbAnd();
@@ -151,18 +151,18 @@ class DataList {
 			}
 		}
 
-		$Result = $this->ForeignDataManager->FindAllByQuery($Query);
+		$Items = $this->ForeignDataManager->FindAllByQuery($Query);
 
 		if($this->PluralAlias !== null) {
-			$DataType->{$this->PluralAlias} = $Result;
+			$DataType->{$this->PluralAlias} = $Items;
 
 			$DataType->{'Is'.$this->PluralAlias.'Loaded'} = true;
 		}
 
-		return 0 < count($Result);
+		return 0 < count($Items);
 	}
 
-	public function Load_ATranslationDataManager(\Framework\Newnorth\DataType $DataType) {
+	private function Load_ATranslationDataManager(\Framework\Newnorth\DataType $DataType, &$Items) {
 		$Query = $this->ForeignDataManager->CreateSelectQuery();
 
 		$Query->Conditions = new \Framework\Newnorth\DbAnd();
