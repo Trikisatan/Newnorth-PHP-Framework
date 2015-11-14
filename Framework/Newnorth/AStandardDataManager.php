@@ -56,7 +56,12 @@ abstract class AStandardDataManager extends ADataManager {
 	public function InsertByArray(array $Data, $Source) {
 		$Query = new \Framework\Newnorth\DbInsertQuery();
 
-		$Query->Source = '`'.$this->Database.'`.`'.$this->Table.'`';
+		if($this->Database === null) {
+			$Query->Source = '`'.$this->Table.'`';
+		}
+		else {
+			$Query->Source = '`'.$this->Database.'`.`'.$this->Table.'`';
+		}
 
 		foreach($Data as $Column => $Value) {
 			$Query->AddColumn('`'.$Column.'`');
