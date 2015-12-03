@@ -41,7 +41,12 @@ abstract class ADataMember {
 	private function Log(\Framework\Newnorth\DataType $DataType, $Method, $Source) {
 		$Query = new \Framework\Newnorth\DbInsertQuery();
 
-		$Query->Source = '`'.$this->DataManager->Database.'`.`'.$this->DataManager->Table.'-Log`';
+		if($this->DataManager->Database === null) {
+			$Query->Source = '`'.$this->DataManager->Table.'»Log`';
+		}
+		else {
+			$Query->Source = '`'.$this->DataManager->Database.'`.`'.$this->DataManager->Table.'»Log`';
+		}
 
 		$Query->AddColumn('`PrimaryKey`');
 

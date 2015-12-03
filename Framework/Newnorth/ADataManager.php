@@ -63,7 +63,12 @@ abstract class ADataManager {
 	}
 
 	public function __toString() {
-		return '`'.$this->Database.'`.`'.$this->Table.'`';
+		if($this->Database === null) {
+			return '`'.$this->Table.'`';
+		}
+		else {
+			return '`'.$this->Database.'`.`'.$this->Table.'`';
+		}
 	}
 
 	/* Instance methods */

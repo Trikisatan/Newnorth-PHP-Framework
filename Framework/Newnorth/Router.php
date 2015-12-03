@@ -4,28 +4,14 @@ namespace Framework\Newnorth;
 class Router {
 	/* Static methods */
 
-	public static function RerouteErrorPage($Exception) {
-		header('HTTP/1.0 500 Internal Server Error');
-
-		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
-
-		$Parameters['Error'] = $Exception;
-
-		foreach($GLOBALS['Parameters'] as $Key => $Value) {
-			if(!isset($Parameters[$Key])) {
-				$Parameters[$Key] = $Value;
-			}
-		}
-
-		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
-		}
-
-		throw new RerouteException($Parameters);
-	}
-
 	public static function RerouteBadRequestPage() {
 		header('HTTP/1.0 400 Bad Request');
+
+		\Framework\Newnorth\Router::GetRoute(null, '/BadRequest', $Route);
+
+		$GLOBALS['Route'] = $Route;
+
+		$GLOBALS['RealRoute'] = $Route;
 
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['BadRequest'];
 
@@ -45,6 +31,12 @@ class Router {
 	public static function RerouteForbiddenPage() {
 		header('HTTP/1.0 403 Forbidden');
 
+		\Framework\Newnorth\Router::GetRoute(null, '/Forbidden', $Route);
+
+		$GLOBALS['Route'] = $Route;
+
+		$GLOBALS['RealRoute'] = $Route;
+
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Forbidden'];
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
@@ -63,7 +55,39 @@ class Router {
 	public static function RerouteNotFoundPage() {
 		header('HTTP/1.0 404 Not Found');
 
+		\Framework\Newnorth\Router::GetRoute(null, '/NotFound', $Route);
+
+		$GLOBALS['Route'] = $Route;
+
+		$GLOBALS['RealRoute'] = $Route;
+
 		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
+
+		foreach($GLOBALS['Parameters'] as $Key => $Value) {
+			if(!isset($Parameters[$Key])) {
+				$Parameters[$Key] = $Value;
+			}
+		}
+
+		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
+			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		}
+
+		throw new RerouteException($Parameters);
+	}
+
+	public static function RerouteErrorPage($Exception) {
+		header('HTTP/1.0 500 Internal Server Error');
+
+		\Framework\Newnorth\Router::GetRoute(null, '/Error', $Route);
+
+		$GLOBALS['Route'] = $Route;
+
+		$GLOBALS['RealRoute'] = $Route;
+
+		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+
+		$Parameters['Error'] = $Exception;
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -167,7 +191,9 @@ class Router {
 			);
 		}
 		else {
-			return $CurrentRoute;
+			$Route = $CurrentRoute;
+
+			return true;
 		}
 	}
 

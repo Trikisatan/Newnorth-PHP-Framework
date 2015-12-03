@@ -100,9 +100,11 @@ function Initialize(array $ConfigFilePaths) {
 			if(!\Framework\Newnorth\Router::ParseUrl($GLOBALS['Url'], $GLOBALS['Route'], $GLOBALS['RealRoute'], $GLOBALS['Parameters'])) {
 				header('HTTP/1.0 404 Not Found');
 
-				$GLOBALS['Route'] = null;
+				\Framework\Newnorth\Router::GetRoute(null, '/NotFound', $Route);
 
-				$GLOBALS['RealRoute'] = null;
+				$GLOBALS['Route'] = $Route;
+
+				$GLOBALS['RealRoute'] = $Route;
 
 				$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
 
@@ -120,9 +122,11 @@ function Initialize(array $ConfigFilePaths) {
 
 			header('HTTP/1.0 500 Internal Server Error');
 
-			$GLOBALS['Route'] = null;
+			\Framework\Newnorth\Router::GetRoute(null, '/Error', $Route);
 
-			$GLOBALS['RealRoute'] = null;
+			$GLOBALS['Route'] = $Route;
+
+			$GLOBALS['RealRoute'] = $Route;
 
 			$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
 
@@ -144,9 +148,11 @@ function Initialize(array $ConfigFilePaths) {
 
 		header('HTTP/1.0 500 Internal Server Error');
 
-		$GLOBALS['Route'] = null;
+		\Framework\Newnorth\Router::GetRoute(null, '/Error', $Route);
 
-		$GLOBALS['RealRoute'] = null;
+		$GLOBALS['Route'] = $Route;
+
+		$GLOBALS['RealRoute'] = $Route;
 
 		$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
 
