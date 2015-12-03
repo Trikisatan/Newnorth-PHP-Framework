@@ -27,6 +27,10 @@ class ResetControl extends \Framework\Newnorth\Control {
 			$this->_Parameters['Id'] = $this->_Parent->{'SetControl»Id»'.$this->_Alias}($this);
 		}
 
+		if(method_exists($this->_Parent, 'SetControl»Form»'.$this->_Alias)) {
+			$this->_Parameters['Form'] = $this->_Parent->{'SetControl»Form»'.$this->_Alias}($this);
+		}
+
 		if(method_exists($this->_Parent, 'SetControl»Name»'.$this->_Alias)) {
 			$this->_Parameters['Name'] = $this->_Parent->{'SetControl»Name»'.$this->_Alias}($this);
 		}
