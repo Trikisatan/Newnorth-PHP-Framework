@@ -13,7 +13,15 @@ function A() {
 	return $GLOBALS['Application'];
 }
 
-function C($Key = null, $DefaultValue = null) {
+function L() {
+	return $GLOBALS['Layout'];
+}
+
+function P() {
+	return $GLOBALS['Page'];
+}
+
+function Config($Key = null, $DefaultValue = null) {
 	if($Key === null) {
 		return $GLOBALS['Config'];
 	}
@@ -25,16 +33,12 @@ function C($Key = null, $DefaultValue = null) {
 	}
 }
 
-function DM($Alias) {
+function DataManager($Alias) {
 	return $GLOBALS['Application']->GetDataManager($Alias);
 }
 
-function L() {
-	return $GLOBALS['Layout'];
-}
-
-function P() {
-	return $GLOBALS['Page'];
+function CreateUrl($Path = '', array $Parameters = [], $QueryString = '') {
+	return \Framework\Newnorth\Router::CreateUrl($Path, $Parameters, $QueryString);
 }
 
 /* Execution of application */
