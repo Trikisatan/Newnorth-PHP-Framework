@@ -4,9 +4,19 @@ namespace Framework\Newnorth;
 class EMail {
 	/* Instance variables */
 
-	private $From = null;
+	private $SMTP = [
+		'Host' => null,
+		'Port' => null,
+		'Username' => null,
+		'Password' => null,
+	];
 
-	private $ReplyTo = null;
+	private $From = [
+		'EMail' => null,
+		'Name' => null,
+	];
+
+	private $ReplyTo = [];
 
 	private $Subject = null;
 
@@ -18,12 +28,88 @@ class EMail {
 
 	/* Instance methods */
 
-	public function SetFrom($From) {
-		$this->From = $From;
+	public function GetSMTP() {
+		return [
+			'Host' => $this->GetSMTPHost(),
+			'Port' => $this->GetSMTPPort(),
+			'Username' => $this->GetSMTPUsername(),
+			'Password' => $this->GetSMTPPassword(),
+		];
 	}
 
-	public function SetReplyTo($ReplyTo) {
-		$this->ReplyTo = $ReplyTo;
+	public function GetSMTPHost() {
+		if($this->SMTP['Host'] !== null) {
+			return $this->SMTP['Host'];
+		}
+		else {
+			return Config('SMTP/Host', null);
+		}
+	}
+
+	public function GetSMTPPort() {
+		if($this->SMTP['Port'] !== null) {
+			return $this->SMTP['Port'];
+		}
+		else {
+			return Config('SMTP/Port', null);
+		}
+	}
+
+	public function GetSMTPUsername() {
+		if($this->SMTP['Username'] !== null) {
+			return $this->SMTP['Username'];
+		}
+		else {
+			return Config('SMTP/Username', null);
+		}
+	}
+
+	public function GetSMTPPassword() {
+		if($this->SMTP['Password'] !== null) {
+			return $this->SMTP['Password'];
+		}
+		else {
+			return Config('SMTP/Password', null);
+		}
+	}
+
+	public function SetSMTP($Host = null, $Port = null, $Username = null, $Password = null) {
+		$this->SMTP['Host'] = $Host;
+
+		$this->SMTP['Port'] = $Port;
+
+		$this->SMTP['Username'] = $Username;
+
+		$this->SMTP['Password'] = $Password;
+	}
+
+	public function SetSMTPHost($Host = null) {
+		$this->SMTP['Host'] = $Host;
+	}
+
+	public function SetSMTPPort($Port = null) {
+		$this->SMTP['Port'] = $Port;
+	}
+
+	public function SetSMTPUsername($Username = null) {
+		$this->SMTP['Username'] = $Username;
+	}
+
+	public function SetSMTPPassword($Password = null) {
+		$this->SMTP['Password'] = $Password;
+	}
+
+	public function SetFrom($EMail, $Name) {
+		$this->From['EMail'] = $EMail;
+
+		$this->From['Name'] = $Name;
+	}
+
+	public function AddReplyTo($EMail, $Name) {
+		$this->ReplyTo[] = [
+			'EMail' => $EMail,
+			'Name' => $Name,
+		];
 	}
 
 	public function SetTemplate($Template, $Variables = []) {
@@ -89,80 +175,58 @@ class EMail {
 		}
 	}
 
-	public function AddAttachment($Name, $Type, $Contents) {
-		$this->Attachments[] = ['Name' => $Name, 'Type' => $Type, 'Contents' => $Contents];
-	}
-
 	public function Send($To) {
-		$Rel = 'PHP-rel-'.md5(rand());
-		$Alt = 'PHP-alt-'.md5(rand());
-		$Newline = "\r\n";
+		$mail = new \PHPMailer();
 
-		$Headers =
-			'Content-Type: multipart/related; boundary="'.$Rel.'"'.$Newline.
-			'Date: '.date('r');
+		$SMTP = $this->GetSMTP();
 
-		if($this->From !== null) {
-			$Headers .= "\r\n".'From: '.$this->From;
-		}
+		if($SMTP['Host'] !== null && $SMTP['Port'] !== null) {
+			$mail->isSMTP();
 
-		if($this->ReplyTo !== null) {
-			$Headers .= "\r\n".'Reply-To: '.$this->ReplyTo;
-		}
+			$mail->Host = $SMTP['Host'];
 
-		$Message =
-			'--'.$Rel.$Newline.
-			'Content-Type: multipart/alternative; boundary="'.$Alt.'"'.$Newline
-		;
+			$mail->Port = $SMTP['Port'];
 
-		if($this->Text !== null) {
-			$Message .=
-				'--'.$Alt.$Newline.
-				'Content-Type: text/plain; charset=UTF-8'.$Newline.
-				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Text).$Newline.$Newline
-			;
-		}
+			if($SMTP['Username'] !== null && $SMTP['Password'] !== NULL) {
+				$mail->SMTPAuth = true;
 
-		if($this->Html !== null) {
-			$Message .=
-				'--'.$Alt.$Newline.
-				'Content-Type: text/html; charset=UTF-8'.$Newline.
-				'Content-Transfer-Encoding: quoted-printable'.$Newline.$Newline.
-				quoted_printable_encode($this->Html).$Newline.$Newline
-			;
-		}
+				$mail->Username = $SMTP['Username'];
 
-		$Message .=
-			'--'.$Alt.'--'.$Newline
-		;
-
-		foreach($this->Attachments as $Attachment) {
-			$Message .=
-				'--'.$Rel.$Newline.
-				'Content-Type: '.$Attachment['Type'].'; name="'.$Attachment['Name'].'"'.$Newline.
-				'Content-Transfer-Encoding: base64'.$Newline.
-				'Content-Disposition: attachment'.$Newline.$Newline.
-				chunk_split(base64_encode($Attachment['Contents'])).$Newline.$Newline
-			;
-		}
-
-		$Message .=
-			'--'.$Rel.'--'
-		;
-
-		if(is_array($To)) {
-			$Status = true;
-
-			for($I = 0; $I < count($To); ++$I) {
-				$Status = $Status && mail($To[$I], $this->Subject, $Message, $Headers);
+				$mail->Password = $SMTP['Password'];
 			}
-
-			return $Status;
 		}
 		else {
-			return mail($To, $this->Subject, $Message, $Headers);
+			$mail->isMail();
 		}
+
+		$mail->CharSet = 'UTF-8';
+
+		$mail->From = $this->From['EMail'];
+
+		$mail->FromName = $this->From['Name'];
+
+		foreach($this->ReplyTo as $ReplyTo) {
+			$mail->addReplyTo($ReplyTo['EMail'], $ReplyTo['Name']);
+		}
+
+		$mail->Subject = $this->Subject;
+
+		$mail->msgHTML($this->Html);
+
+		$mail->AltBody = $this->Text;
+
+		//$mail->AddAttachment("images/phpmailer.gif");             // attachment
+
+		if(is_array($To)) {
+			for($I = 0; $I < count($To); ++$I) {
+				$mail->AddAddress($To[$I]);
+			}
+		}
+		else {
+			$mail->AddAddress($To);
+		}
+
+		return $mail->Send();
 	}
 }
 ?>
