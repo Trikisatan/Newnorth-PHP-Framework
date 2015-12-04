@@ -32,7 +32,7 @@ class DataType {
 
 	public function __call($Function, $Parameters) {
 		if(preg_match('/^Load([A-Z][0-9A-Za-z]+)$/', $Function, $Matches) === 1) {
-			if($this->Load($Matches[1], $Result)) {
+			if($this->Load($Matches[1], $Parameters, $Result)) {
 				return $Result;
 			}
 		}
@@ -126,14 +126,14 @@ class DataType {
 
 	/* Instance methods */
 
-	private function Load($Alias, &$Result) {
+	private function Load($Alias, $Parameters, &$Result) {
 		if(isset($this->_DataManager->DataReferences[$Alias])) {
 			$Result = $this->_DataManager->DataReferences[$Alias]->Load($this);
 
 			return true;
 		}
 		else if(isset($this->_DataManager->DataLists[$Alias])) {
-			$Result = $this->_DataManager->DataLists[$Alias]->Load($this);
+			$Result = $this->_DataManager->DataLists[$Alias]->Load($this, $Parameters);
 
 			return true;
 		}
@@ -181,7 +181,7 @@ class DataType {
 	}
 
 	private function OnDelete_DataList_Delete($DataList, $Source) {
-		if($DataList->Load($this, $Items)) {
+		if($DataList->Load($this, [], $Items)) {
 			foreach($Items as $Item) {
 				$DataList->Delete($this, $Item, $Source);
 			}
@@ -189,7 +189,7 @@ class DataType {
 	}
 
 	private function OnDelete_DataList_Remove($DataList, $Source) {
-		if($DataList->Load($this, $Items)) {
+		if($DataList->Load($this, [], $Items)) {
 			foreach($Items as $Item) {
 				$DataList->Remove($this, $Item, $Source);
 			}
