@@ -6,12 +6,6 @@ class Config {
 
 	public $Data = [];
 
-	public $System = '';
-
-	public $Defaults = [
-		'Locale' => '',
-	];
-
 	public $Files = [
 		'Applications' => '',
 		'Layouts' => '',
@@ -74,13 +68,17 @@ class Config {
 	/* Instance methods */
 
 	public function Initialize(array $FilePaths) {
+		$Data = [];
+
 		foreach($FilePaths as $FilePath) {
-			$this->AppendData($this->Data, ParseIniFile($FilePath));
+			$FileData = file_get_contents($FilePath);
+
+			$FileData = json_decode($FileData, true);
+
+			$this->AppendData($Data, $FileData);
 		}
 
-		$this->MergeData($this->Data);
-
-		$this->Load();
+		$this->MergeData($Data);
 	}
 
 	public function AppendData(array &$A, array $B) {

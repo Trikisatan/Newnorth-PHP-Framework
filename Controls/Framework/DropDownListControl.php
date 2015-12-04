@@ -6,7 +6,7 @@ class DropDownListControl extends \Framework\Newnorth\Control {
 
 	public function __construct($Parent, $Directory, $Namespace, $Name, $Alias, $Parameters) {
 		if($this->_Directory === null) {
-			$this->_Directory = $GLOBALS['Config']->Files['Controls'].'Framework/';
+			$this->_Directory = Config('Files/Controls').'Framework/';
 		}
 
 		if($this->_Namespace === null) {

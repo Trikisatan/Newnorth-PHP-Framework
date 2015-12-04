@@ -5,7 +5,7 @@ class ErrorHandler {
 	/* Static methods */
 
 	public static function HandleException($Exception) {
-		$Exception = ErrorHandler::FormatException($Exception);
+		$Exception = ErrorHandler::FormatException($Exception);var_dump($Exception);die();
 
 		if($GLOBALS['Config']->ErrorHandling['Log']) {
 			foreach($GLOBALS['Config']->ErrorHandling['LogMethods'] as $LogMethod) {

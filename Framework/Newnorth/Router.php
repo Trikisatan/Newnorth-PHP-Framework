@@ -21,8 +21,8 @@ class Router {
 			}
 		}
 
-		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		if(!isset($Parameters['Locale']) && Config»IsNotEmpty('Defaults/Locale')) {
+			$Parameters['Locale'] = Config('Defaults/Locale');
 		}
 
 		throw new RerouteException($Parameters);
@@ -45,8 +45,8 @@ class Router {
 			}
 		}
 
-		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		if(!isset($Parameters['Locale']) && Config»IsNotEmpty('Defaults/Locale')) {
+			$Parameters['Locale'] = Config('Defaults/Locale');
 		}
 
 		throw new RerouteException($Parameters);
@@ -69,8 +69,8 @@ class Router {
 			}
 		}
 
-		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		if(!isset($Parameters['Locale']) && Config»IsNotEmpty('Defaults/Locale')) {
+			$Parameters['Locale'] = Config('Defaults/Locale');
 		}
 
 		throw new RerouteException($Parameters);
@@ -95,8 +95,8 @@ class Router {
 			}
 		}
 
-		if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-			$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+		if(!isset($Parameters['Locale']) && Config»IsNotEmpty('Defaults/Locale')) {
+			$Parameters['Locale'] = Config('Defaults/Locale');
 		}
 
 		throw new RerouteException($Parameters);
@@ -149,8 +149,8 @@ class Router {
 
 			$Parameters['Page'] = $RealRoute->FullName;
 
-			if(!isset($Parameters['Locale']) && isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-				$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			if(!isset($Parameters['Locale']) && Config»IsNotEmpty('Defaults/Locale')) {
+				$Parameters['Locale'] = Config('Defaults/Locale');
 			}
 
 			return true;

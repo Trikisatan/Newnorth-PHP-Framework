@@ -38,9 +38,11 @@ class Layout {
 	}
 
 	private static function ParsePath($Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
-		$FilePath = $GLOBALS['Config']->Files['Layouts'].$Path.'Layout.php';
+		$FilePath = Config('Files/Layouts', '').$Path.'Layout.php';
 
-		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
+		$Directory = strrpos($FilePath, '/');
+
+		$Directory = ($Directory === false) ? '' : substr($FilePath, 0, strrpos($FilePath, '/') + 1);
 
 		$ClassName = '\\'.str_replace('/', '\\', $Path).'Layout';
 

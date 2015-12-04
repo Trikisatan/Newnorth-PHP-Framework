@@ -1,11 +1,11 @@
 <?
-if($GLOBALS['Config']->ErrorHandling['DisplayErrorMessages']) {
+if(Config('ErrorHandling/DisplayErrorMessages', false)) {
 	?>
 	<b><?=$GLOBALS['Parameters']['Error']['Type']?></b><br />
 	<?=htmlspecialchars($GLOBALS['Parameters']['Error']['Message'])?><br />
 	<br />
 	<?
-	if($GLOBALS['Config']->ErrorHandling['DisplayErrorMessageDetails']) {
+	if(Config('ErrorHandling/DisplayErrorMessageDetails', false)) {
 		?>
 		<b>Details</b><br />
 		<?=str_replace(["\n", '    '], ['<br />', '&nbsp;&nbsp;&nbsp;&nbsp;'], print_r($GLOBALS['Parameters']['Error'], true))?>

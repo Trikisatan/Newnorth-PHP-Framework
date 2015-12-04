@@ -38,9 +38,11 @@ class Page {
 	}
 
 	private static function ParsePath($Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
-		$FilePath = $GLOBALS['Config']->Files['Pages'].$Path.'Page.php';
+		$FilePath = Config('Files/Pages', '').$Path.'Page.php';
 
-		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
+		$Directory = strrpos($FilePath, '/');
+
+		$Directory = ($Directory === false) ? '' : substr($FilePath, 0, strrpos($FilePath, '/') + 1);
 
 		$ClassName = '\\'.str_replace('/', '\\', $Path).'Page';
 

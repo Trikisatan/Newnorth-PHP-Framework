@@ -111,6 +111,10 @@ class Route {
 
 	/* Instance methods */
 
+	public function AddRoute($Name, $Data) {
+		$this->Routes[$Name] = new Route($this, $Name, $Data);
+	}
+
 	public function ParseUrl($Url, &$Route, Route &$RealRoute = null, array &$Parameters) {
 		if($this->RealRoute !== null && !Router::GetRoute($this, $this->RealRoute, $RealRoute)) {
 			throw new RuntimeException(
@@ -372,8 +376,8 @@ class Route {
 		else {
 			if(0 < count($this->TranslatedReversablePatterns)) {
 				if(!isset($Parameters['Locale'])) {
-					if(isset($GLOBALS['Config']->Defaults['Locale'][0])) {
-						$Parameters['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+					if(Config»IsNotEmpty('Defaults/Locale')) {
+						$Parameters['Locale'] = Config('Defaults/Locale');
 					}
 					else {
 						throw new RuntimeException('Locale not set.');

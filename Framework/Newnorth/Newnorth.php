@@ -106,14 +106,14 @@ function Initialize(array $ConfigFilePaths) {
 
 				$GLOBALS['RealRoute'] = $Route;
 
-				$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
+				$GLOBALS['Parameters'] = [];
 
 				$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
 
 				$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 
 				if(!isset($GLOBALS['Parameters']['Locale'])) {
-					$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+					$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
 				}
 			}
 		}
@@ -128,14 +128,14 @@ function Initialize(array $ConfigFilePaths) {
 
 			$GLOBALS['RealRoute'] = $Route;
 
-			$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+			$GLOBALS['Parameters'] = [];
 
 			$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
 
 			$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 
 			if(!isset($GLOBALS['Parameters']['Locale'])) {
-				$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+				$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
 			}
 
 			$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);
@@ -154,14 +154,14 @@ function Initialize(array $ConfigFilePaths) {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$GLOBALS['Parameters'] = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+		$GLOBALS['Parameters'] = [];
 
 		$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
 
 		$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
 
 		if(!isset($GLOBALS['Parameters']['Locale'])) {
-			$GLOBALS['Parameters']['Locale'] = $GLOBALS['Config']->Defaults['Locale'];
+			$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
 		}
 
 		$GLOBALS['Parameters']['Error'] = \Framework\Newnorth\ErrorHandler::FormatException($Exception);

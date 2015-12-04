@@ -39,7 +39,7 @@ abstract class Control {
 	}
 
 	private static function ParsePath($Parent, $Path, &$FilePath, &$Directory, &$ClassName, &$Namespace, &$Name) {
-		$FilePath = $GLOBALS['Config']->Files['Controls'].$Path.'Control.php';
+		$FilePath = Config('Files/Controls').$Path.'Control.php';
 
 		$Directory = substr($FilePath, 0, strrpos($FilePath, '/') + 1);
 

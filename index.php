@@ -21,16 +21,29 @@ function P() {
 	return $GLOBALS['Page'];
 }
 
-function Config($Key = null, $DefaultValue = null) {
-	if($Key === null) {
-		return $GLOBALS['Config'];
-	}
-	else if(isset($GLOBALS['Config']->Data[$Key])) {
+function Config($Key, $DefaultValue = null) {
+	if(isset($GLOBALS['Config']->Data[$Key])) {
 		return $GLOBALS['Config']->Data[$Key];
 	}
 	else {
 		return $DefaultValue;
 	}
+}
+
+function Config»Exist($Key) {
+	return isset($GLOBALS['Config']->Data[$Key]);
+}
+
+function Config»DoesNotExist($Key) {
+	return !isset($GLOBALS['Config']->Data[$Key]);
+}
+
+function Config»IsEmpty($Key) {
+	return !isset($GLOBALS['Config']->Data[$Key][0]);
+}
+
+function Config»IsNotEmpty($Key) {
+	return isset($GLOBALS['Config']->Data[$Key][0]);
 }
 
 function DataManager($Alias) {
@@ -43,7 +56,7 @@ function CreateUrl($Path = '', array $Parameters = [], $QueryString = '') {
 
 /* Execution of application */
 
-\Framework\Newnorth\Initialize(['Config.ini']);
+\Framework\Newnorth\Initialize(['Config.json']);
 
 \Framework\Newnorth\Run();
 ?>

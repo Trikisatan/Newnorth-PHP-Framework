@@ -66,11 +66,11 @@ abstract class ADataMember {
 
 		$Query->AddColumn('`System`');
 
-		$Query->AddValue('"'.$GLOBALS['Config']->System.'"');
+		$Query->AddValue('"'.Config('System/Name', '').'"');
 
 		$Query->AddColumn('`Source`');
 
-		$Query->AddValue('"'.$Source.'"');
+		$Query->AddValue('"'.Config('System/Source', '').'"');
 
 		$Query->AddColumn('`Time`');
 
