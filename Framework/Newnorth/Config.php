@@ -75,7 +75,17 @@ class Config {
 
 			$FileData = json_decode($FileData, true);
 
-			$this->AppendData($Data, $FileData);
+			if($FileData === null) {
+				throw new ConfigException(
+					'Unable to parse config file.',
+					[
+						'File path' => $FilePath,
+					]
+				);
+			}
+			else {
+				$this->AppendData($Data, $FileData);
+			}
 		}
 
 		$this->MergeData($Data);
@@ -94,6 +104,13 @@ class Config {
 
 	public function MergeData(array $Data, $Path = null) {
 		foreach($Data as $K => $V) {
+			if($Path === null) {
+				$this->Data[$K] = $V;
+			}
+			else {
+				$this->Data[$Path.'/'.$K] = $V;
+			}
+
 			if(is_array($V)) {
 				if($Path === null) {
 					$this->MergeData($V, $K);
@@ -101,12 +118,6 @@ class Config {
 				else {
 					$this->MergeData($V, $Path.'/'.$K);
 				}
-			}
-			else if($Path === null) {
-				$this->Data[$K] = $V;
-			}
-			else {
-				$this->Data[$Path.'/'.$K] = $V;
 			}
 		}
 	}

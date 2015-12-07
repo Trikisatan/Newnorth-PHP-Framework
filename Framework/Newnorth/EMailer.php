@@ -4,18 +4,16 @@ namespace Framework\Newnorth;
 class EMailer {
 	/* Static methods */
 
-	public static function ErrorReport($Data) {
+	public static function Log($Data) {
 		$EMail = new EMail();
 
-		if(Config»IsNotEmpty('EMailer/ErrorReport/From')) {
-			$EMail->SetFrom(Config('EMailer/ErrorReport/From'));
-		}
+		$EMail->SetFrom(Config('EMailer/Log/From'));
 
 		$EMail->SetSubject($Data['Type'].': '.$Data['Url']);
 
 		$EMail->SetText(print_r($Data, true));
 
-		@$EMail->Send(Config('EMailer/ErrorReport/To'));
+		@$EMail->Send(Config('EMailer/Log/To'));
 	}
 }
 ?>

@@ -13,7 +13,7 @@ class Router {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['BadRequest'];
+		$Parameters = $Route->Parameters;
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -37,7 +37,7 @@ class Router {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Forbidden'];
+		$Parameters = $Route->Parameters;
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -61,7 +61,7 @@ class Router {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['NotFound'];
+		$Parameters = $Route->Parameters;
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -85,7 +85,7 @@ class Router {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$Parameters = $GLOBALS['Config']->ErrorHandling['Pages']['Error'];
+		$Parameters = $Route->Parameters;
 
 		$Parameters['Error'] = $Exception;
 

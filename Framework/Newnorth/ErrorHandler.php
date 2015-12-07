@@ -5,21 +5,17 @@ class ErrorHandler {
 	/* Static methods */
 
 	public static function HandleException($Exception) {
-		$Exception = ErrorHandler::FormatException($Exception);var_dump($Exception);die();
+		$Exception = ErrorHandler::FormatException($Exception);
 
-		if($GLOBALS['Config']->ErrorHandling['Log']) {
-			foreach($GLOBALS['Config']->ErrorHandling['LogMethods'] as $LogMethod) {
+		if(Config('Logging/Errors', false)) {
+			foreach(Config('Logging/Methods', []) as $LogMethod) {
 				call_user_func($LogMethod, $Exception);
 			}
 		}
 
-		if($GLOBALS['Config']->ErrorHandling['Report']) {
-			foreach($GLOBALS['Config']->ErrorHandling['ReportMethods'] as $ReportMethod) {
-				call_user_func($ReportMethod, $Exception);
-			}
-		}
-
 		ob_clean();
+
+		die($GLOBALS['Parameters']['Page']);
 
 		if($GLOBALS['Parameters']['Page'] !== $GLOBALS['Config']->ErrorHandling['Pages']['Error']['Page']) {
 			Router::RerouteErrorPage($Exception);

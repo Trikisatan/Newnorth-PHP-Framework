@@ -106,11 +106,25 @@ function Initialize(array $ConfigFilePaths) {
 
 				$GLOBALS['RealRoute'] = $Route;
 
-				$GLOBALS['Parameters'] = [];
+				$GLOBALS['Parameters'] = $Route->Parameters;
 
-				$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+				$GLOBALS['Parameters']['Route'] = $Route->FullName;
 
-				$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+				$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
+
+				if(!isset($GLOBALS['Parameters']['Application'][0])) {
+					$GLOBALS['Parameters']['Application'] = 'Default';
+				}
+
+				if(!isset($GLOBALS['Parameters']['Layout'][0])) {
+					$GLOBALS['Parameters']['Layout'] = 'Default';
+				}
+
+				$GLOBALS['Parameters']['Page'] = $Route->FullName;
+
+				if(!isset($GLOBALS['Parameters']['Locale'])) {
+					$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
+				}
 
 				if(!isset($GLOBALS['Parameters']['Locale'])) {
 					$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
@@ -128,11 +142,21 @@ function Initialize(array $ConfigFilePaths) {
 
 			$GLOBALS['RealRoute'] = $Route;
 
-			$GLOBALS['Parameters'] = [];
+			$GLOBALS['Parameters'] = $Route->Parameters;
 
-			$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+			$GLOBALS['Parameters']['Route'] = $Route->FullName;
 
-			$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+			$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
+
+			if(!isset($GLOBALS['Parameters']['Application'][0])) {
+				$GLOBALS['Parameters']['Application'] = 'Default';
+			}
+
+			if(!isset($GLOBALS['Parameters']['Layout'][0])) {
+				$GLOBALS['Parameters']['Layout'] = 'Default';
+			}
+
+			$GLOBALS['Parameters']['Page'] = $Route->FullName;
 
 			if(!isset($GLOBALS['Parameters']['Locale'])) {
 				$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');
@@ -142,8 +166,6 @@ function Initialize(array $ConfigFilePaths) {
 		}
 	}
 	catch(\Framework\Newnorth\Exception $Exception) {
-		$GLOBALS['Config'] = new \Framework\Newnorth\Config();
-
 		$GLOBALS['Routing'] = new \Framework\Newnorth\Routing();
 
 		header('HTTP/1.0 500 Internal Server Error');
@@ -154,11 +176,21 @@ function Initialize(array $ConfigFilePaths) {
 
 		$GLOBALS['RealRoute'] = $Route;
 
-		$GLOBALS['Parameters'] = [];
+		$GLOBALS['Parameters'] = $Route->Parameters;
 
-		$GLOBALS['Parameters']['Route'] = $GLOBALS['Parameters']['Page'];
+		$GLOBALS['Parameters']['Route'] = $Route->FullName;
 
-		$GLOBALS['Parameters']['RealRoute'] = $GLOBALS['Parameters']['Page'];
+		$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
+
+		if(!isset($GLOBALS['Parameters']['Application'][0])) {
+			$GLOBALS['Parameters']['Application'] = 'Default';
+		}
+
+		if(!isset($GLOBALS['Parameters']['Layout'][0])) {
+			$GLOBALS['Parameters']['Layout'] = 'Default';
+		}
+
+		$GLOBALS['Parameters']['Page'] = $Route->FullName;
 
 		if(!isset($GLOBALS['Parameters']['Locale'])) {
 			$GLOBALS['Parameters']['Locale'] = Config('Defaults/Locale');

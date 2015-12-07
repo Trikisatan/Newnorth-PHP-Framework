@@ -159,45 +159,19 @@ class Application {
 		$MissingTranslations = Translator::GetMissingTranslations($Output);
 
 		if(0 < count($MissingTranslations)) {
-			if($GLOBALS['Config']->Translation['ThrowException']) {
-				throw new ConfigException(
-					'Translation(s) not found',
-					[
-						'Missing translations' => $MissingTranslations,
-					]
-				);
-			}
-			else {
-				if($GLOBALS['Config']->Translation['Log']) {
-					foreach($GLOBALS['Config']->ErrorHandling['LogMethods'] as $LogMethod) {
-						call_user_func(
-							$LogMethod,
-							[
-								'Type' => 'Translation(s) not found',
-								'Message' => 'Unable to translate content.',
-								'Request URI' => $_SERVER['REQUEST_URI'],
-								'Request method' => $_SERVER['REQUEST_METHOD'],
-								'Request data' => $_POST,
-								'Missing translations' => $MissingTranslations,
-							]
-						);
-					}
-				}
-
-				if($GLOBALS['Config']->Translation['Report']) {
-					foreach($GLOBALS['Config']->ErrorHandling['ReportMethods'] as $ReportMethod) {
-						call_user_func(
-							$ReportMethod,
-							[
-								'Type' => 'Translation(s) not found',
-								'Message' => 'Unable to translate content.',
-								'Request URI' => $_SERVER['REQUEST_URI'],
-								'Request method' => $_SERVER['REQUEST_METHOD'],
-								'Request data' => $_POST,
-								'Missing translations' => $MissingTranslations,
-							]
-						);
-					}
+			if(Config('Logging/MissingTranslations', false)) {
+				foreach(Config('Logging/Methods', []) as $LogMethod) {
+					call_user_func(
+						$LogMethod,
+						[
+							'Type' => 'Translation(s) not found',
+							'Message' => 'Unable to translate content.',
+							'Request URI' => $_SERVER['REQUEST_URI'],
+							'Request method' => $_SERVER['REQUEST_METHOD'],
+							'Request data' => $_POST,
+							'Translations' => $MissingTranslations,
+						]
+					);
 				}
 			}
 		}
@@ -243,8 +217,8 @@ class Application {
 		if(isset($this->DbConnections[$Alias])) {
 			return $this->DbConnections[$Alias];
 		}
-		else if(isset($GLOBALS['Config']->DbConnections[$Alias])) {
-			$Parameters = $GLOBALS['Config']->DbConnections[$Alias];
+		else if(Config»Exist('DbConnections/'.$Alias)) {
+			$Parameters = Config('DbConnections/'.$Alias);
 
 			if(!isset($Parameters['Type'])) {
 				throw new ConfigException(
@@ -284,7 +258,7 @@ class Application {
 		else {
 			$DataManager = '\\'.str_replace('/', '\\', $Alias).'DataManager';
 
-			$File = $GLOBALS['Config']->Files['DataManagers'].$Alias.'DataManager.php';
+			$File = Config('Files/DataManagers').$Alias.'DataManager.php';
 
 			if(class_exists($DataManager, false)) {
 				$DataManager = new $DataManager();
@@ -317,7 +291,7 @@ class Application {
 
 			$DataType = '\\'.str_replace('/', '\\', $Alias).'DataType';
 
-			$File = $GLOBALS['Config']->Files['DataTypes'].$Alias.'DataType.php';
+			$File = Config('Files/DataTypes').$Alias.'DataType.php';
 
 			if(class_exists($DataType, false)) {
 				$DataManager->DataType = $DataType;
