@@ -108,10 +108,6 @@ function Initialize(array $ConfigFilePaths) {
 
 				$GLOBALS['Parameters'] = $Route->Parameters;
 
-				$GLOBALS['Parameters']['Route'] = $Route->FullName;
-
-				$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
-
 				if(!isset($GLOBALS['Parameters']['Application'][0])) {
 					$GLOBALS['Parameters']['Application'] = 'Default';
 				}
@@ -144,10 +140,6 @@ function Initialize(array $ConfigFilePaths) {
 
 			$GLOBALS['Parameters'] = $Route->Parameters;
 
-			$GLOBALS['Parameters']['Route'] = $Route->FullName;
-
-			$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
-
 			if(!isset($GLOBALS['Parameters']['Application'][0])) {
 				$GLOBALS['Parameters']['Application'] = 'Default';
 			}
@@ -177,10 +169,6 @@ function Initialize(array $ConfigFilePaths) {
 		$GLOBALS['RealRoute'] = $Route;
 
 		$GLOBALS['Parameters'] = $Route->Parameters;
-
-		$GLOBALS['Parameters']['Route'] = $Route->FullName;
-
-		$GLOBALS['Parameters']['RealRoute'] = $Route->FullName;
 
 		if(!isset($GLOBALS['Parameters']['Application'][0])) {
 			$GLOBALS['Parameters']['Application'] = 'Default';

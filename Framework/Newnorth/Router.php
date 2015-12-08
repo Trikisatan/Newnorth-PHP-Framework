@@ -15,6 +15,8 @@ class Router {
 
 		$Parameters = $Route->Parameters;
 
+		$Parameters['Page'] = $Route->FullName;
+
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
 				$Parameters[$Key] = $Value;
@@ -38,6 +40,8 @@ class Router {
 		$GLOBALS['RealRoute'] = $Route;
 
 		$Parameters = $Route->Parameters;
+
+		$Parameters['Page'] = $Route->FullName;
 
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
@@ -63,6 +67,8 @@ class Router {
 
 		$Parameters = $Route->Parameters;
 
+		$Parameters['Page'] = $Route->FullName;
+
 		foreach($GLOBALS['Parameters'] as $Key => $Value) {
 			if(!isset($Parameters[$Key])) {
 				$Parameters[$Key] = $Value;
@@ -86,6 +92,8 @@ class Router {
 		$GLOBALS['RealRoute'] = $Route;
 
 		$Parameters = $Route->Parameters;
+
+		$Parameters['Page'] = $Route->FullName;
 
 		$Parameters['Error'] = $Exception;
 

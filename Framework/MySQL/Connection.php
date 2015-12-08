@@ -83,10 +83,10 @@ class Connection extends DbConnection {
 			return '';
 		}
 
-		$Sql = $this->ProcessExpression_DbColumn($Columns[0]);
+		$Sql = $this->ProcessExpression»DbColumn($Columns[0]);
 
 		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', '.$this->ProcessExpression_DbColumn($Columns[$I]);
+			$Sql .= ', '.$this->ProcessExpression»DbColumn($Columns[$I]);
 		}
 
 		return ' ('.$Sql.')';
@@ -132,10 +132,10 @@ class Connection extends DbConnection {
 			return '';
 		}
 
-		$Sql = $this->ProcessExpression_DbColumn($Columns[0]);
+		$Sql = $this->ProcessExpression»DbColumn($Columns[0]);
 
 		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', '.$this->ProcessExpression_DbColumn($Columns[$I]);
+			$Sql .= ', '.$this->ProcessExpression»DbColumn($Columns[$I]);
 		}
 
 		return ' ('.$Sql.')';
@@ -165,10 +165,10 @@ class Connection extends DbConnection {
 			return '';
 		}
 		else {
-			$Sql = $this->ProcessExpression_DbColumn($Updates[0]->Column).'='.$this->ProcessExpression($Updates[0]->Value);
+			$Sql = $this->ProcessExpression»DbColumn($Updates[0]->Column).'='.$this->ProcessExpression($Updates[0]->Value);
 
 			for($I = 1; $I < $Count; ++$I) {
-				$Sql .= ', '.$this->ProcessExpression_DbColumn($Updates[$I]->Column).'='.$this->ProcessExpression($Updates[$I]->Value);
+				$Sql .= ', '.$this->ProcessExpression»DbColumn($Updates[$I]->Column).'='.$this->ProcessExpression($Updates[$I]->Value);
 			}
 
 			return ' ON DUPLICATE KEY UPDATE '.$Sql;
@@ -196,10 +196,10 @@ class Connection extends DbConnection {
 			throw new \Framework\Newnorth\RuntimeException('No changes specified.');
 		}
 
-		$Sql = $this->ProcessExpression_DbColumn($Changes[0]->Column).'='.$this->ProcessExpression($Changes[0]->Value);
+		$Sql = $this->ProcessExpression»DbColumn($Changes[0]->Column).'='.$this->ProcessExpression($Changes[0]->Value);
 
 		for($I = 1; $I < $Count; ++$I) {
-			$Sql .= ', '.$this->ProcessExpression_DbColumn($Changes[$I]->Column).'='.$this->ProcessExpression($Changes[$I]->Value);
+			$Sql .= ', '.$this->ProcessExpression»DbColumn($Changes[$I]->Column).'='.$this->ProcessExpression($Changes[$I]->Value);
 		}
 
 		return $Sql;
@@ -659,41 +659,41 @@ class Connection extends DbConnection {
 
 	private function ProcessCondition(DbCondition $Condition) {
 		if($Condition instanceof DbAnd) {
-			return $this->ProcessCondition_DbAnd($Condition);
+			return $this->ProcessCondition»DbAnd($Condition);
 		}
 		else if($Condition instanceof DbOr) {
-			return $this->ProcessCondition_DbOr($Condition);
+			return $this->ProcessCondition»DbOr($Condition);
 		}
 		else if($Condition instanceof DbEqualTo) {
-			return $this->ProcessCondition_DbEqualTo($Condition);
+			return $this->ProcessCondition»DbEqualTo($Condition);
 		}
 		else if($Condition instanceof \Framework\Newnorth\DbNotEqualTo) {
-			return $this->ProcessCondition_DbNotEqualTo($Condition);
+			return $this->ProcessCondition»DbNotEqualTo($Condition);
 		}
 		else if($Condition instanceof DbLike) {
-			return $this->ProcessCondition_DbLike($Condition);
+			return $this->ProcessCondition»DbLike($Condition);
 		}
 		else if($Condition instanceof DbContains) {
-			return $this->ProcessCondition_DbContains($Condition);
+			return $this->ProcessCondition»DbContains($Condition);
 		}
 		else if($Condition instanceof DbStartsWith) {
-			return $this->ProcessCondition_DbStartsWith($Condition);
+			return $this->ProcessCondition»DbStartsWith($Condition);
 		}
 		else if($Condition instanceof DbEndsWith) {
-			return $this->ProcessCondition_DbEndsWith($Condition);
+			return $this->ProcessCondition»DbEndsWith($Condition);
 		}
 		else if($Condition instanceof DbGreaterThan) {
-			return $this->ProcessCondition_DbGreaterThan($Condition);
+			return $this->ProcessCondition»DbGreaterThan($Condition);
 		}
 		else if($Condition instanceof DbLessThan) {
-			return $this->ProcessCondition_DbLessThan($Condition);
+			return $this->ProcessCondition»DbLessThan($Condition);
 		}
 		else if($Condition instanceof \Framework\Newnorth\DbIn) {
-			return $this->ProcessCondition_DbIn($Condition);
+			return $this->ProcessCondition»DbIn($Condition);
 		}
 	}
 
-	private function ProcessCondition_DbAnd(DbAnd $ConditionGroup) {
+	private function ProcessCondition»DbAnd(DbAnd $ConditionGroup) {
 		$Count = count($ConditionGroup->Conditions);
 
 		if(0 < $Count) {
@@ -710,7 +710,7 @@ class Connection extends DbConnection {
 		}
 	}
 
-	private function ProcessCondition_DbOr(DbOr $ConditionGroup) {
+	private function ProcessCondition»DbOr(DbOr $ConditionGroup) {
 		$Count = count($ConditionGroup->Conditions);
 
 		if(0 < $Count) {
@@ -727,7 +727,7 @@ class Connection extends DbConnection {
 		}
 	}
 
-	private function ProcessCondition_DbEqualTo(DbEqualTo $Condition) {
+	private function ProcessCondition»DbEqualTo(DbEqualTo $Condition) {
 		if($Condition->A instanceof DbNull) {
 			if($Condition->B instanceof DbNull) {
 				return 'NULL IS NULL';
@@ -746,7 +746,7 @@ class Connection extends DbConnection {
 		}
 	}
 
-	private function ProcessCondition_DbNotEqualTo(\Framework\Newnorth\DbNotEqualTo $Condition) {
+	private function ProcessCondition»DbNotEqualTo(\Framework\Newnorth\DbNotEqualTo $Condition) {
 		if($Condition->A instanceof DbNull) {
 			if($Condition->B instanceof DbNull) {
 				return 'NULL IS NOT NULL';
@@ -765,31 +765,31 @@ class Connection extends DbConnection {
 		}
 	}
 
-	private function ProcessCondition_DbLike(DbLike $Condition) {
+	private function ProcessCondition»DbLike(DbLike $Condition) {
 		return $this->ProcessExpression($Condition->A).' LIKE '.$this->ProcessExpression($Condition->B);
 	}
 
-	private function ProcessCondition_DbContains(DbContains $Condition) {
+	private function ProcessCondition»DbContains(DbContains $Condition) {
 		return $this->ProcessExpression($Condition->A).' LIKE CONCAT("%", '.$this->ProcessExpression($Condition->B).', "%")';
 	}
 
-	private function ProcessCondition_DbStartsWith(DbStartsWith $Condition) {
+	private function ProcessCondition»DbStartsWith(DbStartsWith $Condition) {
 		return $this->ProcessExpression($Condition->A).' LIKE CONCAT('.$this->ProcessExpression($Condition->B).', "%")';
 	}
 
-	private function ProcessCondition_DbEndsWith(DbEndsWith $Condition) {
+	private function ProcessCondition»DbEndsWith(DbEndsWith $Condition) {
 		return $this->ProcessExpression($Condition->A).' LIKE CONCAT("%", '.$this->ProcessExpression($Condition->B).')';
 	}
 
-	private function ProcessCondition_DbGreaterThan(DbGreaterThan $Condition) {
+	private function ProcessCondition»DbGreaterThan(DbGreaterThan $Condition) {
 		return $this->ProcessExpression($Condition->A).' > '.$this->ProcessExpression($Condition->B);
 	}
 
-	private function ProcessCondition_DbLessThan(DbLessThan $Condition) {
+	private function ProcessCondition»DbLessThan(DbLessThan $Condition) {
 		return $this->ProcessExpression($Condition->A).' < '.$this->ProcessExpression($Condition->B);
 	}
 
-	private function ProcessCondition_DbIn(\Framework\Newnorth\DbIn $Condition) {
+	private function ProcessCondition»DbIn(\Framework\Newnorth\DbIn $Condition) {
 		$Count = count($Condition->B);
 
 		if(0 < $Count) {
@@ -808,36 +808,36 @@ class Connection extends DbConnection {
 
 	private function ProcessExpression(DbExpression $Expression) {
 		if($Expression instanceof DbArray) {
-			return $this->ProcessExpression_DbArray($Expression);
+			return $this->ProcessExpression»DbArray($Expression);
 		}
 		else if($Expression instanceof DbBool) {
-			return $this->ProcessExpression_DbBool($Expression);
+			return $this->ProcessExpression»DbBool($Expression);
 		}
 		else if($Expression instanceof DbColumn) {
-			return $this->ProcessExpression_DbColumn($Expression);
+			return $this->ProcessExpression»DbColumn($Expression);
 		}
 		else if($Expression instanceof DbFloat) {
-			return $this->ProcessExpression_DbFloat($Expression);
+			return $this->ProcessExpression»DbFloat($Expression);
 		}
 		else if($Expression instanceof DbInt) {
-			return $this->ProcessExpression_DbInt($Expression);
+			return $this->ProcessExpression»DbInt($Expression);
 		}
 		else if($Expression instanceof DbString) {
-			return $this->ProcessExpression_DbString($Expression);
+			return $this->ProcessExpression»DbString($Expression);
 		}
 		else if($Expression instanceof DbNull) {
-			return $this->ProcessExpression_DbNull($Expression);
+			return $this->ProcessExpression»DbNull($Expression);
 		}
 		else {
-			return $this->ProcessExpression_DbExpression($Expression);
+			return $this->ProcessExpression»DbExpression($Expression);
 		}
 	}
 
-	private function ProcessExpression_DbExpression(DbExpression $Expression) {
+	private function ProcessExpression»DbExpression(DbExpression $Expression) {
 		return $Expression->Value;
 	}
 
-	private function ProcessExpression_DbArray(DbArray $Expression) {
+	private function ProcessExpression»DbArray(DbArray $Expression) {
 		// The array is never empty.
 
 		$Sql = $this->ProcessExpression($Expression->Value[0]);
@@ -851,27 +851,27 @@ class Connection extends DbConnection {
 		return '('.$Sql.')';
 	}
 
-	private function ProcessExpression_DbBool(DbBool $Expression) {
+	private function ProcessExpression»DbBool(DbBool $Expression) {
 		return $Expression->Value ? MYSQL_TRUE : MYSQL_FALSE;
 	}
 
-	private function ProcessExpression_DbColumn(DbColumn $Expression) {
+	private function ProcessExpression»DbColumn(DbColumn $Expression) {
 		return '`'.implode('`.`', $Expression->Value).'`';
 	}
 
-	private function ProcessExpression_DbFloat(DbFloat $Expression) {
+	private function ProcessExpression»DbFloat(DbFloat $Expression) {
 		return (string)$Expression->Value;
 	}
 
-	private function ProcessExpression_DbInt(DbInt $Expression) {
+	private function ProcessExpression»DbInt(DbInt $Expression) {
 		return (string)$Expression->Value;
 	}
 
-	private function ProcessExpression_DbString(DbString $Expression) {
+	private function ProcessExpression»DbString(DbString $Expression) {
 		return '"'.$this->EscapeString($Expression->Value).'"';
 	}
 
-	private function ProcessExpression_DbNull(DbNull $Expression) {
+	private function ProcessExpression»DbNull(DbNull $Expression) {
 		return 'NULL';
 	}
 }
