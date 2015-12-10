@@ -105,7 +105,23 @@ abstract class ADataManager {
 
 	public abstract function CreateSelectQuery();
 
-	public function InsertByQuery(\Framework\Newnorth\DbInsertQuery $Query, $Source) {
+	public function Insert(array $Data) {
+		$Query = new \Framework\Newnorth\DbInsertQuery();
+
+		$Query->Source = $this->__toString();
+
+		foreach($Data as $Column => $Value) {
+			$DataMember = $this->DataMembers[$Column];
+
+			$Query->AddColumn($DataMember);
+
+			$Query->AddValue($DataMember->ToDbExpression($Value));
+		}
+
+		return $this->InsertByQuery($Query);
+	}
+
+	public function InsertByQuery(\Framework\Newnorth\DbInsertQuery $Query) {
 		$Result = $this->Connection->Insert($Query);
 
 		if($Result === false) {
@@ -118,7 +134,7 @@ abstract class ADataManager {
 
 			foreach($this->DataMembers as $DataMember) {
 				if($DataMember->UseLogInsert) {
-					$DataMember->LogInsert($Item, $Source);
+					$DataMember->LogInsert($Item);
 				}
 			}
 
@@ -130,13 +146,13 @@ abstract class ADataManager {
 				}
 			}
 
-			$this->OnInserted($Item, $Source);
+			$this->OnInserted($Item);
 
 			return $Item;
 		}
 	}
 
-	public abstract function OnInserted(\Framework\Newnorth\DataType $Item, $Source);
+	public abstract function OnInserted(\Framework\Newnorth\DataType $Item);
 
 	private function UpdateBy($Column, $Expression, $Parameters) {
 		$Value = $Parameters[0];
@@ -166,10 +182,10 @@ abstract class ADataManager {
 		}
 	}
 
-	public function Delete($Item, $Source) {
-		$Item->OnDelete($Source);
+	public function Delete($Item) {
+		$Item->OnDelete();
 
-		$this->OnDelete($Item, $Source);
+		$this->OnDelete($Item);
 
 		$Query = new \Framework\Newnorth\DbDeleteQuery();
 
@@ -185,11 +201,11 @@ abstract class ADataManager {
 		else if($this->Connection->AffectedRows() === 1) {
 			foreach($this->DataMembers as $DataMember) {
 				if($DataMember->UseLogDelete) {
-					$DataMember->LogDelete($Item, $Source);
+					$DataMember->LogDelete($Item);
 				}
 			}
 
-			$this->OnDeleted($Item, $Source);
+			$this->OnDeleted($Item);
 
 			return true;
 		}
@@ -201,9 +217,9 @@ abstract class ADataManager {
 		}
 	}
 
-	public abstract function OnDelete(\Framework\Newnorth\DataType $Item, $Source);
+	public abstract function OnDelete(\Framework\Newnorth\DataType $Item);
 
-	public abstract function OnDeleted(\Framework\Newnorth\DataType $Item, $Source);
+	public abstract function OnDeleted(\Framework\Newnorth\DataType $Item);
 
 	private function DeleteBy($Expression, $Parameters, &$Result) {
 		$DataMembers = explode('And', $Expression);
@@ -227,22 +243,19 @@ abstract class ADataManager {
 			array_splice($Parameters, 0, 1);
 		}
 
-		$Result = $this->DeleteByQuery(
-			$Query,
-			$Parameters[0]
-		);
+		$Result = $this->DeleteByQuery($Query);
 
 		return true;
 	}
 
-	public function DeleteByQuery(\Framework\Newnorth\DbSelectQuery $Query, $Source) {
+	public function DeleteByQuery(\Framework\Newnorth\DbSelectQuery $Query) {
 		$Items = $this->FindAllByQuery($Query);
 
 		if(0 < count($Items)) {
 			$Result = true;
 
 			foreach($Items as $Item) {
-				$Result = $this->Delete($Item, $Source) && $Result;
+				$Result = $this->Delete($Item) && $Result;
 			}
 
 			return $Result;

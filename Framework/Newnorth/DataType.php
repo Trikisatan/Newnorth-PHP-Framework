@@ -143,74 +143,63 @@ class DataType {
 	}
 
 	private function Create($DataList, $Parameters) {
-		return $this->_DataManager->DataLists[$DataList]->Create(
-			$this,
-			$Parameters[0],
-			$Parameters[1]
-		);
+		return $this->_DataManager->DataLists[$DataList]->Create($this, $Parameters[0]);
 	}
 
 	private function Add($DataList, $Parameters) {
-		return $this->_DataManager->DataLists[$DataList]->Add($this, $Parameters[0], $Parameters[1]);
+		return $this->_DataManager->DataLists[$DataList]->Add($this, $Parameters[0]);
 	}
 
-	public function OnDelete($Source) {
+	public function OnDelete() {
 		foreach($this->_DataManager->DataReferences as $DataReference) {
 			if($DataReference->OnDelete !== null) {
-				$this->{'OnDelete_DataReference_'.$DataReference->OnDelete}($DataReference, $Source);
+				$this->{'OnDelete_DataReference_'.$DataReference->OnDelete}($DataReference);
 			}
 		}
 
 		foreach($this->_DataManager->DataLists as $DataList) {
 			if($DataList->OnDelete !== null) {
-				$this->{'OnDelete_DataList_'.$DataList->OnDelete}($DataList, $Source);
+				$this->{'OnDelete_DataList_'.$DataList->OnDelete}($DataList);
 			}
 		}
 	}
 
-	private function OnDelete_DataReference_Delete($DataReference, $Source) {
+	private function OnDelete_DataReference_Delete($DataReference) {
 		if($DataReference->Load($this)) {
-			$DataReference->Delete($this, $Source);
+			$DataReference->Delete($this);
 		}
 	}
 
-	private function OnDelete_DataReference_Remove($DataReference, $Source) {
+	private function OnDelete_DataReference_Remove($DataReference) {
 		if($DataReference->Load($this)) {
-			$DataReference->Remove($this, $Source);
+			$DataReference->Remove($this);
 		}
 	}
 
-	private function OnDelete_DataList_Delete($DataList, $Source) {
+	private function OnDelete_DataList_Delete($DataList) {
 		if($DataList->Load($this, [], $Items)) {
 			foreach($Items as $Item) {
-				$DataList->Delete($this, $Item, $Source);
+				$DataList->Delete($this, $Item);
 			}
 		}
 	}
 
-	private function OnDelete_DataList_Remove($DataList, $Source) {
+	private function OnDelete_DataList_Remove($DataList) {
 		if($DataList->Load($this, [], $Items)) {
 			foreach($Items as $Item) {
-				$DataList->Remove($this, $Item, $Source);
+				$DataList->Remove($this, $Item);
 			}
 		}
 	}
 
 	private function Delete($Alias, $Parameters, &$Result) {
 		if(isset($this->_DataManager->DataReferences[$Alias])) {
-			$Result = $this->_DataManager->DataReferences[$Alias]->Delete(
-				$this,
-				$Parameters[0]
-			);
+			$Result = $this->_DataManager->DataReferences[$Alias]->Delete($this);
 
 			return true;
 		}
 		else if(isset($this->_DataManager->DataLists[$Alias])) {
-			$Result = $this->_DataManager->DataLists[$Alias]->Delete(
-				$this,
-				$Parameters[0],
-				$Parameters[1]
-			);
+			$Result = $this->_DataManager->DataLists[$Alias]->Delete($this, $Parameters[0]);
 
 			return true;
 		}
@@ -221,12 +210,12 @@ class DataType {
 
 	private function Remove($Alias, $Parameters, &$Result) {
 		if(isset($this->_DataManager->DataReferences[$Alias])) {
-			$Result = $this->_DataManager->DataReferences[$Alias]->Remove($this, $Parameters[0]);
+			$Result = $this->_DataManager->DataReferences[$Alias]->Remove($this);
 
 			return true;
 		}
 		else if(isset($this->_DataManager->DataLists[$Alias])) {
-			$Result = $this->_DataManager->DataLists[$Alias]->Remove($this, $Parameters[0], $Parameters[1]);
+			$Result = $this->_DataManager->DataLists[$Alias]->Remove($this, $Parameters[0]);
 
 			return true;
 		}

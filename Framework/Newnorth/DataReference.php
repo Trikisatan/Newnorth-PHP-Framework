@@ -124,20 +124,20 @@ class DataReference {
 		return $DataType->{$this->Alias} !== null;
 	}
 
-	public function Delete(\Framework\Newnorth\DataType $DataType, $Source) {
+	public function Delete(\Framework\Newnorth\DataType $DataType) {
 		$this->Load($DataType);
 
-		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias}, $Source);
+		$this->ForeignDataManager->{'DeleteBy'.$this->ForeignPrimaryKey->Alias}($DataType->{$this->Alias}->{$this->ForeignPrimaryKey->Alias});
 
 		$DataType->{$this->Alias} = null;
 	}
 
-	public function Remove(\Framework\Newnorth\DataType $DataType, $Source) {
+	public function Remove(\Framework\Newnorth\DataType $DataType) {
 		$this->Load($DataType);
 
 		foreach($this->ForeignKeys as $ForeignKey)
 		{
-			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Alias}(null, $Source);
+			$DataType->{$this->Alias}->{'Set'.$ForeignKey->Alias}(null);
 		}
 
 		$DataType->{$this->Alias} = null;

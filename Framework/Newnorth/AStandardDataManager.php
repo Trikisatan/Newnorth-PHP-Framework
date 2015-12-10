@@ -53,7 +53,7 @@ abstract class AStandardDataManager extends ADataManager {
 
 	/* Insert methods */
 
-	public function InsertByArray(array $Data, $Source) {
+	public function InsertByArray(array $Data) {
 		$Query = new \Framework\Newnorth\DbInsertQuery();
 
 		if($this->Database === null) {
@@ -69,7 +69,7 @@ abstract class AStandardDataManager extends ADataManager {
 			$Query->AddValue($Value);
 		}
 
-		return $this->InsertByQuery($Query, $Source);
+		return $this->InsertByQuery($Query);
 	}
 
 	/* InsertUpdate methods */

@@ -38,7 +38,7 @@ abstract class ADataMember {
 
 	public abstract function Decrement(\Framework\Newnorth\DataType $DataType, array $Parameters);
 
-	private function Log(\Framework\Newnorth\DataType $DataType, $Method, $Source) {
+	private function Log(\Framework\Newnorth\DataType $DataType, $Method) {
 		$Query = new \Framework\Newnorth\DbInsertQuery();
 
 		if($this->DataManager->Database === null) {
@@ -66,11 +66,11 @@ abstract class ADataMember {
 
 		$Query->AddColumn('`System`');
 
-		$Query->AddValue('"'.Config('System/Name', '').'"');
+		$Query->AddValue('"'.Config('Logging/System', '').'"');
 
 		$Query->AddColumn('`Source`');
 
-		$Query->AddValue('"'.Config('System/Source', '').'"');
+		$Query->AddValue('"'.Config('Logging/Source', '').'"');
 
 		$Query->AddColumn('`Time`');
 
@@ -79,16 +79,16 @@ abstract class ADataMember {
 		return $this->DataManager->Connection->Insert($Query);
 	}
 
-	public function LogUpdate(\Framework\Newnorth\DataType $DataType, $Source) {
-		return $this->Log($DataType, 'UPDATE', $Source);
+	public function LogUpdate(\Framework\Newnorth\DataType $DataType) {
+		return $this->Log($DataType, 'UPDATE');
 	}
 
-	public function LogInsert(\Framework\Newnorth\DataType $DataType, $Source) {
-		return $this->Log($DataType, 'INSERT', $Source);
+	public function LogInsert(\Framework\Newnorth\DataType $DataType) {
+		return $this->Log($DataType, 'INSERT');
 	}
 
-	public function LogDelete(\Framework\Newnorth\DataType $DataType, $Source) {
-		return $this->Log($DataType, 'DELETE', $Source);
+	public function LogDelete(\Framework\Newnorth\DataType $DataType) {
+		return $this->Log($DataType, 'DELETE');
 	}
 }
 ?>
